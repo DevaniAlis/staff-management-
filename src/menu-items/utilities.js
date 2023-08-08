@@ -13,33 +13,9 @@ const icons = {
 
 const utilities = {
   id: 'utilities',
-  title: 'Utilities',
+  title: 'Other Page',
   type: 'group',
   children: [
-    {
-      id: 'util-typography',
-      title: 'Typography',
-      type: 'item',
-      url: '/utils/util-typography',
-      icon: icons.IconTypography,
-      breadcrumbs: false
-    },
-    {
-      id: 'util-color',
-      title: 'Color',
-      type: 'item',
-      url: '/utils/util-color',
-      icon: icons.IconPalette,
-      breadcrumbs: false
-    },
-    {
-      id: 'util-shadow',
-      title: 'Shadow',
-      type: 'item',
-      url: '/utils/util-shadow',
-      icon: icons.IconShadow,
-      breadcrumbs: false
-    },
     {
       id: 'icons',
       title: 'Icons',
@@ -63,7 +39,29 @@ const utilities = {
           breadcrumbs: false
         }
       ]
-    }
+    },
+    // {
+    //   id: 'Other',
+    //   title: 'Other',
+    //   type: 'collapse',
+    //   icon: icons.IconWindmill,
+    //   children: [
+    //     {
+    //       id: 'salary',
+    //       title: 'Salary',
+    //       type: 'item',
+    //       url: '/other/salary',
+    //       breadcrumbs: false
+    //     },
+    //     {
+    //       id: 'leaves',
+    //       title: 'Leaves',
+    //       type: 'item',
+    //       url: '/other/leaves',
+    //       breadcrumbs: false
+    //     }
+    //   ]
+    // }
   ]
 };
 

@@ -1,91 +1,132 @@
-import { lazy } from 'react';
+import { lazy } from "react";
 
 // project imports
-import MainLayout from 'layout/MainLayout';
-import Loadable from 'ui-component/Loadable';
+import MainLayout from "layout/MainLayout";
+import Loadable from "ui-component/Loadable";
 
 // dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
+const DashboardDefault = Loadable(
+  lazy(() => import("views/dashboard/Default"))
+);
+const Staff = Loadable(lazy(() => import("../views/staff/staff")));
+const Transaction = Loadable(
+  lazy(() => import("views/transaction/transaction"))
+);
+const Salary = Loadable(lazy(() => import("views/otherFiles/salary")));
+const Leaves = Loadable(lazy(() => import("views/otherFiles/leaves")));
 
 // utilities routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
-const UtilsMaterialIcons = Loadable(lazy(() => import('views/utilities/MaterialIcons')));
-const UtilsTablerIcons = Loadable(lazy(() => import('views/utilities/TablerIcons')));
+const UtilsTypography = Loadable(
+  lazy(() => import("views/utilities/Typography"))
+);
+const UtilsColor = Loadable(lazy(() => import("views/utilities/Color")));
+const UtilsShadow = Loadable(lazy(() => import("views/utilities/Shadow")));
+const UtilsMaterialIcons = Loadable(
+  lazy(() => import("views/utilities/MaterialIcons"))
+);
+const UtilsTablerIcons = Loadable(
+  lazy(() => import("views/utilities/TablerIcons"))
+);
 
 // sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const SamplePage = Loadable(lazy(() => import("views/sample-page")));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
-  path: '/',
+  path: "/",
   element: <MainLayout />,
   children: [
     {
-      path: '/',
-      element: <DashboardDefault />
+      path: "/",
+      element: <DashboardDefault />,
     },
     {
-      path: 'dashboard',
+      path: "dashboard",
       children: [
         {
-          path: 'default',
-          element: <DashboardDefault />
-        }
-      ]
+          path: "default",
+          element: <DashboardDefault />,
+        },
+      ],
     },
     {
-      path: 'utils',
+      path: "staff",
       children: [
         {
-          path: 'util-typography',
-          element: <UtilsTypography />
-        }
-      ]
+          path: "",
+          element: <Staff />,
+        },
+      ],
     },
     {
-      path: 'utils',
+      path: "transaction",
       children: [
         {
-          path: 'util-color',
-          element: <UtilsColor />
-        }
-      ]
+          path: "",
+          element: <Transaction />,
+        },
+      ],
     },
     {
-      path: 'utils',
+      path: "leaves",
       children: [
         {
-          path: 'util-shadow',
-          element: <UtilsShadow />
-        }
-      ]
+          path: "",
+          element: <Leaves />,
+        },
+      ],
     },
     {
-      path: 'icons',
+      path: "salary",
       children: [
         {
-          path: 'tabler-icons',
-          element: <UtilsTablerIcons />
-        }
-      ]
+          path: "",
+          element: <Salary />,
+        },
+      ],
     },
+    // {
+    //   path: "other",
+    //   children: [
+    //     {
+    //       path: "salary",
+    //       element: <Salary />,
+    //     },
+    //   ],
+    // },
+    // {
+    //   path: "other",
+    //   children: [
+    //     {
+    //       path: "leaves",
+    //       element: <Leaves />,
+    //     },
+    //   ],
+    // },
     {
-      path: 'icons',
+      path: "icons",
       children: [
         {
-          path: 'material-icons',
-          element: <UtilsMaterialIcons />
-        }
-      ]
+          path: "tabler-icons",
+          element: <UtilsTablerIcons />,
+        },
+      ],
     },
     {
-      path: 'sample-page',
-      element: <SamplePage />
-    }
-  ]
+      path: "icons",
+      children: [
+        {
+          path: "material-icons",
+          element: <UtilsMaterialIcons />,
+        },
+      ],
+    },
+    {
+      path: "sample-page",
+      element: <SamplePage />,
+    },
+  ],
 };
 
 export default MainRoutes;
