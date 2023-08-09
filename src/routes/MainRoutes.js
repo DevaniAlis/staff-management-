@@ -7,6 +7,9 @@ import Loadable from 'ui-component/Loadable';
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 
+const EmployeesDefault = Loadable(lazy(() => import('views/employees/EmployeesList')));
+
+
 // utilities routing
 const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
 const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
@@ -33,6 +36,15 @@ const MainRoutes = {
         {
           path: 'default',
           element: <DashboardDefault />
+        }
+      ]
+    },
+    {
+      path: '',
+      children: [
+        {
+          path: 'employeesList',
+          element: <EmployeesDefault/>
         }
       ]
     },
