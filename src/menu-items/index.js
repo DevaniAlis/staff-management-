@@ -1,13 +1,12 @@
-import dashboard from './dashboard';
-import pages from './pages';
-import utilities from './utilities';
-import other from './other';
-import employees from './employees';
+import dashboard from "./dashboard";
+import otherFiles from "./otherFiles";
+import staff from "./staff";
+import transaction from "./transctionList";
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [dashboard, employees, pages, utilities, other]
+items: [dashboard, staff, transaction, otherFiles]
 };
 
 export default menuItems;

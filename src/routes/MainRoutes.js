@@ -1,103 +1,76 @@
-import { lazy } from 'react';
+import { lazy } from "react";
 
 // project imports
-import MainLayout from 'layout/MainLayout';
-import Loadable from 'ui-component/Loadable';
+import MainLayout from "layout/MainLayout";
+import Loadable from "ui-component/Loadable";
 
 // dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
-
-const EmployeesDefault = Loadable(lazy(() => import('views/employees/EmployeesList')));
-
-
-// utilities routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
-const UtilsMaterialIcons = Loadable(lazy(() => import('views/utilities/MaterialIcons')));
-const UtilsTablerIcons = Loadable(lazy(() => import('views/utilities/TablerIcons')));
-
-// sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const DashboardDefault = Loadable(
+  lazy(() => import("views/dashboard/Default"))
+);
+const Staff = Loadable(lazy(() => import("../views/staff/staff")));
+const Transaction = Loadable(
+  lazy(() => import("views/transaction/transaction"))
+);
+const Salary = Loadable(lazy(() => import("views/otherFiles/salary")));
+const Leaves = Loadable(lazy(() => import("views/otherFiles/leaves")));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
-  path: '/',
+  path: "/",
   element: <MainLayout />,
   children: [
     {
-      path: '/',
-      element: <DashboardDefault />
+      path: "/",
+      element: <DashboardDefault />,
     },
     {
-      path: 'dashboard',
+      path: "dashboard",
       children: [
         {
-          path: 'default',
-          element: <DashboardDefault />
-        }
-      ]
+          path: "default",
+          element: <DashboardDefault />,
+        },
+      ],
     },
     {
-      path: '',
+      path: "staff",
       children: [
         {
-          path: 'employeesList',
-          element: <EmployeesDefault/>
-        }
-      ]
+          path: "",
+          element: <Staff />,
+        },
+      ],
     },
     {
-      path: 'utils',
+      path: "transaction",
       children: [
         {
-          path: 'util-typography',
-          element: <UtilsTypography />
-        }
-      ]
+          path: "",
+          element: <Transaction />,
+        },
+      ],
     },
     {
-      path: 'utils',
+      path: "leaves",
       children: [
         {
-          path: 'util-color',
-          element: <UtilsColor />
-        }
-      ]
+          path: "",
+          element: <Leaves />,
+        },
+      ],
     },
     {
-      path: 'utils',
+      path: "salary",
       children: [
         {
-          path: 'util-shadow',
-          element: <UtilsShadow />
-        }
-      ]
+          path: "",
+          element: <Salary />,
+        },
+      ],
     },
-    {
-      path: 'icons',
-      children: [
-        {
-          path: 'tabler-icons',
-          element: <UtilsTablerIcons />
-        }
-      ]
-    },
-    {
-      path: 'icons',
-      children: [
-        {
-          path: 'material-icons',
-          element: <UtilsMaterialIcons />
-        }
-      ]
-    },
-    {
-      path: 'sample-page',
-      element: <SamplePage />
-    }
-  ]
+  ],
 };
 
 export default MainRoutes;
