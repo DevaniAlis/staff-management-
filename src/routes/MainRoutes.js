@@ -15,22 +15,6 @@ const Transaction = Loadable(
 const Salary = Loadable(lazy(() => import("views/otherFiles/salary")));
 const Leaves = Loadable(lazy(() => import("views/otherFiles/leaves")));
 
-// utilities routing
-const UtilsTypography = Loadable(
-  lazy(() => import("views/utilities/Typography"))
-);
-const UtilsColor = Loadable(lazy(() => import("views/utilities/Color")));
-const UtilsShadow = Loadable(lazy(() => import("views/utilities/Shadow")));
-const UtilsMaterialIcons = Loadable(
-  lazy(() => import("views/utilities/MaterialIcons"))
-);
-const UtilsTablerIcons = Loadable(
-  lazy(() => import("views/utilities/TablerIcons"))
-);
-
-// sample page routing
-const SamplePage = Loadable(lazy(() => import("views/sample-page")));
-
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -85,46 +69,6 @@ const MainRoutes = {
           element: <Salary />,
         },
       ],
-    },
-    // {
-    //   path: "other",
-    //   children: [
-    //     {
-    //       path: "salary",
-    //       element: <Salary />,
-    //     },
-    //   ],
-    // },
-    // {
-    //   path: "other",
-    //   children: [
-    //     {
-    //       path: "leaves",
-    //       element: <Leaves />,
-    //     },
-    //   ],
-    // },
-    {
-      path: "icons",
-      children: [
-        {
-          path: "tabler-icons",
-          element: <UtilsTablerIcons />,
-        },
-      ],
-    },
-    {
-      path: "icons",
-      children: [
-        {
-          path: "material-icons",
-          element: <UtilsMaterialIcons />,
-        },
-      ],
-    },
-    {
-      path: "sample-page",
-      element: <SamplePage />,
     },
   ],
 };

@@ -55,7 +55,7 @@ const Staff = () => {
           <Grid item xs={12} sm={12} sx={displayStyle}>
             <Box>
               <Typography variant="h3" gutterBottom>
-                Employee
+                Staff
               </Typography>
             </Box>
             <Box>
@@ -64,7 +64,7 @@ const Staff = () => {
                 sx={addButtonStyle}
                 startIcon={<IconCirclePlus />}
               >
-                New User
+                Add Staff
               </Button>
             </Box>
           </Grid>

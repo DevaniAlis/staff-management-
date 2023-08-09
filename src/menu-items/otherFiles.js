@@ -1,6 +1,11 @@
 // assets
 import { IconKey } from "@tabler/icons";
-import { IconUser , IconSettings2 , IconCoinRupee , IconDoorExit} from "@tabler/icons";
+import {
+  IconUser,
+  IconSettings2,
+  IconCoinRupee,
+  IconDoorExit,
+} from "@tabler/icons";
 
 // constant
 const icons = {
@@ -8,15 +13,15 @@ const icons = {
   IconUser,
   IconSettings2,
   IconCoinRupee,
-  IconDoorExit
+  IconDoorExit,
 };
 
 // ==============================|| EXTRA PAGES MENU ITEMS ||============================== //
 
 const otherFiles = {
-  id: "pages",
-  title: "Pages",
-  caption: "Pages Caption",
+  id: "Otherpages",
+  title: "Other Pages",
+  caption: "Salary , Leave Request",
   type: "group",
   children: [
     {
