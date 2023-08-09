@@ -6,7 +6,7 @@ import transaction from "./transctionList";
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [dashboard, staff, transaction, otherFiles],
+items: [dashboard, staff, transaction, otherFiles]
 };
 
 export default menuItems;
