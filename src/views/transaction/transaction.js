@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import moment from "moment";
 import {
   Button,
   Dialog,
@@ -32,6 +34,10 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useEffect } from "react";
+import { Oval } from "react-loader-spinner";
+
+import baseUrl from "../baseUrl";
 
 // ==============================|| Employee ||============================== //
 
@@ -69,6 +75,7 @@ const cancelButton = {
 const Transaction = () => {
   const [open, setOpen] = useState(null);
   const [transaction, setTransaction] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -78,69 +85,171 @@ const Transaction = () => {
     setOpen(null);
   };
 
+  const [transactionsData, setTransactionsData] = useState({
+    staffId: "",
+    transactionType: "",
+    amount: "",
+    description: "",
+  });
+
+  const handleChangeValue = (event) => {
+    setTransactionsData({
+      ...transactionsData,
+      [event.target.name]: event.target.value,
+    });
+  };
+  console.log(transactionsData);
+
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setTransactionsData((prevState) => ({
+      ...prevState,
+      transactionDate: formattedDate,
+    }));
+  };
+
+  const handleSaveData = (event) => {
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `"${baseUrl.url}/api/transaction"`,
+      headers: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNTY2MDMzLCJleHAiOjE2OTE2NTI0MzN9.lPsrwxWAjsSKEfeYfJvDIItNY2kLuI8J13Jy-QgeEXc",
+        "Content-Type": "application/json",
+      },
+      data: transactionsData,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const [transactionList, setTransactionList] = useState([]);
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/transaction/list`,
+      headers: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNTY2MDMzLCJleHAiOjE2OTE2NTI0MzN9.lPsrwxWAjsSKEfeYfJvDIItNY2kLuI8J13Jy-QgeEXc",
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log("response", response.data);
+        setTransactionList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
   return (
     <>
-      <MainCard>
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <Box>
-              <Typography variant="h3" gutterBottom>
-                Transaction
-              </Typography>
-            </Box>
-            <Box>
-              <Button
-                variant="contained"
-                onClick={() => setTransaction(true)}
-                sx={addButtonStyle}
-                startIcon={<IconCirclePlus />}
-              >
-                Add Transaction
-              </Button>
-            </Box>
+      {isLoading ? (
+        <Oval
+          height={50}
+          width={50}
+          color="#673ab7"
+          wrapperStyle={{
+            position: "absolute",
+            top: "52%",
+            left: "55%",
+          }}
+          wrapperClass=""
+          visible={true}
+          ariaLabel="oval-loading"
+          secondaryColor="#673ab7"
+          strokeWidth={2}
+          strokeWidthSecondary={2}
+        />
+      ) : (
+        <MainCard>
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <Box>
+                <Typography variant="h3" gutterBottom>
+                  Transaction
+                </Typography>
+              </Box>
+              <Box>
+                <Button
+                  variant="contained"
+                  onClick={() => setTransaction(true)}
+                  sx={addButtonStyle}
+                  startIcon={<IconCirclePlus />}
+                >
+                  Add Transaction
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-        <SearchSection />
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center">Employee ID</TableCell>
-                    <TableCell align="center">Employee Name</TableCell>
-                    <TableCell align="center">Position</TableCell>
-                    <TableCell align="center">Department</TableCell>
-                    <TableCell align="center">Phone Number</TableCell>
-                    <TableCell align="center">Salary</TableCell>
-                    <TableCell align="center">Join Date</TableCell>
-                    <TableCell align="center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableCell align="center">1</TableCell>
-                  <TableCell align="center">Abhishek Savaliya</TableCell>
-                  <TableCell align="center">senior Developer </TableCell>
-                  <TableCell align="center">Web Development</TableCell>
-                  <TableCell align="center">123456789</TableCell>
-                  <TableCell align="center">15000</TableCell>
-                  <TableCell align="center">29-07-23</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="large"
-                      color="inherit"
-                      onClick={handleOpenMenu}
-                    >
-                      <IconDotsVertical icon={"eva:more-vertical-fill"} />
-                    </IconButton>
-                  </TableCell>
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+          <SearchSection />
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">Employee ID</TableCell>
+                      <TableCell align="center">Transaction Type</TableCell>
+                      <TableCell align="center">Transaction Date</TableCell>
+                      <TableCell align="center">Amount</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {transactionList.map((item) => {
+                      return (
+                        <>
+                          <TableRow>
+                            <TableCell align="center">{item.staffId}</TableCell>
+                            <TableCell align="center">
+                              {item.transactionType}
+                            </TableCell>
+                            <TableCell align="center">
+                              {new Date(
+                                item.transactionDate
+                              ).toLocaleDateString("en-us")}
+                            </TableCell>
+                            <TableCell align="center">{item.amount}</TableCell>
+                            <TableCell align="center">
+                              <IconButton
+                                size="large"
+                                color="inherit"
+                                onClick={handleOpenMenu}
+                              >
+                                <IconDotsVertical
+                                  icon={"eva:more-vertical-fill"}
+                                />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
           </Grid>
-        </Grid>
-      </MainCard>
+        </MainCard>
+      )}
+
       <Popover
         open={Boolean(open)}
         anchorEl={open}
@@ -189,6 +298,8 @@ const Transaction = () => {
                   sx={{ width: "100%" }}
                   placeholder="Staff Id"
                   label="Staff ID"
+                  onChange={handleChangeValue}
+                  name="staffId"
                 />
               </Grid>
               <Grid md={12}>
@@ -198,6 +309,7 @@ const Transaction = () => {
                       <DatePicker
                         sx={{ width: "100%", mt: "4px" }}
                         label="Transaction Date"
+                        onChange={handleDatePicker}
                       />
                     </DemoContainer>
                   </LocalizationProvider>
@@ -209,6 +321,8 @@ const Transaction = () => {
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Transaction Type"
                     label="Transaction Type"
+                    onChange={handleChangeValue}
+                    name="transactionType"
                   />
                 </Grid>
                 <Grid md={6}>
@@ -216,6 +330,8 @@ const Transaction = () => {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Amount"
                     label="Amount"
+                    onChange={handleChangeValue}
+                    name="amount"
                   />
                 </Grid>
               </Grid>
@@ -224,13 +340,15 @@ const Transaction = () => {
                   sx={{ width: "100%" }}
                   placeholder="Description"
                   label="Description"
+                  onChange={handleChangeValue}
+                  name="description"
                 />
               </Grid>
             </Grid>
           </Box>
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
-          <Button sx={saveButton} variant="contained">
+          <Button sx={saveButton} variant="contained" onClick={handleSaveData}>
             Save
           </Button>
           <Button
