@@ -161,7 +161,7 @@ const Staff = () => {
       url: `${baseUrl.url}/api/staff/list`,
       headers: {
         token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNTY2MDMzLCJleHAiOjE2OTE2NTI0MzN9.lPsrwxWAjsSKEfeYfJvDIItNY2kLuI8J13Jy-QgeEXc",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjYxNDg0LCJleHAiOjE2OTE3NDc4ODR9.1JyyHoU8gD3QmwGZtHgCwZwDtxbkkTjD8c2dEceouyg",
       },
     };
 

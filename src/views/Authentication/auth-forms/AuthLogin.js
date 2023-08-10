@@ -40,11 +40,10 @@ const FirebaseLogin = ({ ...others }) => {
     username: "",
     password: "",
   });
-  const [token , setToken] = useState();
+  const [token, setToken] = useState();
 
-  if(token)
-  {
-    window.location.href = "/free/dashboard/default";
+  if (token) {
+    window.location.href = "/dashboard";
   }
 
   const handleChange = (event) => {
@@ -68,6 +67,7 @@ const FirebaseLogin = ({ ...others }) => {
       .then((response) => {
         console.log(response.data);
         setToken(response.data.data);
+        localStorage.setItem("token", response.data.data)
       })
       .catch((error) => {
         console.log(error);
