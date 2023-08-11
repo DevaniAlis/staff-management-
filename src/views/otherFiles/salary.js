@@ -1,15 +1,15 @@
 import React, { useState } from "react";
+import axios from "axios";
+import moment from "moment";
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
   Grid,
-  IconButton,
-  MenuItem,
-  Popover,
   Table,
   TableBody,
   TableCell,
@@ -21,8 +21,7 @@ import {
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
 import {
-  IconCirclePlus,
-  IconDotsVertical,
+  IconCirclePlus, 
   IconPencil,
   IconTrash,
 } from "@tabler/icons";
@@ -32,6 +31,8 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useEffect } from "react";
+import { Oval } from "react-loader-spinner";
 
 const displayStyle = {
   display: "flex",
@@ -64,106 +65,285 @@ const cancelButton = {
   color: "#000000",
 };
 
-function Salary(props) {
-  const [open, setOpen] = useState(null);
-  const [salaryopen, setSalaryOpen] = useState(false);
+const editDialog = {
+  color: "#000000",
+};
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
+const deleteDialog = {
+  padding: "5px 20px",
+};
+
+const hoverEffect = {
+  "&:hover": {
+    backgroundColor: "transparent",
+  },
+  padding: "0px",
+  minWidth: "35px",
+};
+
+function Salary(props) { 
+  const [salaryOpen, setSalaryOpen] = useState(false);
+  const [salaryList, setSalaryList] = useState([]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [salaryToDelete, setSalaryToDelete] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSalary, setEditSalary] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [staffSalary, setStaffSalary] = useState({
+    staffId: "",
+    date: "",
+    salary: "",
+    note: "",
+  });
+
+  const addSalary = (ele) => {
+    setStaffSalary({ ...staffSalary, [ele.target.name]: ele.target.value });
   };
 
-  const handleCloseMenu = (event) => {
-    setOpen(null);
+  const handleDatePicker = (type, newDate) => {
+    const currentDate = new Date(newDate);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MM-YYYY");
+
+    setStaffSalary((prevState) => ({
+      ...prevState,
+      [type]: formattedDate,
+    }));
   };
+
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+
+      url: "https://staff-lending-be.onrender.com/api/salary/list",
+      headers: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        "Content-Type": "application/json",
+      },
+    };
+    setIsLoading(true);
+    axios
+      .request(config)
+      .then((response) => {
+        setSalaryList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleSalary = () => {
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://staff-lending-be.onrender.com/api/salary",
+      headers: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+      },
+      data: staffSalary,
+    };
+    setSalaryOpen(false);
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const deleteSalary = (staffId) => {
+    if (salaryToDelete) {
+      let config = {
+        method: "delete",
+        maxBodyLength: Infinity,
+        url: `https://staff-lending-be.onrender.com/api/salary/${staffId}`,
+        headers: {
+          token:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          "Content-Type": "application/json",
+        },
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleDeleteOpen = (staffId) => {
+    setSalaryToDelete(staffId);
+    setDeleteOpen(true);
+  };
+
+  const editStaffSalary = () => {
+    if (editSalary) {
+      let config = {
+        method: "put",
+        maxBodyLength: Infinity,
+        url: `https://staff-lending-be.onrender.com/api/salary/${editSalary._id}`,
+        headers: {
+          token:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          "Content-Type": "application/json",
+        },
+        data: editSalary,
+      };
+      console.log(editSalary);
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+          setEditOpen(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  // const handleEditDatePicker = (type, newDate) => {
+  //   const currentDate = new Date(newDate);
+  //   const dateString = currentDate.toLocaleDateString("en-US");
+  //   const formattedDate = moment(dateString).format("DD-MM-YYYY");
+
+  //   setEditSalary((prevState) => ({
+  //     ...prevState,
+  //     [type]: formattedDate,
+  //   }));
+  // };
+  // console.log(editSalary);
+
+  const handleEditClick = (item) => {
+    console.log(item);
+    setEditSalary(item);
+    setEditOpen(true);
+  };
+
+  const handleEditInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditSalary((prevEditSalary) => ({
+      ...prevEditSalary,
+      [name]: value,
+    }));
+  };
+
   return (
     <>
-      <MainCard>
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <Box>
-              <Typography variant="h3" gutterBottom>
-                Salary Details
-              </Typography>
-            </Box>
-            <Box>
-              <Button
-                variant="contained"
-                onClick={() => setSalaryOpen(true)}
-                sx={addButtonStyle}
-                startIcon={<IconCirclePlus />}
-              >
-                Add Salary
-              </Button>
-            </Box>
+      {isLoading ? (
+        <Oval
+          height={50}
+          width={50}
+          color="#673ab7"
+          wrapperStyle={{
+            position: "absolute",
+            top: "52%",
+            left: "55%",
+          }}
+          wrapperClass=""
+          visible={true}
+          ariaLabel="oval-loading"
+          secondaryColor="#673ab7"
+          strokeWidth={2}
+          strokeWidthSecondary={2}
+        />
+      ) : (
+        <MainCard>
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <Box>
+                <Typography variant="h3" gutterBottom>
+                  Salary Details
+                </Typography>
+              </Box>
+              <Box>
+                <Button
+                  variant="contained"
+                  onClick={() => setSalaryOpen(true)}
+                  sx={addButtonStyle}
+                  startIcon={<IconCirclePlus />}
+                >
+                  Add Salary
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-        <SearchSection />
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center">Employee ID</TableCell>
-                    <TableCell align="center">Salary</TableCell>
-                    <TableCell align="center">Salary Date</TableCell>
-                    <TableCell align="center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableCell align="center">1</TableCell>
-                  <TableCell align="center">15000</TableCell>
-                  <TableCell align="center">15-02-2004</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="large"
-                      color="inherit"
-                      onClick={handleOpenMenu}
-                    >
-                      <IconDotsVertical icon={"eva:more-vertical-fill"} />
-                    </IconButton>
-                  </TableCell>
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+          <SearchSection />
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">Staff ID</TableCell>
+                      <TableCell align="center">Salary</TableCell>
+                      <TableCell align="center">Salary Date</TableCell>
+                      <TableCell align="center">Notes</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {salaryList.map((item) => {
+                      return (
+                        <>
+                          <TableRow key={item._id}>
+                            <TableCell align="center">{item.staffId}</TableCell>
+                            <TableCell align="center">{item.salary}</TableCell>
+                            <TableCell align="center">
+                              {new Date(item.date).getDate()}/
+                              {new Date(item.date).getMonth()}/
+                              {new Date(item.date).getFullYear()}
+                            </TableCell>
+                            <TableCell align="center">{item.note}</TableCell>
+                            <TableCell align="center">
+                              <Button
+                                onClick={() => handleEditClick(item)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconPencil />
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteOpen(item._id)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconTrash style={{ color: "#e51e25" }} />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
           </Grid>
-        </Grid>
-      </MainCard>
-      <Popover
-        open={Boolean(open)}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          sx: {
-            p: 1,
-            width: 140,
-            "& .MuiMenuItem-root": {
-              px: 1,
-              typography: "body2",
-              borderRadius: 0.75,
-            },
-          },
-        }}
-      >
-        <MenuItem>
-          <IconPencil style={{ marginRight: "8px" }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem style={{ color: "red" }}>
-          <IconTrash style={{ marginRight: "8px" }} />
-          Delete
-        </MenuItem>
-      </Popover>
+        </MainCard>
+      )}
       {/* start salary dialog */}
       <Dialog
-         open={salaryopen}
-         maxWidth="sm"
-         fullWidth={true}
-         onClose={() => setSalaryOpen(false)}
+        open={salaryOpen}
+        maxWidth="sm"
+        fullWidth={true}
+        onClose={() => setSalaryOpen(false)}
       >
         <DialogTitle>
           <Typography sx={{ fontSize: "20px" }}>Add Salary</Typography>
@@ -177,6 +357,8 @@ function Salary(props) {
                   sx={{ width: "100%" }}
                   placeholder="Staff Id"
                   label="Staff ID"
+                  name="staffId"
+                  onChange={addSalary}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
@@ -187,6 +369,10 @@ function Salary(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Salary Date"
+                          value={staffSalary.date}
+                          onChange={(newDate) =>
+                            handleDatePicker("date", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -197,6 +383,8 @@ function Salary(props) {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Salary"
                     label="Salary"
+                    name="salary"
+                    onChange={addSalary}
                   />
                 </Grid>
               </Grid>
@@ -205,13 +393,15 @@ function Salary(props) {
                   sx={{ width: "100%" }}
                   placeholder="Notes"
                   label="Notes"
+                  name="note"
+                  onChange={addSalary}
                 />
               </Grid>
             </Grid>
           </Box>
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
-          <Button sx={saveButton} variant="contained">
+          <Button onClick={handleSalary} sx={saveButton} variant="contained">
             Save
           </Button>
           <Button
@@ -224,6 +414,114 @@ function Salary(props) {
         </DialogActions>
       </Dialog>
       {/* end salary dialog */}
+      {/* delete staff salary data */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle sx={{ fontSize: "20px" }}>{"Delete"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: "16px" }}>
+          <Button
+            sx={editDialog}
+            onClick={() => setDeleteOpen(false)}
+            autoFocus
+            variant="outlined"
+          >
+            CANCEL
+          </Button>
+          <Button
+            sx={deleteDialog}
+            onClick={() => deleteSalary(salaryToDelete)}
+            variant="contained"
+            disableElevation
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* start edit staff salary dialog */}
+      <Dialog
+        open={editOpen}
+        maxWidth="sm"
+        fullWidth={true}
+        onClose={() => setEditOpen(false)}
+      >
+        <DialogTitle>
+          <Typography sx={{ fontSize: "20px" }}>Edit Salary</Typography>
+        </DialogTitle>
+        <Divider sx={{ marginY: "2px", color: "black" }} />
+        <DialogContent>
+          <Box>
+            <Grid container>
+              <Grid md={12}>
+                <TextField
+                  sx={{ width: "100%" }}
+                  placeholder="Staff Id"
+                  label="Staff ID"
+                  name="staffId"
+                  value={editSalary?.staffId || ""}
+                  onChange={addSalary}
+                />
+              </Grid>
+              <Grid display="contents" mt={2}>
+                <Grid md={6}>
+                  <Box>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={["DatePicker"]}>
+                        <DatePicker
+                          sx={{ width: "96%", mt: "4px" }}
+                          label="Salary Date"
+                          // value={editSalary?.date || null}
+                          // onChange={(newDate) =>
+                          //   handleEditDatePicker("date", newDate)
+                          // }
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  </Box>
+                </Grid>
+                <Grid md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Salary"
+                    label="Salary"
+                    name="salary"
+                    value={editSalary?.salary || ""}
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+              </Grid>
+              <Grid md={12} mt="12px">
+                <TextField
+                  sx={{ width: "100%" }}
+                  placeholder="Notes"
+                  label="Notes"
+                  name="note"
+                  value={editSalary?.note || ""}
+                  onChange={handleEditInputChange}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ display: "flex" }}>
+          <Button onClick={editStaffSalary} sx={saveButton} variant="contained">
+            Save
+          </Button>
+          <Button
+            sx={cancelButton}
+            variant="outlined"
+            onClick={() => {
+              setEditSalary(null);
+              setEditOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
