@@ -19,7 +19,8 @@ import ChartDataYear from "./chart-data/total-order-year-line-chart";
 // assets
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import {IconUsers} from '@tabler/icons';
+import { IconUsers } from "@tabler/icons";
+import CountUp from "react-countup";
 
 // constant
 const icons = { IconUsers };
@@ -160,7 +161,7 @@ const TotalOrderLineChartCard = ({ isLoading }) => {
                             mb: 0.75,
                           }}
                         >
-                          {totalStaff}
+                          <CountUp start={0} end={totalStaff} delay={0}/>
                         </Typography>
                       </Grid>
                       <Grid item>
