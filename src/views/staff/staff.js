@@ -85,6 +85,7 @@ const Staff = () => {
   const [open, setOpen] = useState(null);
   const [staff, setStaff] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("token");
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -135,8 +136,7 @@ const Staff = () => {
       maxBodyLength: Infinity,
       url: `${baseUrl.url}/api/staff`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNTY2MDMzLCJleHAiOjE2OTE2NTI0MzN9.lPsrwxWAjsSKEfeYfJvDIItNY2kLuI8J13Jy-QgeEXc",
+        token: token,
         "Content-Type": "application/json",
       },
       data: staffData,
@@ -160,8 +160,7 @@ const Staff = () => {
       maxBodyLength: Infinity,
       url: `${baseUrl.url}/api/staff/list`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjYxNDg0LCJleHAiOjE2OTE3NDc4ODR9.1JyyHoU8gD3QmwGZtHgCwZwDtxbkkTjD8c2dEceouyg",
+        token: token,
       },
     };
 

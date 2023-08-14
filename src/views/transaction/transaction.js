@@ -77,6 +77,8 @@ const Transaction = () => {
   const [transaction, setTransaction] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const token = localStorage.getItem("token");
+
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
   };
@@ -116,9 +118,7 @@ const Transaction = () => {
       maxBodyLength: Infinity,
       url: `"${baseUrl.url}/api/transaction"`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNTY2MDMzLCJleHAiOjE2OTE2NTI0MzN9.lPsrwxWAjsSKEfeYfJvDIItNY2kLuI8J13Jy-QgeEXc",
-        "Content-Type": "application/json",
+        token: token,
       },
       data: transactionsData,
     };
@@ -140,8 +140,7 @@ const Transaction = () => {
       maxBodyLength: Infinity,
       url: `${baseUrl.url}/api/transaction/list`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNTY2MDMzLCJleHAiOjE2OTE2NTI0MzN9.lPsrwxWAjsSKEfeYfJvDIItNY2kLuI8J13Jy-QgeEXc",
+        token: token,
       },
     };
 
