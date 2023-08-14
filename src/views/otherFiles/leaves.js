@@ -1,16 +1,14 @@
 import React, { useState } from "react";
-import {
-  Autocomplete,
+import moment from "moment";
+import { 
   Button,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
-  Grid,
-  IconButton,
-  MenuItem,
-  Popover,
+  Grid, 
   Table,
   TableBody,
   TableCell,
@@ -22,8 +20,7 @@ import {
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
 import {
-  IconCirclePlus,
-  IconDotsVertical,
+  IconCirclePlus, 
   IconPencil,
   IconTrash,
 } from "@tabler/icons";
@@ -33,6 +30,9 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useEffect } from "react";
+import axios from "axios";
+import { Oval } from "react-loader-spinner";
 
 const displayStyle = {
   display: "flex",
@@ -65,108 +65,269 @@ const cancelButton = {
   color: "#000000",
 };
 
-const medicinesName = [{ label: "alis" }, { label: "yash" }, { label: "raj " }];
+const editDialog = {
+  color: "#000000",
+};
 
-function Leaves(props) {
-  const [open, setOpen] = useState(null);
+const deleteDialog = {
+  padding: "5px 20px",
+};
+
+const hoverEffect = {
+  "&:hover": {
+    backgroundColor: "transparent",
+  },
+  padding: "0px",
+  minWidth: "35px",
+};
+
+function Leaves(props) { 
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteLeaveOpen, setDeleteLeaveOpen] = useState(false);
+  const [leaveToDelete, setLeaveToDElete] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editLeave, setEditLeave] = useState(null);
+  const [staffLeave, setStaffLeave] = useState({
+    staffId: "",
+    startDate: "",
+    endDate: "",
+    reason: "",
+  });
 
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
+  const addLeave = (ele) => {
+    setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
   };
 
-  const handleCloseMenu = (event) => {
-    setOpen(null);
+  const handleDatePicker = (type, newDate) => {
+    const currentDate = new Date(newDate);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MM-YYYY");
+
+    setStaffLeave((prevState) => ({
+      ...prevState,
+      [type]: formattedDate,
+    }));
   };
+
+  const [staffLeaveList, setStaffLeaveList] = useState([]);
+
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: "https://staff-lending-be.onrender.com/api/leave/list",
+      headers: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        "Content-Type": "application/json",
+      },
+    };
+    setIsLoading(true);
+    axios
+      .request(config)
+      .then((response) => {
+        setStaffLeaveList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleLeave = () => {
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://staff-lending-be.onrender.com/api/leave",
+      headers: {
+        token:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+      },
+      data: staffLeave,
+    };
+    setLeaveOpen(false);
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const deleteLeave = (staffId) => {
+    if (leaveToDelete) {
+      let config = {
+        method: "delete",
+        maxBodyLength: Infinity,
+        url: `https://staff-lending-be.onrender.com/api/leave/${staffId}`,
+        headers: {
+          token:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          "Content-Type": "application/json",
+        },
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleLeaveOpen = (staffId) => {
+    setLeaveToDElete(staffId);
+    setDeleteLeaveOpen(true);
+  };
+
+  const editStaffLeave = () => {
+    if (editLeave) {
+      let config = {
+        method: "put",
+        maxBodyLength: Infinity,
+        url: `https://staff-lending-be.onrender.com/api/leave/${editLeave._id}`,
+        headers: {
+          token:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          "Content-Type": "application/json",
+        },
+        data: editLeave,
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+          setEditOpen(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleEditClick = (item) => {
+    setEditLeave(item);
+    setEditOpen(true);
+  };
+
+  const handleEditInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditLeave((prevEditLeave) => ({
+      ...prevEditLeave,
+      [name]: value,
+    }));
+  };
+
   return (
     <>
-      <MainCard>
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <Box>
-              <Typography variant="h3" gutterBottom>
-                Leave Request
-              </Typography>
-            </Box>
-            <Box>
-              <Button
-                variant="contained"
-                sx={addButtonStyle}
-                startIcon={<IconCirclePlus />}
-                onClick={() => setLeaveOpen(true)} 
-              >
-                Add Leave
-              </Button>
-            </Box>
+      {isLoading ? (
+        <Oval
+          height={50}
+          width={50}
+          color="#673ab7"
+          wrapperStyle={{
+            position: "absolute",
+            top: "52%",
+            left: "55%",
+          }}
+          wrapperClass=""
+          visible={true}
+          ariaLabel="oval-loading"
+          secondaryColor="#673ab7"
+          strokeWidth={2}
+          strokeWidthSecondary={2}
+        />
+      ) : (
+        <MainCard>
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <Box>
+                <Typography variant="h3" gutterBottom>
+                  Leave Request
+                </Typography>
+              </Box>
+              <Box>
+                <Button
+                  variant="contained"
+                  sx={addButtonStyle}
+                  startIcon={<IconCirclePlus />}
+                  onClick={() => setLeaveOpen(true)}
+                >
+                  Add Leave
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-        <SearchSection />
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center">Employee ID</TableCell>
-                    <TableCell align="center">Employee Name</TableCell>
-                    <TableCell align="center">Leave Type</TableCell>
-                    <TableCell align="center">From</TableCell>
-                    <TableCell align="center">To</TableCell>
-                    <TableCell align="center">Reason</TableCell>
-                    <TableCell align="center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableCell align="center">1</TableCell>
-                  <TableCell align="center">Abhishek Savaliya</TableCell>
-                  <TableCell align="center">Medical Leave</TableCell>
-                  <TableCell align="center">08-06-23</TableCell>
-                  <TableCell align="center">10-06-23</TableCell>
-                  <TableCell align="center">Hospital Admit</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="large"
-                      color="inherit"
-                      onClick={handleOpenMenu}
-                    >
-                      <IconDotsVertical icon={"eva:more-vertical-fill"} />
-                    </IconButton>
-                  </TableCell>
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+          <SearchSection />
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">Staff ID</TableCell>
+                      <TableCell align="center">Start Date</TableCell>
+                      <TableCell align="center">End Date</TableCell>
+                      <TableCell align="center">Reason</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {staffLeaveList.map((item) => {
+                      return (
+                        <>
+                          <TableRow key={item._id}>
+                            <TableCell align="center">{item.staffId}</TableCell>
+                            <TableCell align="center">
+                              {new Date(item.startDate).getDate()}/
+                              {new Date(item.startDate).getMonth()}/
+                              {new Date(item.startDate).getFullYear()}
+                            </TableCell>
+                            <TableCell align="center">
+                              {new Date(item.endDate).getDate()}/
+                              {new Date(item.endDate).getMonth()}/
+                              {new Date(item.endDate).getFullYear()}
+                            </TableCell>
+                            <TableCell align="center">{item.reason}</TableCell>
+                            <TableCell align="center">
+                              <Button
+                                onClick={() => handleEditClick(item)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconPencil />
+                              </Button>
+                              <Button
+                                onClick={() => handleLeaveOpen(item._id)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconTrash style={{ color: "#e51e25" }} />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
           </Grid>
-        </Grid>
-      </MainCard>
-      <Popover
-        open={Boolean(open)}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          sx: {
-            p: 1,
-            width: 140,
-            "& .MuiMenuItem-root": {
-              px: 1,
-              typography: "body2",
-              borderRadius: 0.75,
-            },
-          },
-        }}
-      >
-        <MenuItem>
-          <IconPencil style={{ marginRight: "8px" }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem style={{ color: "red" }}>
-          <IconTrash style={{ marginRight: "8px" }} />
-          Delete
-        </MenuItem>
-      </Popover>
+        </MainCard>
+      )}
       {/* start add leave dialog */}
       <Dialog
         open={leaveOpen}
@@ -182,17 +343,12 @@ function Leaves(props) {
           <Box>
             <Grid container>
               <Grid md={12}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={medicinesName}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Staff name"
-                      placeholder="Staff name"
-                    />
-                  )}
+                <TextField
+                  sx={{ width: "100%" }}
+                  label="Staff ID"
+                  placeholder="Staff Id"
+                  onChange={addLeave}
+                  name="staffId"
                 />
               </Grid>
               <Grid display="contents" mt={2}>
@@ -203,6 +359,9 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
+                          onChange={(newDate) =>
+                            handleDatePicker("startDate", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -215,6 +374,9 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
+                          onChange={(newDate) =>
+                            handleDatePicker("endDate", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -226,13 +388,15 @@ function Leaves(props) {
                   sx={{ width: "100%" }}
                   placeholder="Leave Reason"
                   label="Leave Reason"
+                  onChange={addLeave}
+                  name="reason"
                 />
               </Grid>
             </Grid>
           </Box>
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
-          <Button sx={saveButton} variant="contained">
+          <Button onClick={handleLeave} sx={saveButton} variant="contained">
             Save
           </Button>
           <Button
@@ -245,6 +409,117 @@ function Leaves(props) {
         </DialogActions>
       </Dialog>
       {/* end leave dialog */}
+
+      {/* delete staff leave data */}
+      <Dialog open={deleteLeaveOpen} onClose={() => setDeleteLeaveOpen(false)}>
+        <DialogTitle sx={{ fontSize: "20px" }}>{"Delete"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: "16px" }}>
+          <Button
+            sx={editDialog}
+            onClick={() => setDeleteLeaveOpen(false)}
+            autoFocus
+            variant="outlined"
+          >
+            CANCEL
+          </Button>
+          <Button
+            sx={deleteDialog}
+            onClick={() => deleteLeave(leaveToDelete)}
+            variant="contained"
+            disableElevation
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* start edit staff leave data */}
+      <Dialog
+        open={editOpen}
+        maxWidth="sm"
+        fullWidth={true}
+        onClose={() => setEditOpen(false)}
+      >
+        <DialogTitle>
+          <Typography sx={{ fontSize: "20px" }}>Add Leave</Typography>
+        </DialogTitle>
+        <Divider sx={{ marginY: "2px", color: "black" }} />
+        <DialogContent>
+          <Box>
+            <Grid container>
+              <Grid item md={12}>
+                <TextField
+                  sx={{ width: "100%" }}
+                  label="Staff ID"
+                  placeholder="Staff Id"
+                  value={editLeave?.staffId || ""}
+                  onChange={addLeave}
+                  name="staffId"
+                />
+              </Grid>
+              <Grid display="contents" mt={2}>
+                <Grid item md={6}>
+                  <Box>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={["DatePicker"]}>
+                        <DatePicker
+                          sx={{ width: "96%", mt: "4px" }}
+                          label=" Leave From Date"
+                          onChange={(newDate) =>
+                            handleDatePicker("startDate", newDate)
+                          }
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  </Box>
+                </Grid>
+                <Grid item md={6}>
+                  <Box>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={["DatePicker"]}>
+                        <DatePicker
+                          sx={{ width: "100%", mt: "4px" }}
+                          label="Leave to Date"
+                          onChange={(newDate) =>
+                            handleDatePicker("endDate", newDate)
+                          }
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  </Box>
+                </Grid>
+              </Grid>
+              <Grid item md={12} mt="12px">
+                <TextField
+                  sx={{ width: "100%" }}
+                  placeholder="Leave Reason"
+                  label="Leave Reason"
+                  value={editLeave?.reason || ""}
+                  onChange={handleEditInputChange}
+                  name="reason"
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ display: "flex" }}>
+          <Button onClick={editStaffLeave} sx={saveButton} variant="contained">
+            Save
+          </Button>
+          <Button
+            sx={cancelButton}
+            variant="outlined"
+            onClick={() => setEditOpen(false)}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
