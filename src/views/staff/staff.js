@@ -1,11 +1,17 @@
 import React, { useState } from "react";
+import axios from "axios";
+import moment from "moment/moment";
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
   Grid,
   IconButton,
   MenuItem,
@@ -32,7 +38,10 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useEffect } from "react";
+import { Oval } from "react-loader-spinner";
 
+import baseUrl from "../baseUrl";
 // ==============================|| Employee ||============================== //
 
 const displayStyle = {
@@ -66,9 +75,17 @@ const cancelButton = {
   color: "#000000",
 };
 
+const loaderSet = {
+  position: "absolute",
+  top: "60%",
+  left: "60%",
+};
+
 const Staff = () => {
   const [open, setOpen] = useState(null);
-  const [staff , setStaff] = useState(false);
+  const [staff, setStaff] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("token");
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -78,69 +95,186 @@ const Staff = () => {
     setOpen(null);
   };
 
+  const [staffData, setStaffData] = useState({
+    staffId: "",
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    gender: "",
+    description: "",
+    position: "",
+    email: "",
+    phone: "",
+    address: "",
+    aadhaarNo: "",
+    pancardNo: "",
+    bankName: "",
+    accountNo: "",
+    ifscCode: "",
+    salary: "",
+  });
+
+  const handleChangeValue = (event) => {
+    setStaffData({ ...staffData, [event.target.name]: event.target.value });
+  };
+
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setStaffData((prevState) => ({
+      ...prevState,
+      joinDate: formattedDate,
+    }));
+  };
+
+  console.log(staffData);
+
+  const handleSaveData = (event) => {
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+      data: staffData,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const [staffDataList, setStaffDataList] = useState([]);
+
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/list`,
+      headers: {
+        token: token,
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data);
+        setStaffDataList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
   return (
     <>
-      <MainCard>
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <Box>
-              <Typography variant="h3" gutterBottom>
-                Staff
-              </Typography>
-            </Box>
-            <Box>
-              <Button
-                variant="contained"
-                onClick={() => setStaff(true)}
-                sx={addButtonStyle}
-                startIcon={<IconCirclePlus />}
-              >
-                Add Staff
-              </Button>
-            </Box>
+      {isLoading ? (
+        <Oval
+          height={50}
+          width={50}
+          color="#673ab7"
+          wrapperStyle={{
+            position: "absolute",
+            top: "52%",
+            left: "55%",
+          }}
+          wrapperClass=""
+          visible={true}
+          ariaLabel="oval-loading"
+          secondaryColor="#673ab7"
+          strokeWidth={2}
+          strokeWidthSecondary={2}
+        />
+      ) : (
+        <MainCard>
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <Box>
+                <Typography variant="h3" gutterBottom>
+                  Staff
+                </Typography>
+              </Box>
+              <Box>
+                <Button
+                  variant="contained"
+                  onClick={() => setStaff(true)}
+                  sx={addButtonStyle}
+                  startIcon={<IconCirclePlus />}
+                >
+                  Add Staff
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-        <SearchSection />
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} sm={12} sx={displayStyle}>
-            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="center">Employee ID</TableCell>
-                    <TableCell align="center">Employee Name</TableCell>
-                    <TableCell align="center">Position</TableCell>
-                    <TableCell align="center">Department</TableCell>
-                    <TableCell align="center">Phone Number</TableCell>
-                    <TableCell align="center">Salary</TableCell>
-                    <TableCell align="center">Join Date</TableCell>
-                    <TableCell align="center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableCell align="center">1</TableCell>
-                  <TableCell align="center">Abhishek Savaliya</TableCell>
-                  <TableCell align="center">senior Developer </TableCell>
-                  <TableCell align="center">Web Development</TableCell>
-                  <TableCell align="center">123456789</TableCell>
-                  <TableCell align="center">15000</TableCell>
-                  <TableCell align="center">29-07-23</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="large"
-                      color="inherit"
-                      onClick={handleOpenMenu}
-                    >
-                      <IconDotsVertical icon={"eva:more-vertical-fill"} />
-                    </IconButton>
-                  </TableCell>
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+          <SearchSection />
+          <Grid container spacing={gridSpacing}>
+            <Grid item xs={12} sm={12} sx={displayStyle}>
+              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">Employee ID</TableCell>
+                      <TableCell align="center">Employee Name</TableCell>
+                      <TableCell align="center">Position</TableCell>
+                      <TableCell align="center">Phone Number</TableCell>
+                      <TableCell align="center">Salary</TableCell>
+                      <TableCell align="center">Join Date</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {staffDataList.map((item) => {
+                      return (
+                        <>
+                          <TableRow>
+                            <TableCell align="center">{item.staffId}</TableCell>
+                            <TableCell align="center">
+                              {item.firstName}
+                            </TableCell>
+                            <TableCell align="center">
+                              {item.position}
+                            </TableCell>
+                            <TableCell align="center">{item.phone}</TableCell>
+                            <TableCell align="center">{item.salary}</TableCell>
+                            <TableCell align="center">
+                              {new Date(item.joinDate).toLocaleDateString(
+                                "en-us"
+                              )}
+                            </TableCell>
+                            <TableCell align="right">
+                              <IconButton
+                                size="large"
+                                color="inherit"
+                                onClick={handleOpenMenu}
+                              >
+                                <IconDotsVertical
+                                  icon={"eva:more-vertical-fill"}
+                                />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
           </Grid>
-        </Grid>
-      </MainCard>
+        </MainCard>
+      )}
+
       <Popover
         open={Boolean(open)}
         anchorEl={open}
@@ -190,6 +324,8 @@ const Staff = () => {
                     placeholder="First Name"
                     variant="outlined"
                     label="First Name"
+                    onChange={handleChangeValue}
+                    name="firstName"
                   />
                 </Grid>
                 <Grid item md={12}>
@@ -198,6 +334,8 @@ const Staff = () => {
                     placeholder="Middle Name"
                     variant="outlined"
                     label="Middle Name"
+                    onChange={handleChangeValue}
+                    name="lastName"
                   />
                 </Grid>
                 <Grid item md={12}>
@@ -206,6 +344,8 @@ const Staff = () => {
                     placeholder="Last Name"
                     variant="outlined"
                     label="Last Name"
+                    onChange={handleChangeValue}
+                    name="middleName"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -213,6 +353,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Staff ID"
                     label="Staff ID"
+                    onChange={handleChangeValue}
+                    name="staffId"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -221,6 +363,7 @@ const Staff = () => {
                       <DatePicker
                         sx={{ width: "100%", mt: "4px" }}
                         label="Joining Date"
+                        onChange={handleDatePicker}
                       />
                     </DemoContainer>
                   </LocalizationProvider>
@@ -228,29 +371,37 @@ const Staff = () => {
                 <Grid item md={6}>
                   <TextField
                     sx={{ mt: "12px", width: "96%" }}
-                    placeholder="Position"
-                    label="Position"
+                    placeholder="Gender"
+                    label="Gender"
+                    onChange={handleChangeValue}
+                    name="gender"
                   />
                 </Grid>
                 <Grid item md={6}>
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
-                    placeholder="Email ID"
-                    label="Email ID"
+                    placeholder="Position"
+                    label="Position"
+                    onChange={handleChangeValue}
+                    name="position"
                   />
                 </Grid>
                 <Grid item md={6}>
                   <TextField
                     sx={{ mt: "12px", width: "96%" }}
-                    placeholder="Phone Number"
-                    label="Phone Number"
+                    placeholder="Email ID"
+                    label="Email ID"
+                    onChange={handleChangeValue}
+                    name="email"
                   />
                 </Grid>
                 <Grid item md={6}>
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
-                    placeholder="Department"
-                    label="Department"
+                    placeholder="Phone Number"
+                    label="Phone Number"
+                    onChange={handleChangeValue}
+                    name="phone"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -258,6 +409,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Aadhaar Number"
                     label="Aadhaar Number"
+                    onChange={handleChangeValue}
+                    name="aadhaarNo"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -265,6 +418,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Pancard Number"
                     label="Pancard Number"
+                    onChange={handleChangeValue}
+                    name="pancardNo"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -272,6 +427,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Bank Name"
                     label="Bank Name"
+                    onChange={handleChangeValue}
+                    name="bankName"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -279,6 +436,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Account Number"
                     label="Account Number"
+                    onChange={handleChangeValue}
+                    name="accountNo"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -286,6 +445,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Ifsc Code"
                     label="Ifsc Code"
+                    onChange={handleChangeValue}
+                    name="ifscCode"
                   />
                 </Grid>
                 <Grid item md={6}>
@@ -293,6 +454,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Salary"
                     label="Salary"
+                    onChange={handleChangeValue}
+                    name="salary"
                   />
                 </Grid>
                 <Grid item md={12}>
@@ -300,6 +463,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Address"
                     label="Address"
+                    onChange={handleChangeValue}
+                    name="address"
                   />
                 </Grid>
                 <Grid item md={12}>
@@ -307,6 +472,8 @@ const Staff = () => {
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Description"
                     label="Description"
+                    onChange={handleChangeValue}
+                    name="description"
                   />
                 </Grid>
               </Grid>
@@ -314,7 +481,7 @@ const Staff = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
-          <Button sx={saveButton} variant="contained">
+          <Button sx={saveButton} variant="contained" onClick={handleSaveData}>
             Save
           </Button>
           <Button
