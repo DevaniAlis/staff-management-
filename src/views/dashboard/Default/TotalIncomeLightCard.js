@@ -1,45 +1,58 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // material-ui
-import { useTheme, styled } from '@mui/material/styles';
-import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
+import { useTheme, styled } from "@mui/material/styles";
+import {
+  Avatar,
+  Box,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 
 // project imports
-import MainCard from 'ui-component/cards/MainCard';
-import TotalIncomeCard from 'ui-component/cards/Skeleton/TotalIncomeCard';
+import MainCard from "ui-component/cards/MainCard";
+import TotalIncomeCard from "ui-component/cards/Skeleton/TotalIncomeCard";
 
 // assets
-import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
+import StorefrontTwoToneIcon from "@mui/icons-material/StorefrontTwoTone";
+import { IconChartAreaLine } from "@tabler/icons";
+
+import CountUp from "react-countup";
 
 // styles
 const CardWrapper = styled(MainCard)(({ theme }) => ({
-  overflow: 'hidden',
-  position: 'relative',
-  '&:after': {
+  backgroundColor: theme.palette.secondary.dark,
+  color: "#fff",
+  overflow: "hidden",
+  position: "relative",
+  "&:after": {
     content: '""',
-    position: 'absolute',
+    position: "absolute",
     width: 210,
     height: 210,
-    background: `linear-gradient(210.04deg, ${theme.palette.warning.dark} -50.94%, rgba(144, 202, 249, 0) 83.49%)`,
-    borderRadius: '50%',
+    background: theme.palette.secondary[800],
+    borderRadius: "50%",
     top: -30,
-    right: -180
+    right: -180,
   },
-  '&:before': {
+  "&:before": {
     content: '""',
-    position: 'absolute',
+    position: "absolute",
     width: 210,
     height: 210,
-    background: `linear-gradient(140.9deg, ${theme.palette.warning.dark} -14.02%, rgba(144, 202, 249, 0) 70.50%)`,
-    borderRadius: '50%',
+    background: theme.palette.secondary[800],
+    borderRadius: "50%",
     top: -160,
-    right: -130
-  }
+    right: -130,
+  },
 }));
 
 // ==============================|| DASHBOARD - TOTAL INCOME LIGHT CARD ||============================== //
 
-const TotalIncomeLightCard = ({ isLoading }) => {
+const TotalIncomeLightCard = ({ isLoading, averageSalary }) => {
   const theme = useTheme();
 
   return (
@@ -57,29 +70,33 @@ const TotalIncomeLightCard = ({ isLoading }) => {
                     sx={{
                       ...theme.typography.commonAvatar,
                       ...theme.typography.largeAvatar,
-                      backgroundColor: theme.palette.warning.light,
-                      color: theme.palette.warning.dark
+                      backgroundColor: theme.palette.secondary[800],
+                      color: "#fff",
                     }}
                   >
-                    <StorefrontTwoToneIcon fontSize="inherit" />
+                    <IconChartAreaLine fontSize="inherit" />
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   sx={{
                     py: 0,
                     mt: 0.45,
-                    mb: 0.45
+                    mb: 0.45,
                   }}
-                  primary={<Typography variant="h4">$203k</Typography>}
+                  primary={
+                    <Typography variant="h4" sx={{ color: "#fff" }}>
+                      <CountUp start={0} end={averageSalary} delay={0} />
+                    </Typography>
+                  }
                   secondary={
                     <Typography
                       variant="subtitle2"
                       sx={{
-                        color: theme.palette.grey[500],
-                        mt: 0.5
+                        color: theme.palette.secondary[200],
+                        mt: 0.5,
                       }}
                     >
-                      Total Income
+                      Average Salary
                     </Typography>
                   }
                 />
@@ -93,7 +110,7 @@ const TotalIncomeLightCard = ({ isLoading }) => {
 };
 
 TotalIncomeLightCard.propTypes = {
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
 };
 
 export default TotalIncomeLightCard;

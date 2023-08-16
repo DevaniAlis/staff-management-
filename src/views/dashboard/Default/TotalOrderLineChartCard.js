@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 
 // material-ui
 import { useTheme, styled } from "@mui/material/styles";
@@ -17,7 +16,6 @@ import ChartDataMonth from "./chart-data/total-order-month-line-chart";
 import ChartDataYear from "./chart-data/total-order-year-line-chart";
 
 // assets
-import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { IconUsers } from "@tabler/icons";
 import CountUp from "react-countup";
@@ -69,37 +67,8 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
 
 // ==============================|| DASHBOARD - TOTAL ORDER LINE CHART CARD ||============================== //
 
-const TotalOrderLineChartCard = ({ isLoading }) => {
+const TotalOrderLineChartCard = ({ isLoading, totalStaff }) => {
   const theme = useTheme();
-
-  const [timeValue, setTimeValue] = useState(false);
-  const handleChangeTime = (event, newValue) => {
-    setTimeValue(newValue);
-  };
-
-  const [totalStaff, setTotalStaff] = useState();
-  const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: "https://staff-lending-be.onrender.com/api/staff/list",
-      headers: {
-        token: token,
-      },
-    };
-
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data.data.length);
-        setTotalStaff(response.data.data.length);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
 
   return (
     <>
@@ -125,79 +94,48 @@ const TotalOrderLineChartCard = ({ isLoading }) => {
                       <IconUsers fontSize="inherit" />
                     </Avatar>
                   </Grid>
-                  <Grid item>
-                    <Button
-                      disableElevation
-                      variant={timeValue ? "contained" : "text"}
-                      size="small"
-                      sx={{ color: "inherit" }}
-                      onClick={(e) => handleChangeTime(e, true)}
-                    >
-                      Month
-                    </Button>
-                    <Button
-                      disableElevation
-                      variant={!timeValue ? "contained" : "text"}
-                      size="small"
-                      sx={{ color: "inherit" }}
-                      onClick={(e) => handleChangeTime(e, false)}
-                    >
-                      Year
-                    </Button>
-                  </Grid>
                 </Grid>
               </Grid>
-              <Grid item sx={{ mb: 0.75 }}>
+              <Grid item>
                 <Grid container alignItems="center">
-                  <Grid item xs={6}>
-                    <Grid container alignItems="center">
-                      <Grid item>
-                        <Typography
-                          sx={{
-                            fontSize: "2.125rem",
-                            fontWeight: 500,
-                            mr: 1,
-                            mt: 1.75,
-                            mb: 0.75,
-                          }}
-                        >
-                          <CountUp start={0} end={totalStaff} delay={0}/>
-                        </Typography>
-                      </Grid>
-                      <Grid item>
-                        <Avatar
-                          sx={{
-                            ...theme.typography.smallAvatar,
-                            cursor: "pointer",
-                            backgroundColor: theme.palette.primary[200],
-                            color: theme.palette.primary.dark,
-                          }}
-                        >
-                          <ArrowDownwardIcon
-                            fontSize="inherit"
-                            sx={{ transform: "rotate3d(1, 1, 1, 45deg)" }}
-                          />
-                        </Avatar>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Typography
-                          sx={{
-                            fontSize: "1rem",
-                            fontWeight: 500,
-                            color: theme.palette.primary[200],
-                          }}
-                        >
-                          Total Staff
-                        </Typography>
-                      </Grid>
-                    </Grid>
+                  <Grid item>
+                    <Typography
+                      sx={{
+                        fontSize: "2.125rem",
+                        fontWeight: 500,
+                        mr: 1,
+                        mt: 1.75,
+                        mb: 0.75,
+                      }}
+                    >
+                      <CountUp start={0} end={totalStaff} delay={0} />
+                    </Typography>
                   </Grid>
-                  <Grid item xs={6}>
-                    {timeValue ? (
-                      <Chart {...ChartDataMonth} />
-                    ) : (
-                      <Chart {...ChartDataYear} />
-                    )}
+                  <Grid item>
+                    <Avatar
+                      sx={{
+                        ...theme.typography.smallAvatar,
+                        cursor: "pointer",
+                        backgroundColor: theme.palette.primary[200],
+                        color: theme.palette.primary.dark,
+                      }}
+                    >
+                      <ArrowDownwardIcon
+                        fontSize="inherit"
+                        sx={{ transform: "rotate3d(1, 1, 1, 45deg)" }}
+                      />
+                    </Avatar>
+                  </Grid>
+                  <Grid item xs={12} sx={{ mb: 1.25 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "1rem",
+                        fontWeight: 500,
+                        color: theme.palette.primary[200],
+                      }}
+                    >
+                      Total Staff
+                    </Typography>
                   </Grid>
                 </Grid>
               </Grid>
