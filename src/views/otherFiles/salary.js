@@ -20,11 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus, 
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -33,6 +29,7 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useEffect } from "react";
 import { Oval } from "react-loader-spinner";
+import baseUrl from "../../views/baseUrl";
 
 const displayStyle = {
   display: "flex",
@@ -81,8 +78,9 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
-function Salary(props) { 
+function Salary(props) {
   const [salaryOpen, setSalaryOpen] = useState(false);
+  const token = localStorage.getItem("token");
   const [salaryList, setSalaryList] = useState([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [salaryToDelete, setSalaryToDelete] = useState(null);
@@ -90,6 +88,7 @@ function Salary(props) {
   const [editSalary, setEditSalary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [staffSalary, setStaffSalary] = useState({
+    firstName: "",
     staffId: "",
     date: "",
     salary: "",
@@ -100,14 +99,21 @@ function Salary(props) {
     setStaffSalary({ ...staffSalary, [ele.target.name]: ele.target.value });
   };
 
+  // const handleDatePicker = (type, newDate) => {
+  //   const currentDate = new Date(newDate);
+  //   const dateString = currentDate.toLocaleDateString("en-US");
+  //   const formattedDate = moment(dateString).format("DD-MM-YYYY");
+
+  //   setStaffSalary((prevState) => ({
+  //     ...prevState,
+  //     [type]: formattedDate,
+  //   }));
+  // };
   const handleDatePicker = (type, newDate) => {
     const currentDate = new Date(newDate);
-    const dateString = currentDate.toLocaleDateString("en-US");
-    const formattedDate = moment(dateString).format("DD-MM-YYYY");
-
-    setStaffSalary((prevState) => ({
+    setEditSalary((prevState) => ({
       ...prevState,
-      [type]: formattedDate,
+      [type]: currentDate,
     }));
   };
 
@@ -116,10 +122,9 @@ function Salary(props) {
       method: "get",
       maxBodyLength: Infinity,
 
-      url: "https://staff-lending-be.onrender.com/api/salary/list",
+      url: `${baseUrl.url}/api/salary/list`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        token: token,
         "Content-Type": "application/json",
       },
     };
@@ -140,10 +145,10 @@ function Salary(props) {
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "https://staff-lending-be.onrender.com/api/salary",
+      url: `${baseUrl.url}/api/salary`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        token: token,
+        "Content-Type": "application/json",
       },
       data: staffSalary,
     };
@@ -164,10 +169,9 @@ function Salary(props) {
       let config = {
         method: "delete",
         maxBodyLength: Infinity,
-        url: `https://staff-lending-be.onrender.com/api/salary/${staffId}`,
+        url: `${baseUrl.url}/api/salary/${staffId}`,
         headers: {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          token: token,
           "Content-Type": "application/json",
         },
       };
@@ -194,10 +198,9 @@ function Salary(props) {
       let config = {
         method: "put",
         maxBodyLength: Infinity,
-        url: `https://staff-lending-be.onrender.com/api/salary/${editSalary._id}`,
+        url: `${baseUrl.url}/api/salary/${editSalary._id}`,
         headers: {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          token: token,
           "Content-Type": "application/json",
         },
         data: editSalary,
@@ -227,7 +230,7 @@ function Salary(props) {
   //     [type]: formattedDate,
   //   }));
   // };
-  // console.log(editSalary);
+  console.log(editSalary);
 
   const handleEditClick = (item) => {
     console.log(item);
@@ -291,7 +294,7 @@ function Salary(props) {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Staff ID</TableCell>
+                      <TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Salary</TableCell>
                       <TableCell align="center">Salary Date</TableCell>
                       <TableCell align="center">Notes</TableCell>
@@ -303,7 +306,9 @@ function Salary(props) {
                       return (
                         <>
                           <TableRow key={item._id}>
-                            <TableCell align="center">{item.staffId}</TableCell>
+                            <TableCell align="center">
+                              {item.staffId ? `${item.staffId.firstName} ${item.staffId.lastName}` : ''}
+                            </TableCell>
                             <TableCell align="center">{item.salary}</TableCell>
                             <TableCell align="center">
                               {new Date(item.date).getDate()}/
@@ -352,7 +357,16 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              {/* <Grid md={12}>
+                <TextField
+                  sx={{ width: "100%" }}
+                  placeholder="Staff Name"
+                  label="Staff Name"
+                  name="staffname"
+                  onChange={addSalary}
+                />
+              </Grid> */}
+              <Grid md={12} mt="12px">
                 <TextField
                   sx={{ width: "100%" }}
                   placeholder="Staff Id"
@@ -369,7 +383,6 @@ function Salary(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Salary Date"
-                          value={staffSalary.date}
                           onChange={(newDate) =>
                             handleDatePicker("date", newDate)
                           }
@@ -458,10 +471,9 @@ function Salary(props) {
               <Grid md={12}>
                 <TextField
                   sx={{ width: "100%" }}
-                  placeholder="Staff Id"
-                  label="Staff ID"
-                  name="staffId"
-                  value={editSalary?.staffId || ""}
+                  placeholder="Staff Name"
+                  label="Staff Name"
+                  value={`${editSalary?.staffId.firstName} ${editSalary?.staffId.lastName}`}
                   onChange={addSalary}
                 />
               </Grid>

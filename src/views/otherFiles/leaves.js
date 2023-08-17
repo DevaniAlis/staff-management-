@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import moment from "moment";
-import { 
+import {
   Button,
   Dialog,
   DialogActions,
@@ -8,7 +8,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
-  Grid, 
+  Grid,
   Table,
   TableBody,
   TableCell,
@@ -19,11 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus, 
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -33,6 +29,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useEffect } from "react";
 import axios from "axios";
 import { Oval } from "react-loader-spinner";
+import baseUrl from "../../views/baseUrl";
 
 const displayStyle = {
   display: "flex",
@@ -81,34 +78,50 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
-function Leaves(props) { 
+function Leaves(props) {
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("token");
   const [deleteLeaveOpen, setDeleteLeaveOpen] = useState(false);
   const [leaveToDelete, setLeaveToDElete] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editLeave, setEditLeave] = useState(null);
   const [staffLeave, setStaffLeave] = useState({
+    firstName: "",
+    lastName: "",
     staffId: "",
     startDate: "",
     endDate: "",
     reason: "",
   });
 
-  const addLeave = (ele) => {
-    setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
-  };
-
-  const handleDatePicker = (type, newDate) => {
-    const currentDate = new Date(newDate);
-    const dateString = currentDate.toLocaleDateString("en-US");
-    const formattedDate = moment(dateString).format("DD-MM-YYYY");
-
+  // const addLeave = (ele) => {
+  //   setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
+  // };
+  const addLeave = (event) => {
+    const { name, value } = event.target;
     setStaffLeave((prevState) => ({
       ...prevState,
-      [type]: formattedDate,
+      [name]: value,
     }));
   };
+
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    staffLeave((prevState) => ({
+      ...prevState,
+      joinDate: formattedDate,
+    }));
+  };
+  // const handleDatePicker = (type, newDate) => {
+  //   const currentDate = new Date(newDate);
+  //   setStaffLeave((prevState) => ({
+  //     ...prevState,
+  //     [type]: currentDate,
+  //   }));
+  // };
 
   const [staffLeaveList, setStaffLeaveList] = useState([]);
 
@@ -116,11 +129,9 @@ function Leaves(props) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: "https://staff-lending-be.onrender.com/api/leave/list",
+      url: `${baseUrl.url}/api/leave/list`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
-        "Content-Type": "application/json",
+        token: token,
       },
     };
     setIsLoading(true);
@@ -140,10 +151,9 @@ function Leaves(props) {
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "https://staff-lending-be.onrender.com/api/leave",
+      url: `${baseUrl.url}/api/leave`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        token: token,
       },
       data: staffLeave,
     };
@@ -158,16 +168,16 @@ function Leaves(props) {
         console.log(error);
       });
   };
+  console.log("staff leave", staffLeave);
 
   const deleteLeave = (staffId) => {
     if (leaveToDelete) {
       let config = {
         method: "delete",
         maxBodyLength: Infinity,
-        url: `https://staff-lending-be.onrender.com/api/leave/${staffId}`,
+        url: `${baseUrl.url}/api/leave/${staffId}`,
         headers: {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          token: token,
           "Content-Type": "application/json",
         },
       };
@@ -194,10 +204,9 @@ function Leaves(props) {
       let config = {
         method: "put",
         maxBodyLength: Infinity,
-        url: `https://staff-lending-be.onrender.com/api/leave/${editLeave._id}`,
+        url: `${baseUrl.url}/api/leave/${editLeave._id}`,
         headers: {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          token: token,
           "Content-Type": "application/json",
         },
         data: editLeave,
@@ -207,7 +216,7 @@ function Leaves(props) {
         .request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
-          window.location.reload();
+          // window.location.reload();
           setEditOpen(false);
         })
         .catch((error) => {
@@ -219,6 +228,14 @@ function Leaves(props) {
   const handleEditClick = (item) => {
     setEditLeave(item);
     setEditOpen(true);
+  };
+
+  const handleEditDatePicker = (type, newDate) => {
+    const formattedDate = moment(newDate).format("DD-MMM-YYYY");
+    setEditLeave((prevEditLeave) => ({
+      ...prevEditLeave,
+      [type]: formattedDate,
+    }));
   };
 
   const handleEditInputChange = (event) => {
@@ -254,7 +271,7 @@ function Leaves(props) {
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <Box>
                 <Typography variant="h3" gutterBottom>
-                  Leave Request
+                  Leave Details
                 </Typography>
               </Box>
               <Box>
@@ -277,7 +294,7 @@ function Leaves(props) {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Staff ID</TableCell>
+                      <TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Start Date</TableCell>
                       <TableCell align="center">End Date</TableCell>
                       <TableCell align="center">Reason</TableCell>
@@ -289,16 +306,16 @@ function Leaves(props) {
                       return (
                         <>
                           <TableRow key={item._id}>
-                            <TableCell align="center">{item.staffId}</TableCell>
                             <TableCell align="center">
-                              {new Date(item.startDate).getDate()}/
-                              {new Date(item.startDate).getMonth()}/
-                              {new Date(item.startDate).getFullYear()}
+                              {item.staffId
+                                ? `${item.staffId.firstName} ${item.staffId.lastName}`
+                                : ""}
                             </TableCell>
                             <TableCell align="center">
-                              {new Date(item.endDate).getDate()}/
-                              {new Date(item.endDate).getMonth()}/
-                              {new Date(item.endDate).getFullYear()}
+                              {moment(item.startDate).format("DD/MM/YYYY")}
+                            </TableCell>
+                            <TableCell align="center">
+                              {moment(item.endDate).format("DD/MM/YYYY")}
                             </TableCell>
                             <TableCell align="center">{item.reason}</TableCell>
                             <TableCell align="center">
@@ -359,6 +376,7 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
+                          value={editLeave?.startDate || null}
                           onChange={(newDate) =>
                             handleDatePicker("startDate", newDate)
                           }
@@ -374,6 +392,7 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
+                          value={editLeave?.endDate || null}
                           onChange={(newDate) =>
                             handleDatePicker("endDate", newDate)
                           }
@@ -446,7 +465,7 @@ function Leaves(props) {
         onClose={() => setEditOpen(false)}
       >
         <DialogTitle>
-          <Typography sx={{ fontSize: "20px" }}>Add Leave</Typography>
+          <Typography sx={{ fontSize: "20px" }}>Edit Leave</Typography>
         </DialogTitle>
         <Divider sx={{ marginY: "2px", color: "black" }} />
         <DialogContent>
@@ -457,9 +476,13 @@ function Leaves(props) {
                   sx={{ width: "100%" }}
                   label="Staff ID"
                   placeholder="Staff Id"
-                  value={editLeave?.staffId || ""}
-                  onChange={addLeave}
+                  value={
+                    editLeave
+                      ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
+                      : ""
+                  }
                   name="staffId"
+                  onChange={addLeave}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
@@ -470,9 +493,6 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
-                          onChange={(newDate) =>
-                            handleDatePicker("startDate", newDate)
-                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -485,9 +505,6 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
-                          onChange={(newDate) =>
-                            handleDatePicker("endDate", newDate)
-                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
