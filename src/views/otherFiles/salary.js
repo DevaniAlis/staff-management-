@@ -20,11 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus, 
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -81,7 +77,7 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
-function Salary(props) { 
+function Salary(props) {
   const [salaryOpen, setSalaryOpen] = useState(false);
   const [salaryList, setSalaryList] = useState([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -89,6 +85,8 @@ function Salary(props) {
   const [editOpen, setEditOpen] = useState(false);
   const [editSalary, setEditSalary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffSalary, setStaffSalary] = useState({
     staffId: "",
     date: "",
@@ -111,7 +109,7 @@ function Salary(props) {
     }));
   };
 
-  useEffect(() => {
+  const allSalaryList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -134,7 +132,7 @@ function Salary(props) {
         console.log(error);
         setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleSalary = () => {
     let config = {
@@ -243,6 +241,32 @@ function Salary(props) {
     }));
   };
 
+  useEffect(() => {
+    allSalaryList();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(salaryList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, salaryList]);
+
+  const handleSearch = () => {
+    const query = searchQuery;
+    const numberQuery = Number(searchQuery);
+
+    const filteredList = salaryList.filter((item) => {
+      console.log("Item Phone:", item.phone);
+      if (item.phone === numberQuery || item.firstName === query) {
+        return item.phone;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
+  };
+
   return (
     <>
       {isLoading ? (
@@ -284,7 +308,10 @@ function Salary(props) {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -299,7 +326,7 @@ function Salary(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {salaryList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow key={item._id}>

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import moment from "moment";
-import { 
+import {
   Button,
   Dialog,
   DialogActions,
@@ -8,7 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
-  Grid, 
+  Grid,
   Table,
   TableBody,
   TableCell,
@@ -19,20 +20,17 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus, 
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useEffect } from "react";
-import axios from "axios";
 import { Oval } from "react-loader-spinner";
+
+import baseUrl from "../baseUrl";
+const token = localStorage.getItem("token");
 
 const displayStyle = {
   display: "flex",
@@ -81,13 +79,15 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
-function Leaves(props) { 
+function Leaves(props) {
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteLeaveOpen, setDeleteLeaveOpen] = useState(false);
   const [leaveToDelete, setLeaveToDElete] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editLeave, setEditLeave] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffLeave, setStaffLeave] = useState({
     staffId: "",
     startDate: "",
@@ -101,8 +101,7 @@ function Leaves(props) {
 
   const handleDatePicker = (type, newDate) => {
     const currentDate = new Date(newDate);
-    const dateString = currentDate.toLocaleDateString("en-US");
-    const formattedDate = moment(dateString).format("DD-MM-YYYY");
+    const formattedDate = moment(currentDate).format("DD-MM-YYYY");
 
     setStaffLeave((prevState) => ({
       ...prevState,
@@ -112,14 +111,13 @@ function Leaves(props) {
 
   const [staffLeaveList, setStaffLeaveList] = useState([]);
 
-  useEffect(() => {
+  const getLeaveList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: "https://staff-lending-be.onrender.com/api/leave/list",
+      url: `${baseUrl.url}/api/leave/list`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        token: token,
         "Content-Type": "application/json",
       },
     };
@@ -134,16 +132,15 @@ function Leaves(props) {
         console.log(error);
         setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleLeave = () => {
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "https://staff-lending-be.onrender.com/api/leave",
+      url: `${baseUrl.url}/api/leave`,
       headers: {
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+        token: token,
       },
       data: staffLeave,
     };
@@ -164,10 +161,9 @@ function Leaves(props) {
       let config = {
         method: "delete",
         maxBodyLength: Infinity,
-        url: `https://staff-lending-be.onrender.com/api/leave/${staffId}`,
+        url: `${baseUrl.url}/api/leave/${staffId}`,
         headers: {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          token: token,
           "Content-Type": "application/json",
         },
       };
@@ -194,10 +190,9 @@ function Leaves(props) {
       let config = {
         method: "put",
         maxBodyLength: Infinity,
-        url: `https://staff-lending-be.onrender.com/api/leave/${editLeave._id}`,
+        url: `${baseUrl.url}/api/leave/${editLeave._id}`,
         headers: {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0YWZmIiwiaWF0IjoxNjkxNjU3OTA4LCJleHAiOjE2OTE3NDQzMDh9.rKyIAQd2sa6gJx17Mi_Ke9ifaLrCVl79ikpGEvVuRWs",
+          token: token,
           "Content-Type": "application/json",
         },
         data: editLeave,
@@ -227,6 +222,32 @@ function Leaves(props) {
       ...prevEditLeave,
       [name]: value,
     }));
+  };
+
+  useEffect(() => {
+    getLeaveList();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(staffLeaveList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, staffLeaveList]);
+
+  const handleSearch = () => {
+    const query = searchQuery;
+    const numberQuery = Number(searchQuery);
+
+    const filteredList = staffLeaveList.filter((item) => {
+      console.log("Item Phone:", item.phone);
+      if (item.phone === numberQuery || item.firstName === query) {
+        return item.phone;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
   };
 
   return (
@@ -270,14 +291,16 @@ function Leaves(props) {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Staff ID</TableCell>
                       <TableCell align="center">Start Date</TableCell>
                       <TableCell align="center">End Date</TableCell>
                       <TableCell align="center">Reason</TableCell>
@@ -285,11 +308,10 @@ function Leaves(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {staffLeaveList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow key={item._id}>
-                            <TableCell align="center">{item.staffId}</TableCell>
                             <TableCell align="center">
                               {new Date(item.startDate).getDate()}/
                               {new Date(item.startDate).getMonth()}/
@@ -457,7 +479,6 @@ function Leaves(props) {
                   sx={{ width: "100%" }}
                   label="Staff ID"
                   placeholder="Staff Id"
-                  value={editLeave?.staffId || ""}
                   onChange={addLeave}
                   name="staffId"
                 />

@@ -1,17 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment/moment";
 import {
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   FormControlLabel,
-  FormLabel,
   Grid,
   IconButton,
   MenuItem,
@@ -25,6 +22,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import Switch from "@mui/material/Switch";
 import MainCard from "ui-component/cards/MainCard";
 import {
   IconCirclePlus,
@@ -38,7 +37,6 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useEffect } from "react";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
@@ -75,17 +73,65 @@ const cancelButton = {
   color: "#000000",
 };
 
-const loaderSet = {
-  position: "absolute",
-  top: "60%",
-  left: "60%",
-};
+const IOSSwitch = styled((props) => (
+  <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
+))(({ theme }) => ({
+  width: 40,
+  height: 23,
+  padding: 0,
+  "& .MuiSwitch-switchBase": {
+    padding: 0,
+    margin: 2,
+    transitionDuration: "300ms",
+    "&.Mui-checked": {
+      transform: "translateX(16px)",
+      color: "#fff",
+      "& + .MuiSwitch-track": {
+        backgroundColor: theme.palette.mode === "dark" ? "#1e88e5" : "#1e88e5",
+        opacity: 1,
+        border: 0,
+      },
+      "&.Mui-disabled + .MuiSwitch-track": {
+        opacity: 0.5,
+      },
+    },
+    "&.Mui-focusVisible .MuiSwitch-thumb": {
+      color: "#33cf4d",
+      border: "6px solid #fff",
+    },
+    "&.Mui-disabled .MuiSwitch-thumb": {
+      color:
+        theme.palette.mode === "light"
+          ? theme.palette.grey[100]
+          : theme.palette.grey[600],
+    },
+    "&.Mui-disabled + .MuiSwitch-track": {
+      opacity: theme.palette.mode === "light" ? 0.7 : 0.3,
+    },
+  },
+  "& .MuiSwitch-thumb": {
+    boxSizing: "border-box",
+    width: 20,
+    height: 20,
+  },
+  "& .MuiSwitch-track": {
+    borderRadius: 26 / 2,
+    backgroundColor: theme.palette.mode === "light" ? "#E9E9EA" : "#39393D",
+    opacity: 1,
+    transition: theme.transitions.create(["background-color"], {
+      duration: 500,
+    }),
+  },
+}));
 
 const Staff = () => {
+  const token = localStorage.getItem("token");
   const [open, setOpen] = useState(null);
   const [staff, setStaff] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const token = localStorage.getItem("token");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
+  const [isChecked, setIsChecked] = useState(true);
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -128,8 +174,6 @@ const Staff = () => {
     }));
   };
 
-  console.log(staffData);
-
   const handleSaveData = (event) => {
     let config = {
       method: "post",
@@ -154,7 +198,7 @@ const Staff = () => {
 
   const [staffDataList, setStaffDataList] = useState([]);
 
-  useEffect(() => {
+  const getStaffList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -167,14 +211,67 @@ const Staff = () => {
     axios
       .request(config)
       .then((response) => {
-        console.log(response.data);
         setStaffDataList(response.data.data);
         setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  useEffect(() => {
+    getStaffList();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(staffDataList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, staffDataList]);
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const numberQuery = Number(searchQuery);
+
+    const filteredList = staffDataList.filter((item) => {
+      console.log("Item Phone:", item.phone);
+      if (item.phone === numberQuery || item.firstName === query) {
+        return item.phone;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
+  };
+
+  const handleChecked = (event, staffId) => {
+    const newCheckedValue = event.target.checked;
+    const updatedStaffData = {isActive: newCheckedValue };
+    console.log(updatedStaffData);
+
+    const config = {
+      method: "put",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/${staffId}`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+      data: updatedStaffData,
+    };
+    
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log("Status updated successfully:", response.data);
+        setIsChecked(newCheckedValue);
+      })
+      .catch((error) => {
+        console.log("Error updating status:", error);
+      });
+  };
 
   return (
     <>
@@ -217,7 +314,10 @@ const Staff = () => {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -230,14 +330,15 @@ const Staff = () => {
                       <TableCell align="center">Phone Number</TableCell>
                       <TableCell align="center">Salary</TableCell>
                       <TableCell align="center">Join Date</TableCell>
+                      <TableCell align="center">Active</TableCell>
                       <TableCell align="center">Action</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {staffDataList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
-                          <TableRow>
+                          <TableRow key={item.staffId}>
                             <TableCell align="center">{item.staffId}</TableCell>
                             <TableCell align="center">
                               {item.firstName}
@@ -252,7 +353,20 @@ const Staff = () => {
                                 "en-us"
                               )}
                             </TableCell>
-                            <TableCell align="right">
+                            <TableCell align="center">
+                              <FormControlLabel
+                                control={
+                                  <IOSSwitch
+                                    sx={{ m: 1 }}
+                                    defaultChecked={item.isActive}
+                                    onChange={(event) =>
+                                      handleChecked(event, item._id)
+                                    }
+                                  />
+                                }
+                              ></FormControlLabel>
+                            </TableCell>
+                            <TableCell align="center">
                               <IconButton
                                 size="large"
                                 color="inherit"

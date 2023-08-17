@@ -10,7 +10,6 @@ const isTokenAvailable = localStorage.getItem("token");
 
 // Protected route component to handle access based on token
 const ProtectedRoute = ({ element: Element, ...rest }) => {
-  console.log("element", Element);
   return isTokenAvailable ? (
     <Routes>
       <Route {...rest} element={<Element />} />

@@ -76,6 +76,8 @@ const Transaction = () => {
   const [open, setOpen] = useState(null);
   const [transaction, setTransaction] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
 
   const token = localStorage.getItem("token");
 
@@ -134,7 +136,8 @@ const Transaction = () => {
   };
 
   const [transactionList, setTransactionList] = useState([]);
-  useEffect(() => {
+
+  const getTransactionList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -154,7 +157,33 @@ const Transaction = () => {
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  useEffect(() => {
+    getTransactionList();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(transactionList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, transactionList]);
+
+  const handleSearch = () => {
+    const query = searchQuery;
+    const numberQuery = Number(searchQuery);
+
+    const filteredList = transactionList.filter((item) => {
+      console.log("Item Phone:", item.phone);
+      if (item.phone === numberQuery || item.firstName === query) {
+        return item.phone;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
+  };
 
   return (
     <>
@@ -197,7 +226,10 @@ const Transaction = () => {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -212,7 +244,7 @@ const Transaction = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {transactionList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow>
