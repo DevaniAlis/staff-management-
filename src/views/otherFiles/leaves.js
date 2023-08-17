@@ -28,6 +28,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
+import baseUrl from "../../views/baseUrl";
 
 import baseUrl from "../baseUrl";
 const token = localStorage.getItem("token");
@@ -82,6 +83,7 @@ const hoverEffect = {
 function Leaves(props) {
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("token");
   const [deleteLeaveOpen, setDeleteLeaveOpen] = useState(false);
   const [leaveToDelete, setLeaveToDElete] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -89,25 +91,41 @@ function Leaves(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffLeave, setStaffLeave] = useState({
+    firstName: "",
+    lastName: "",
     staffId: "",
     startDate: "",
     endDate: "",
     reason: "",
   });
 
-  const addLeave = (ele) => {
-    setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
-  };
-
-  const handleDatePicker = (type, newDate) => {
-    const currentDate = new Date(newDate);
-    const formattedDate = moment(currentDate).format("DD-MM-YYYY");
-
+  // const addLeave = (ele) => {
+  //   setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
+  // };
+  const addLeave = (event) => {
+    const { name, value } = event.target;
     setStaffLeave((prevState) => ({
       ...prevState,
-      [type]: formattedDate,
+      [name]: value,
     }));
   };
+
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    staffLeave((prevState) => ({
+      ...prevState,
+      joinDate: formattedDate,
+    }));
+  };
+  // const handleDatePicker = (type, newDate) => {
+  //   const currentDate = new Date(newDate);
+  //   setStaffLeave((prevState) => ({
+  //     ...prevState,
+  //     [type]: currentDate,
+  //   }));
+  // };
 
   const [staffLeaveList, setStaffLeaveList] = useState([]);
 
@@ -118,7 +136,7 @@ function Leaves(props) {
       url: `${baseUrl.url}/api/leave/list`,
       headers: {
         token: token,
-        "Content-Type": "application/json",
+ "Content-Type": "application/json",
       },
     };
     setIsLoading(true);
@@ -155,6 +173,7 @@ function Leaves(props) {
         console.log(error);
       });
   };
+  console.log("staff leave", staffLeave);
 
   const deleteLeave = (staffId) => {
     if (leaveToDelete) {
@@ -202,7 +221,7 @@ function Leaves(props) {
         .request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
-          window.location.reload();
+          // window.location.reload();
           setEditOpen(false);
         })
         .catch((error) => {
@@ -214,6 +233,14 @@ function Leaves(props) {
   const handleEditClick = (item) => {
     setEditLeave(item);
     setEditOpen(true);
+  };
+
+  const handleEditDatePicker = (type, newDate) => {
+    const formattedDate = moment(newDate).format("DD-MMM-YYYY");
+    setEditLeave((prevEditLeave) => ({
+      ...prevEditLeave,
+      [type]: formattedDate,
+    }));
   };
 
   const handleEditInputChange = (event) => {
@@ -275,7 +302,7 @@ function Leaves(props) {
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <Box>
                 <Typography variant="h3" gutterBottom>
-                  Leave Request
+                  Leave Details
                 </Typography>
               </Box>
               <Box>
@@ -301,6 +328,7 @@ function Leaves(props) {
                 <Table>
                   <TableHead>
                     <TableRow>
+<TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Start Date</TableCell>
                       <TableCell align="center">End Date</TableCell>
                       <TableCell align="center">Reason</TableCell>
@@ -313,14 +341,15 @@ function Leaves(props) {
                         <>
                           <TableRow key={item._id}>
                             <TableCell align="center">
-                              {new Date(item.startDate).getDate()}/
-                              {new Date(item.startDate).getMonth()}/
-                              {new Date(item.startDate).getFullYear()}
+                              {item.staffId
+                                ? `${item.staffId.firstName} ${item.staffId.lastName}`
+                                : ""}
                             </TableCell>
                             <TableCell align="center">
-                              {new Date(item.endDate).getDate()}/
-                              {new Date(item.endDate).getMonth()}/
-                              {new Date(item.endDate).getFullYear()}
+                              {moment(item.startDate).format("DD/MM/YYYY")}
+                            </TableCell>
+                            <TableCell align="center">
+                              {moment(item.endDate).format("DD/MM/YYYY")}
                             </TableCell>
                             <TableCell align="center">{item.reason}</TableCell>
                             <TableCell align="center">
@@ -381,6 +410,7 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
+                          value={editLeave?.startDate || null}
                           onChange={(newDate) =>
                             handleDatePicker("startDate", newDate)
                           }
@@ -396,6 +426,7 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
+                          value={editLeave?.endDate || null}
                           onChange={(newDate) =>
                             handleDatePicker("endDate", newDate)
                           }
@@ -468,7 +499,7 @@ function Leaves(props) {
         onClose={() => setEditOpen(false)}
       >
         <DialogTitle>
-          <Typography sx={{ fontSize: "20px" }}>Add Leave</Typography>
+          <Typography sx={{ fontSize: "20px" }}>Edit Leave</Typography>
         </DialogTitle>
         <Divider sx={{ marginY: "2px", color: "black" }} />
         <DialogContent>
@@ -479,8 +510,13 @@ function Leaves(props) {
                   sx={{ width: "100%" }}
                   label="Staff ID"
                   placeholder="Staff Id"
-                  onChange={addLeave}
+value={
+                    editLeave
+                      ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
+                      : ""
+                  }
                   name="staffId"
+                  onChange={addLeave}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
@@ -491,9 +527,6 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
-                          onChange={(newDate) =>
-                            handleDatePicker("startDate", newDate)
-                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -506,9 +539,6 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
-                          onChange={(newDate) =>
-                            handleDatePicker("endDate", newDate)
-                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>

@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
   Grid,
@@ -61,6 +62,22 @@ const saveButton = {
   backgroundColor: "#1E88E5",
 };
 
+const hoverEffect = {
+  "&:hover": {
+    backgroundColor: "transparent",
+  },
+  padding: "0px",
+  minWidth: "35px",
+};
+
+const editDialog = {
+  color: "#000000",
+};
+
+const deleteDialog = {
+  padding: "5px 20px",
+};
+
 const cancelButton = {
   "&:hover": {
     border: "1px solid #1E88E5",
@@ -75,19 +92,15 @@ const cancelButton = {
 const Transaction = () => {
   const [open, setOpen] = useState(null);
   const [transaction, setTransaction] = useState(false);
+  const [transactionOpen, setTransactionOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [editTransaction, setEditTransaction] = useState(false);
+  const [editToTransaction, setEditToTransaction] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
 
   const token = localStorage.getItem("token");
-
-  const handleOpenMenu = (event) => {
-    setOpen(event.currentTarget);
-  };
-
-  const handleCloseMenu = (event) => {
-    setOpen(null);
-  };
 
   const [transactionsData, setTransactionsData] = useState({
     staffId: "",
@@ -118,9 +131,10 @@ const Transaction = () => {
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: `"${baseUrl.url}/api/transaction"`,
+      url: `${baseUrl.url}/api/transaction`,
       headers: {
         token: token,
+        "Content-Type": "application/json",
       },
       data: transactionsData,
     };
@@ -129,6 +143,7 @@ const Transaction = () => {
       .request(config)
       .then((response) => {
         console.log(JSON.stringify(response.data));
+        window.location.reload();
       })
       .catch((error) => {
         console.log(error);
@@ -144,6 +159,7 @@ const Transaction = () => {
       url: `${baseUrl.url}/api/transaction/list`,
       headers: {
         token: token,
+        "Content-Type": "application/json",
       },
     };
 
@@ -183,6 +199,73 @@ const Transaction = () => {
       return false;
     });
     setFilteredStaffDataList(filteredList);
+    
+  const transactionDelete = (staffId) => {
+    if (transactionToDelete) {
+      let config = {
+        method: "delete",
+        maxBodyLength: Infinity,
+        url: `${baseUrl.url}/api/transaction/${staffId}`,
+        headers: {
+          token: token,
+          "Content-Type": "application/json",
+        },
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleTransactionOpen = (staffId) => {
+    setTransactionToDelete(staffId);
+    setTransactionOpen(true);
+  };
+
+  const handleTransaction = (staffId) => {
+    if (editToTransaction) {
+      let config = {
+        method: "put",
+        maxBodyLength: Infinity,
+        url: `${baseUrl.url}/api/transaction/${editToTransaction._id}`,
+        headers: {
+          token: token,
+          "Content-Type": "application/json",
+        },
+        data: editToTransaction,
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+          setTransaction(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleEditInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditToTransaction((prevEditSalary) => ({
+      ...prevEditSalary,
+      [name]: value,
+    }));
+  };
+
+  const handleEditClick = (item) => {
+    setEditToTransaction(item);
+    setEditTransaction(true);
   };
 
   return (
@@ -236,7 +319,7 @@ const Transaction = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Employee ID</TableCell>
+                      <TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Transaction Type</TableCell>
                       <TableCell align="center">Transaction Date</TableCell>
                       <TableCell align="center">Amount</TableCell>
@@ -247,8 +330,12 @@ const Transaction = () => {
                     {filteredStaffDataList.map((item) => {
                       return (
                         <>
-                          <TableRow>
-                            <TableCell align="center">{item.staffId}</TableCell>
+                          <TableRow key={item._id}>
+                            <TableCell align="center">
+                              {item.staffId
+                                ? `${item.staffId.firstName} ${item.staffId.lastName}`
+                                : ""}
+                            </TableCell>
                             <TableCell align="center">
                               {item.transactionType}
                             </TableCell>
@@ -259,15 +346,20 @@ const Transaction = () => {
                             </TableCell>
                             <TableCell align="center">{item.amount}</TableCell>
                             <TableCell align="center">
-                              <IconButton
-                                size="large"
-                                color="inherit"
-                                onClick={handleOpenMenu}
+                              <Button
+                                onClick={() => handleEditClick(item)}
+                                disableRipple
+                                sx={hoverEffect}
                               >
-                                <IconDotsVertical
-                                  icon={"eva:more-vertical-fill"}
-                                />
-                              </IconButton>
+                                <IconPencil />
+                              </Button>
+                              <Button
+                                onClick={() => handleTransactionOpen(item._id)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconTrash style={{ color: "#e51e25" }} />
+                              </Button>
                             </TableCell>
                           </TableRow>
                         </>
@@ -281,36 +373,7 @@ const Transaction = () => {
         </MainCard>
       )}
 
-      <Popover
-        open={Boolean(open)}
-        anchorEl={open}
-        onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          sx: {
-            p: 1,
-            width: 140,
-            "& .MuiMenuItem-root": {
-              px: 1,
-              typography: "body2",
-              borderRadius: 0.75,
-            },
-          },
-        }}
-      >
-        <MenuItem>
-          <IconPencil style={{ marginRight: "8px" }} />
-          Edit
-        </MenuItem>
-
-        <MenuItem style={{ color: "red" }}>
-          <IconTrash style={{ marginRight: "8px" }} />
-          Delete
-        </MenuItem>
-      </Popover>
       {/* start Transaction dialog */}
-
       <Dialog
         open={transaction}
         maxWidth="sm"
@@ -379,7 +442,7 @@ const Transaction = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
-          <Button sx={saveButton} variant="contained" onClick={handleSaveData}>
+          <Button onClick={handleSaveData} sx={saveButton} variant="contained">
             Save
           </Button>
           <Button
@@ -391,8 +454,122 @@ const Transaction = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* End Transaction dialog */}
+
+      {/* start transaction delete data */}
+      <Dialog open={transactionOpen} onClose={() => setTransactionOpen(false)}>
+        <DialogTitle sx={{ fontSize: "20px" }}>{"Delete"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: "16px" }}>
+          <Button
+            sx={editDialog}
+            onClick={() => setTransactionOpen(false)}
+            autoFocus
+            variant="outlined"
+          >
+            CANCEL
+          </Button>
+          <Button
+            sx={deleteDialog}
+            onClick={() => transactionDelete(transactionToDelete)}
+            variant="contained"
+            disableElevation
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* end transaction delete data */}
+
+      {/* start edit transaction data */}
+      <Dialog
+        open={editTransaction}
+        maxWidth="sm"
+        fullWidth={true}
+        onClose={() => setEditTransaction(false)}
+      >
+        <DialogTitle>
+          <Typography sx={{ fontSize: "20px" }}>Edit Transaction</Typography>
+        </DialogTitle>
+        <Divider sx={{ marginY: "2px", color: "black" }} />
+        <DialogContent>
+          <Box>
+            <Grid container>
+              <Grid md={12}>
+                <TextField
+                  sx={{ width: "100%" }}
+                  placeholder="Staff Name"
+                  label="Staff Name"
+                  onChange={handleChangeValue}
+                  value={`${editToTransaction?.staffId.firstName} ${editToTransaction?.staffId.lastName}`}
+                />
+              </Grid>
+              <Grid md={12}>
+                <TextField
+                  sx={{ width: "100%", mt: "12px " }}
+                  placeholder="Transaction Type"
+                  label="Transaction Type"
+                  value={editToTransaction?.transactionType || ""}
+                  name="transactionType"
+                  onChange={handleEditInputChange}
+                />
+              </Grid>
+              <Grid display="contents" mt={2}>
+                <Grid md={6}>
+                  <Box>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={["DatePicker"]}>
+                        <DatePicker
+                          sx={{ width: "96%", mt: "4px" }}
+                          label="Transaction Date"
+                          // value={editSalary?.date || null}
+                          // onChange={(newDate) =>
+                          //   handleEditDatePicker("date", newDate)
+                          // }
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  </Box>
+                </Grid>
+                <Grid md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Amount"
+                    label="Amount"
+                    onChange={handleEditInputChange}
+                    value={editToTransaction?.amount || ""}
+                    name="amount"
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ display: "flex" }}>
+          <Button
+            onClick={handleTransaction}
+            sx={saveButton}
+            variant="contained"
+          >
+            Save
+          </Button>
+          <Button
+            sx={cancelButton}
+            variant="outlined"
+            onClick={() => {
+              // setEditSalary(null);
+              setEditTransaction(false);
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* end edit transaction data  */}
     </>
   );
 };
