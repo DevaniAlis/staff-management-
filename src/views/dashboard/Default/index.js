@@ -1,23 +1,64 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 // material-ui
-import { Grid } from '@mui/material';
+import { Grid } from "@mui/material";
 
 // project imports
-import EarningCard from './EarningCard';
-import PopularCard from './PopularCard';
-import TotalOrderLineChartCard from './TotalOrderLineChartCard';
-import TotalIncomeDarkCard from './TotalIncomeDarkCard';
-import TotalIncomeLightCard from './TotalIncomeLightCard';
-import TotalGrowthBarChart from './TotalGrowthBarChart';
-import { gridSpacing } from 'store/constant';
+import EarningCard from "./EarningCard";
+import PopularCard from "./PopularCard";
+import TotalOrderLineChartCard from "./TotalOrderLineChartCard";
+import TotalIncomeDarkCard from "./TotalIncomeDarkCard";
+import TotalIncomeLightCard from "./TotalIncomeLightCard";
+import TotalGrowthBarChart from "./TotalGrowthBarChart";
+import { gridSpacing } from "store/constant";
+import { useNavigate } from "react-router";
+
+// base URl
+import baseUrl from "../../baseUrl";
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [isLoading, setLoading] = useState(true);
   useEffect(() => {
     setLoading(false);
+  }, []);
+
+  const [totalStaff, setTotalStaff] = useState();
+  const [totalTransaction, setTotalTransaction] = useState();
+  const [totalSalary, setTotalSalary] = useState();
+  const [totalEverageSalary, setTotalEverageSalary] = useState();
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/dashboard/total`,
+      headers: {
+        token: token,
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data.Data);
+        setTotalStaff(response.data.Data.totalStaff);
+        setTotalTransaction(response.data.Data.totalTransaction);
+        setTotalSalary(response.data.Data.totalSalary);
+        setTotalEverageSalary(response.data.Data.averageSalary);
+      })
+      .catch((error) => {
+        if (error.response.data == "Invalid Token") {
+          localStorage.clear();
+          navigate = "/";
+        } else {
+          console.error("Error:", error);
+        }
+      });
   }, []);
 
   return (
@@ -25,18 +66,27 @@ const Dashboard = () => {
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
           <Grid item lg={4} md={6} sm={6} xs={12}>
-            <EarningCard isLoading={isLoading} />
+            <EarningCard isLoading={isLoading} totalSalary={totalSalary} />
           </Grid>
           <Grid item lg={4} md={6} sm={6} xs={12}>
-            <TotalOrderLineChartCard isLoading={isLoading} />
+            <TotalOrderLineChartCard
+              isLoading={isLoading}
+              totalStaff={totalStaff}
+            />
           </Grid>
           <Grid item lg={4} md={12} sm={12} xs={12}>
             <Grid container spacing={gridSpacing}>
               <Grid item sm={6} xs={12} md={6} lg={12}>
-                <TotalIncomeDarkCard isLoading={isLoading} />
+                <TotalIncomeDarkCard
+                  isLoading={isLoading}
+                  totalTransaction={totalTransaction}
+                />
               </Grid>
               <Grid item sm={6} xs={12} md={6} lg={12}>
-                <TotalIncomeLightCard isLoading={isLoading} />
+                <TotalIncomeLightCard
+                  isLoading={isLoading}
+                  averageSalary={totalEverageSalary}
+                />
               </Grid>
             </Grid>
           </Grid>
