@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import moment from "moment";
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -87,17 +88,10 @@ function Leaves(props) {
   const [editOpen, setEditOpen] = useState(false);
   const [editLeave, setEditLeave] = useState(null);
   const [staffLeave, setStaffLeave] = useState({
-    firstName: "",
-    lastName: "",
-    staffId: "",
-    startDate: "",
-    endDate: "",
+    staffId: null,
     reason: "",
   });
 
-  // const addLeave = (ele) => {
-  //   setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
-  // };
   const addLeave = (event) => {
     const { name, value } = event.target;
     setStaffLeave((prevState) => ({
@@ -106,25 +100,40 @@ function Leaves(props) {
     }));
   };
 
-  const handleDatePicker = (ele) => {
+  const handleDatePicker = (type, ele) => {
     const currentDate = new Date(ele);
     const dateString = currentDate.toLocaleDateString("en-US");
     const formattedDate = moment(dateString).format("DD-MMM-YYYY");
-    staffLeave((prevState) => ({
+    setStaffLeave((prevState) => ({
       ...prevState,
-      joinDate: formattedDate,
+      [type]: formattedDate,
     }));
   };
-  // const handleDatePicker = (type, newDate) => {
-  //   const currentDate = new Date(newDate);
-  //   setStaffLeave((prevState) => ({
-  //     ...prevState,
-  //     [type]: currentDate,
-  //   }));
-  // };
+
+  const [staffList, setStaffList] = useState([]);
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/list`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        setStaffList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const [staffLeaveList, setStaffLeaveList] = useState([]);
-
   useEffect(() => {
     let config = {
       method: "get",
@@ -216,7 +225,11 @@ function Leaves(props) {
         .request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
-          // window.location.reload();
+          const updatedList = staffLeaveList.map((item) =>
+            item._id === editLeave._id ? editLeave : item
+          );
+          setStaffLeaveList(updatedList);
+          window.location.reload();
           setEditOpen(false);
         })
         .catch((error) => {
@@ -225,15 +238,24 @@ function Leaves(props) {
     }
   };
 
+  const handleSelectChangeValue = (event, newValue) => {
+    setStaffLeave({
+      ...staffLeave,
+      staffId: newValue ? newValue._id : null,
+    });
+  };
+
   const handleEditClick = (item) => {
     setEditLeave(item);
     setEditOpen(true);
   };
 
-  const handleEditDatePicker = (type, newDate) => {
-    const formattedDate = moment(newDate).format("DD-MMM-YYYY");
-    setEditLeave((prevEditLeave) => ({
-      ...prevEditLeave,
+  const handleEditDatePicker = (type, ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setEditLeave((prevState) => ({
+      ...prevState,
       [type]: formattedDate,
     }));
   };
@@ -360,12 +382,28 @@ function Leaves(props) {
           <Box>
             <Grid container>
               <Grid md={12}>
-                <TextField
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={staffList}
+                  getOptionLabel={(staff) =>
+                    `${staff.firstName} ${staff.lastName}`
+                  }
+                  getOptionSelected={(option, value) =>
+                    option._id === value._id
+                  }
+                  value={
+                    staffList.find(
+                      (staff) => staff._id === staffLeave.staffId
+                    ) || null
+                  }
+                  onChange={(event, newValue) =>
+                    handleSelectChangeValue(event, newValue)
+                  }
                   sx={{ width: "100%" }}
-                  label="Staff ID"
-                  placeholder="Staff Id"
-                  onChange={addLeave}
-                  name="staffId"
+                  renderInput={(params) => (
+                    <TextField {...params} label="Staff Id" name="staffId" />
+                  )}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
@@ -376,7 +414,14 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
-                          value={editLeave?.startDate || null}
+                          value={
+                            editLeave?.startDate
+                              ? moment(
+                                  editLeave.startDate,
+                                  "DD-MMM-YYYY"
+                                ).toDate()
+                              : null
+                          }
                           onChange={(newDate) =>
                             handleDatePicker("startDate", newDate)
                           }
@@ -391,8 +436,15 @@ function Leaves(props) {
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
-                          label="Leave to Date"
-                          value={editLeave?.endDate || null}
+                          label="Leave To Date"
+                          value={
+                            editLeave?.endDate
+                              ? moment(
+                                  editLeave.endDate,
+                                  "DD-MMM-YYYY"
+                                ).toDate()
+                              : null
+                          }
                           onChange={(newDate) =>
                             handleDatePicker("endDate", newDate)
                           }
@@ -477,7 +529,7 @@ function Leaves(props) {
                   label="Staff ID"
                   placeholder="Staff Id"
                   value={
-                    editLeave
+                    editLeave && editLeave.staffId
                       ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
                       : ""
                   }
@@ -493,6 +545,17 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
+                          value={
+                            editLeave?.startDate
+                              ? moment(
+                                  editLeave.startDate,
+                                  "DD-MMM-YYYY"
+                                ).toDate()
+                              : null
+                          }
+                          onChange={(newDate) =>
+                            handleEditDatePicker("startDate", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -505,6 +568,17 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
+                          value={
+                            editLeave?.endDate
+                              ? moment(
+                                  editLeave.endDate,
+                                  "DD-MMM-YYYY"
+                                ).toDate()
+                              : null
+                          }
+                          onChange={(newDate) =>
+                            handleEditDatePicker("endDate", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>

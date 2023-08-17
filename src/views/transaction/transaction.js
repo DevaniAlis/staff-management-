@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -10,9 +11,6 @@ import {
   DialogTitle,
   Divider,
   Grid,
-  IconButton,
-  MenuItem,
-  Popover,
   Table,
   TableBody,
   TableCell,
@@ -23,12 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus,
-  IconDotsVertical,
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -90,18 +83,18 @@ const cancelButton = {
 };
 
 const Transaction = () => {
-  const [open, setOpen] = useState(null);
   const [transaction, setTransaction] = useState(false);
   const [transactionOpen, setTransactionOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [editTransaction, setEditTransaction] = useState(false);
   const [editToTransaction, setEditToTransaction] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [staffList, setStaffList] = useState([]);
 
   const token = localStorage.getItem("token");
 
   const [transactionsData, setTransactionsData] = useState({
-    staffId: "",
+    staffId: null,
     transactionType: "",
     amount: "",
     description: "",
@@ -111,6 +104,13 @@ const Transaction = () => {
     setTransactionsData({
       ...transactionsData,
       [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSelectChangeValue = (event, newValue) => {
+    setTransactionsData({
+      ...transactionsData,
+      staffId: newValue ? newValue._id : null,
     });
   };
   console.log(transactionsData);
@@ -147,6 +147,28 @@ const Transaction = () => {
         console.log(error);
       });
   };
+
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/list`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        setStaffList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const [transactionList, setTransactionList] = useState([]);
   useEffect(() => {
@@ -201,7 +223,7 @@ const Transaction = () => {
     setTransactionOpen(true);
   };
 
-  const handleTransaction = (staffId) => {
+  const handleTransaction = () => {
     if (editToTransaction) {
       let config = {
         method: "put",
@@ -357,12 +379,27 @@ const Transaction = () => {
           <Box>
             <Grid container>
               <Grid md={12}>
-                <TextField
+                <Autocomplete
+                  disablePortal 
+                  options={staffList}
+                  getOptionLabel={(staff) =>
+                    `${staff.firstName} ${staff.lastName}`
+                  }
+                  getOptionSelected={(option, value) =>
+                    option._id === value._id
+                  }
+                  value={
+                    staffList.find(
+                      (staff) => staff._id === transactionsData.staffId
+                    ) || null
+                  }
+                  onChange={(event, newValue) =>
+                    handleSelectChangeValue(event, newValue)
+                  }
                   sx={{ width: "100%" }}
-                  placeholder="Staff Id"
-                  label="Staff ID"
-                  onChange={handleChangeValue}
-                  name="staffId"
+                  renderInput={(params) => (
+                    <TextField {...params} label="Staff Id" name="staffId" />
+                  )}
                 />
               </Grid>
               <Grid md={12}>
@@ -495,10 +532,18 @@ const Transaction = () => {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Transaction Date"
-                          // value={editSalary?.date || null}
-                          // onChange={(newDate) =>
-                          //   handleEditDatePicker("date", newDate)
-                          // }
+                          value={moment(
+                            editToTransaction?.transactionDate,
+                            "DD-MMM-YYYY"
+                          )}
+                          onChange={(newDate) =>
+                            handleEditInputChange({
+                              target: {
+                                name: "transactionDate",
+                                value: newDate.format("DD-MMM-YYYY"),
+                              },
+                            })
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -530,7 +575,7 @@ const Transaction = () => {
             sx={cancelButton}
             variant="outlined"
             onClick={() => {
-              // setEditSalary(null);
+              setEditTransaction(null);
               setEditTransaction(false);
             }}
           >

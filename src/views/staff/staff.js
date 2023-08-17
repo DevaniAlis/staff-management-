@@ -3,20 +3,13 @@ import axios from "axios";
 import moment from "moment/moment";
 import {
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Divider,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
   Grid,
-  IconButton,
-  MenuItem,
-  Popover,
   Table,
   TableBody,
   TableCell,
@@ -27,12 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus,
-  IconDotsVertical,
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -92,14 +80,7 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
-const loaderSet = {
-  position: "absolute",
-  top: "60%",
-  left: "60%",
-};
-
 const Staff = () => {
-  const [open, setOpen] = useState(null);
   const [staff, setStaff] = useState(false);
   const [deleteStaffOpen, setDeleteStaffOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
@@ -119,6 +100,7 @@ const Staff = () => {
     email: "",
     phone: "",
     address: "",
+    joinDate:"",
     aadhaarNo: "",
     pancardNo: "",
     bankName: "",
@@ -130,6 +112,7 @@ const Staff = () => {
   const handleChangeValue = (event) => {
     setStaffData({ ...staffData, [event.target.name]: event.target.value });
   };
+  console.log("staffData",staffData);
 
   const handleDatePicker = (ele) => {
     const currentDate = new Date(ele);
@@ -142,7 +125,7 @@ const Staff = () => {
   };
 
   const handleSaveData = (event) => {
-    console.log(staffData);
+    console.log("staff data",staffData);
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -163,6 +146,7 @@ const Staff = () => {
         console.log(error);
       });
   };
+  console.log("staff",staffData);
 
   const [staffDataList, setStaffDataList] = useState([]);
 
@@ -245,14 +229,28 @@ const Staff = () => {
 
   const handleEditInputChange = (event) => {
     const { name, value } = event.target;
-    setEditToStaff((prevEditSalary) => ({
-      ...prevEditSalary,
-      [name]: value,
-    }));
+    if (name === "joinDate") {
+      setEditToStaff((prevEditToStaff) => ({
+        ...prevEditToStaff,
+        joinDate: value,
+      }));
+    } else {
+      setEditToStaff((prevEditToStaff) => ({
+        ...prevEditToStaff,
+        [name]: value,
+      }));
+    }
   };
 
+  // const handleEditClick = (item) => {
+  //   setEditToStaff(item);
+  //   setEditStaff(true);
+  // };
   const handleEditClick = (item) => {
-    setEditToStaff(item);
+    setEditToStaff({
+      ...item,
+      joinDate: moment(item.joinDate, "DD-MMM-YYYY").toDate(),
+    });
     setEditStaff(true);
   };
 
@@ -631,10 +629,18 @@ const Staff = () => {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Join Date"
-                          // value={editSalary?.date || null}
-                          // onChange={(newDate) =>
-                          //   handleEditDatePicker("date", newDate)
-                          // }
+                          name="joinDate"
+                          value={moment(editToStaff?.joinDate || "")}
+                          onChange={(newDate) =>
+                            handleEditInputChange({
+                              target: {
+                                name: "joinDate",
+                                value: newDate
+                                  ? newDate.format("DD-MMM-YYYY")
+                                  : "",
+                              },
+                            })
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -662,7 +668,6 @@ const Staff = () => {
             sx={cancelButton}
             variant="outlined"
             onClick={() => {
-              // setEditSalary(null);
               setEditStaff(false);
             }}
           >
