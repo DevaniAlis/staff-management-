@@ -171,7 +171,8 @@ const Transaction = () => {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        console.log(error.response.data);
+        // if()
       });
   };
 
@@ -199,6 +200,7 @@ const Transaction = () => {
       return false;
     });
     setFilteredStaffDataList(filteredList);
+  }
     
   const transactionDelete = (staffId) => {
     if (transactionToDelete) {
@@ -219,7 +221,8 @@ const Transaction = () => {
           window.location.reload();
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.response.data);
+
         });
     }
   };
@@ -245,12 +248,11 @@ const Transaction = () => {
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
           window.location.reload();
           setTransaction(false);
         })
         .catch((error) => {
-          console.log(error);
+          // console.log(error.response.data);
         });
     }
   };

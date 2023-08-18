@@ -28,7 +28,6 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
-import baseUrl from "../../views/baseUrl";
 
 import baseUrl from "../baseUrl";
 const token = localStorage.getItem("token");

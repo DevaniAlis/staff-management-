@@ -279,8 +279,7 @@ const Staff = () => {
         "Content-Type": "application/json",
       },
       data: updatedStaffData,
-    };
-    
+    };  
 
     axios
       .request(config)
@@ -291,6 +290,7 @@ const Staff = () => {
       .catch((error) => {
         console.log("Error updating status:", error);
       });
+    }
     
   const staffDelete = (staffId) => {
     if (staffToDelete) {
@@ -793,7 +793,7 @@ const Staff = () => {
       </Dialog>
       {/* end start edit staff data */}
     </>
-  );
+  )
 };
 
-export default Staff;
+export default Staff
