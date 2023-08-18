@@ -30,6 +30,7 @@ const Transaction = Loadable(
 );
 const Salary = Loadable(lazy(() => import("views/otherFiles/salary")));
 const Leaves = Loadable(lazy(() => import("views/otherFiles/leaves")));
+const Report = Loadable(lazy(() => import("views/report/report")));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -60,6 +61,10 @@ const MainRoutes = {
     {
       path: "salary",
       element: <ProtectedRoute path="" element={Salary} />,
+    },
+    {
+      path: "report",
+      element: <ProtectedRoute path="" element={Report} />,
     },
   ],
 };
