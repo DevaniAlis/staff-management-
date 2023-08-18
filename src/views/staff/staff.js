@@ -3,6 +3,7 @@ import axios from "axios";
 import moment from "moment/moment";
 import {
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -159,10 +160,11 @@ const Staff = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
+  const [editedJoinDate, setEditedJoinDate] = useState("");
 
   const [staffData, setStaffData] = useState({
-    staffId: "",
     firstName: "",
+    type: "",
     lastName: "",
     middleName: "",
     gender: "",
@@ -194,7 +196,6 @@ const Staff = () => {
   };
 
   const handleSaveData = (event) => {
-    console.log(staffData);
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -232,6 +233,7 @@ const Staff = () => {
       .request(config)
       .then((response) => {
         setStaffDataList(response.data.data);
+        setEditedJoinDate(response.data.data.joinDate);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -267,7 +269,7 @@ const Staff = () => {
 
   const handleChecked = (event, staffId) => {
     const newCheckedValue = event.target.checked;
-    const updatedStaffData = {isActive: newCheckedValue };
+    const updatedStaffData = { isActive: newCheckedValue };
     console.log(updatedStaffData);
 
     const config = {
@@ -279,7 +281,7 @@ const Staff = () => {
         "Content-Type": "application/json",
       },
       data: updatedStaffData,
-    };  
+    };
 
     axios
       .request(config)
@@ -290,8 +292,8 @@ const Staff = () => {
       .catch((error) => {
         console.log("Error updating status:", error);
       });
-    }
-    
+  };
+
   const staffDelete = (staffId) => {
     if (staffToDelete) {
       let config = {
@@ -356,7 +358,11 @@ const Staff = () => {
   };
 
   const handleEditClick = (item) => {
+    console.log("Join Date:", item.joinDate);
     setEditToStaff(item);
+    const formattedDate = moment(item.joinDate, "YYYY-MM-DD");
+    console.log("Formatted Date:", formattedDate);
+    setEditedJoinDate(formattedDate);
     setEditStaff(true);
   };
 
@@ -412,6 +418,7 @@ const Staff = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell align="center">Staff Name</TableCell>
+                      <TableCell align="center">Staff Type</TableCell>
                       <TableCell align="center">Position</TableCell>
                       <TableCell align="center">Phone Number</TableCell>
                       <TableCell align="center">Salary</TableCell>
@@ -429,6 +436,13 @@ const Staff = () => {
                               {`${item.firstName} ${item.lastName}`}
                             </TableCell>
                             <TableCell align="center">
+                              <Chip
+                                label={item.type}
+                                color="primary"
+                                variant="outlined"
+                              />
+                            </TableCell>
+                            <TableCell align="center">
                               {item.position}
                             </TableCell>
                             <TableCell align="center">{item.phone}</TableCell>
@@ -439,7 +453,7 @@ const Staff = () => {
                               )}
                             </TableCell>
                             <TableCell align="center">
-                            <FormControlLabel
+                              <FormControlLabel
                                 control={
                                   <IOSSwitch
                                     sx={{ m: 1 }}
@@ -450,7 +464,7 @@ const Staff = () => {
                                   />
                                 }
                               ></FormControlLabel>
-                            </TableCell>                              
+                            </TableCell>
                             <TableCell align="center">
                               <Button
                                 onClick={() => handleEditClick(item)}
@@ -493,9 +507,10 @@ const Staff = () => {
           <Box>
             <Grid container>
               <Grid container display="flex" justifyContent="space-between">
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "8px", width: "100%" }}
+                    sx={{ mt: "8px" }}
+                    fullWidth
                     placeholder="First Name"
                     variant="outlined"
                     label="First Name"
@@ -503,9 +518,10 @@ const Staff = () => {
                     name="firstName"
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Middle Name"
                     variant="outlined"
                     label="Middle Name"
@@ -513,9 +529,10 @@ const Staff = () => {
                     name="lastName"
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Last Name"
                     variant="outlined"
                     label="Last Name"
@@ -523,128 +540,219 @@ const Staff = () => {
                     name="middleName"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
-                    placeholder="Staff ID"
-                    label="Staff ID"
+                    fullWidth
+                    placeholder="Staff Type"
+                    label="Staff Type"
                     onChange={handleChangeValue}
-                    name="staffId"
+                    name="type"
+                    sx={{
+                      mt: "12px",
+                      marginRight: "10px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
-                        sx={{ width: "100%", mt: "4px" }}
+                        sx={{
+                          mt: "4px",
+                          marginLeft: "10px",
+                          "@media (max-width: 900px)": {
+                            marginLeft: 0,
+                          },
+                        }}
+                        fullWidth
                         label="Joining Date"
                         onChange={handleDatePicker}
                       />
                     </DemoContainer>
                   </LocalizationProvider>
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Gender"
                     label="Gender"
                     onChange={handleChangeValue}
                     name="gender"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Position"
                     label="Position"
                     onChange={handleChangeValue}
                     name="position"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Email ID"
                     label="Email ID"
                     onChange={handleChangeValue}
                     name="email"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Phone Number"
                     label="Phone Number"
                     onChange={handleChangeValue}
                     name="phone"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Aadhaar Number"
                     label="Aadhaar Number"
                     onChange={handleChangeValue}
                     name="aadhaarNo"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Pancard Number"
                     label="Pancard Number"
                     onChange={handleChangeValue}
                     name="pancardNo"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Bank Name"
                     label="Bank Name"
                     onChange={handleChangeValue}
                     name="bankName"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Account Number"
                     label="Account Number"
                     onChange={handleChangeValue}
                     name="accountNo"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Ifsc Code"
                     label="Ifsc Code"
                     onChange={handleChangeValue}
                     name="ifscCode"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Salary"
                     label="Salary"
                     onChange={handleChangeValue}
                     name="salary"
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Address"
                     label="Address"
                     onChange={handleChangeValue}
                     name="address"
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Description"
                     label="Description"
                     onChange={handleChangeValue}
@@ -715,7 +823,7 @@ const Staff = () => {
             <Grid container>
               <Grid md={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  fullWidth
                   placeholder="Staff Name"
                   label="Staff Name"
                   onChange={handleChangeValue}
@@ -752,10 +860,8 @@ const Staff = () => {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Join Date"
-                          // value={editSalary?.date || null}
-                          // onChange={(newDate) =>
-                          //   handleEditDatePicker("date", newDate)
-                          // }
+                          name="joinDate"
+                          value={editedJoinDate}
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -793,7 +899,7 @@ const Staff = () => {
       </Dialog>
       {/* end start edit staff data */}
     </>
-  )
+  );
 };
 
-export default Staff
+export default Staff;

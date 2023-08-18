@@ -115,7 +115,6 @@ const Transaction = () => {
       [event.target.name]: event.target.value,
     });
   };
-  console.log(transactionsData);
 
   const handleDatePicker = (ele) => {
     const currentDate = new Date(ele);
@@ -166,7 +165,6 @@ const Transaction = () => {
     axios
       .request(config)
       .then((response) => {
-        console.log("response", response.data);
         setTransactionList(response.data.data);
         setIsLoading(false);
       })
@@ -189,19 +187,20 @@ const Transaction = () => {
   }, [searchQuery, transactionList]);
 
   const handleSearch = () => {
-    const query = searchQuery;
-    const numberQuery = Number(searchQuery);
+    const query = searchQuery.toLowerCase();
+    console.log(query);
 
     const filteredList = transactionList.filter((item) => {
-      console.log("Item Phone:", item.phone);
-      if (item.phone === numberQuery || item.firstName === query) {
-        return item.phone;
+      const firstName = (item.staffId.firstName).toLowerCase();
+      if (firstName === query) {
+        return item;
       }
       return false;
     });
+    console.log("filteredList", filteredList);
     setFilteredStaffDataList(filteredList);
-  }
-    
+  };
+
   const transactionDelete = (staffId) => {
     if (transactionToDelete) {
       let config = {
@@ -222,7 +221,6 @@ const Transaction = () => {
         })
         .catch((error) => {
           console.log(error.response.data);
-
         });
     }
   };
@@ -389,16 +387,16 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  fullWidth
                   placeholder="Staff Id"
                   label="Staff ID"
                   onChange={handleChangeValue}
                   name="staffId"
                 />
               </Grid>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
@@ -412,16 +410,22 @@ const Transaction = () => {
                 </Box>
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        width: "100%",
+                      },
+                    }}
                     placeholder="Transaction Type"
                     label="Transaction Type"
                     onChange={handleChangeValue}
                     name="transactionType"
                   />
                 </Grid>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Amount"
@@ -431,7 +435,7 @@ const Transaction = () => {
                   />
                 </Grid>
               </Grid>
-              <Grid md={12} mt="12px">
+              <Grid md={12} sm={12} xs={12} mt="12px">
                 <TextField
                   sx={{ width: "100%" }}
                   placeholder="Description"
@@ -501,18 +505,19 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  fullWidth
                   placeholder="Staff Name"
                   label="Staff Name"
                   onChange={handleChangeValue}
                   value={`${editToTransaction?.staffId.firstName} ${editToTransaction?.staffId.lastName}`}
                 />
               </Grid>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%", mt: "12px " }}
+                  fullWidth
+                  sx={{ mt: "12px " }}
                   placeholder="Transaction Type"
                   label="Transaction Type"
                   value={editToTransaction?.transactionType || ""}
@@ -521,7 +526,7 @@ const Transaction = () => {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -537,9 +542,10 @@ const Transaction = () => {
                     </LocalizationProvider>
                   </Box>
                 </Grid>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    fullWidth
+                    sx={{ mt: "12px" }}
                     placeholder="Amount"
                     label="Amount"
                     onChange={handleEditInputChange}
