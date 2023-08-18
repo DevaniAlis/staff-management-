@@ -121,7 +121,6 @@ function Leaves(props) {
         "Content-Type": "application/json",
       },
     };
-
     axios
       .request(config)
       .then((response) => {
@@ -167,7 +166,6 @@ function Leaves(props) {
       data: staffLeave,
     };
     setLeaveOpen(false);
-
     axios
       .request(config)
       .then((response) => {
@@ -190,7 +188,6 @@ function Leaves(props) {
           "Content-Type": "application/json",
         },
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -220,7 +217,6 @@ function Leaves(props) {
         },
         data: editLeave,
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -402,7 +398,7 @@ function Leaves(props) {
                   }
                   sx={{ width: "100%" }}
                   renderInput={(params) => (
-                    <TextField {...params} label="Staff Id" name="staffId" />
+                    <TextField {...params} label="Staff Name" name="staffId" />
                   )}
                 />
               </Grid>
@@ -526,8 +522,8 @@ function Leaves(props) {
               <Grid item md={12}>
                 <TextField
                   sx={{ width: "100%" }}
-                  label="Staff ID"
-                  placeholder="Staff Id"
+                  label="Staff Name"
+                  placeholder="Staff Name"
                   value={
                     editLeave && editLeave.staffId
                       ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
@@ -545,14 +541,7 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label=" Leave From Date"
-                          value={
-                            editLeave?.startDate
-                              ? moment(
-                                  editLeave.startDate,
-                                  "DD-MMM-YYYY"
-                                ).toDate()
-                              : null
-                          }
+                          value={moment(editLeave?.startDate, 'YYYY-MM-DD')}
                           onChange={(newDate) =>
                             handleEditDatePicker("startDate", newDate)
                           }
@@ -568,14 +557,7 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
-                          value={
-                            editLeave?.endDate
-                              ? moment(
-                                  editLeave.endDate,
-                                  "DD-MMM-YYYY"
-                                ).toDate()
-                              : null
-                          }
+                          value={moment(editLeave?.endDate, 'YYYY-MM-DD')}
                           onChange={(newDate) =>
                             handleEditDatePicker("endDate", newDate)
                           }

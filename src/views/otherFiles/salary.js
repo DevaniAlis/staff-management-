@@ -109,7 +109,6 @@ function Salary(props) {
         "Content-Type": "application/json",
       },
     };
-
     axios
       .request(config)
       .then((response) => {
@@ -167,7 +166,6 @@ function Salary(props) {
       data: staffSalary,
     };
     setSalaryOpen(false);
-
     axios
       .request(config)
       .then((response) => {
@@ -190,7 +188,6 @@ function Salary(props) {
           "Content-Type": "application/json",
         },
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -221,7 +218,6 @@ function Salary(props) {
         data: editSalary,
       };
       console.log(editSalary);
-
       axios
         .request(config)
         .then((response) => {
@@ -352,7 +348,7 @@ function Salary(props) {
           </Grid>
         </MainCard>
       )}
-      {/* start salary dialog */}
+      {/* start Add salary dialog */}
       <Dialog
         open={salaryOpen}
         maxWidth="sm"
@@ -366,7 +362,7 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12} mt="12px">
+              <Grid md={12}>
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
@@ -387,12 +383,12 @@ function Salary(props) {
                   }
                   sx={{ width: "100%" }}
                   renderInput={(params) => (
-                    <TextField {...params} label="Staff Id" name="staffId" />
+                    <TextField {...params} label="Staff Name" name="staffId" />
                   )}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6}>
+                <Grid md={6} mt="4px">
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -488,7 +484,7 @@ function Salary(props) {
                   sx={{ width: "100%" }}
                   placeholder="Staff Name"
                   label="Staff Name"
-                  value={`${editSalary?.staffId.firstName} ${editSalary?.staffId.lastName}`}
+                  value={`${editSalary?.staffId?.firstName || ""} ${editSalary?.staffId?.lastName || ""}`}
                   onChange={addSalary}
                 />
               </Grid>
@@ -500,12 +496,12 @@ function Salary(props) {
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Salary Date"
-                          value={moment(editSalary?.date, "DD-MMM-YYYY")}
+                          value={moment(editSalary?.date, 'YYYY-MM-DD')}
                           onChange={(newDate) =>
                             handleEditInputChange({
                               target: {
-                                name: "date",
-                                value: newDate.format("DD-MMM-YYYY"),
+                                name: 'date',
+                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
                               },
                             })
                           }
