@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import moment from "moment";
 import {
   Button,
@@ -26,10 +27,11 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useEffect } from "react";
-import axios from "axios";
 import { Oval } from "react-loader-spinner";
 import baseUrl from "../../views/baseUrl";
+
+import baseUrl from "../baseUrl";
+const token = localStorage.getItem("token");
 
 const displayStyle = {
   display: "flex",
@@ -86,6 +88,8 @@ function Leaves(props) {
   const [leaveToDelete, setLeaveToDElete] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editLeave, setEditLeave] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffLeave, setStaffLeave] = useState({
     firstName: "",
     lastName: "",
@@ -125,13 +129,14 @@ function Leaves(props) {
 
   const [staffLeaveList, setStaffLeaveList] = useState([]);
 
-  useEffect(() => {
+  const getLeaveList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
       url: `${baseUrl.url}/api/leave/list`,
       headers: {
         token: token,
+ "Content-Type": "application/json",
       },
     };
     setIsLoading(true);
@@ -145,7 +150,7 @@ function Leaves(props) {
         console.log(error);
         setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleLeave = () => {
     let config = {
@@ -246,6 +251,32 @@ function Leaves(props) {
     }));
   };
 
+  useEffect(() => {
+    getLeaveList();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(staffLeaveList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, staffLeaveList]);
+
+  const handleSearch = () => {
+    const query = searchQuery;
+    const numberQuery = Number(searchQuery);
+
+    const filteredList = staffLeaveList.filter((item) => {
+      console.log("Item Phone:", item.phone);
+      if (item.phone === numberQuery || item.firstName === query) {
+        return item.phone;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
+  };
+
   return (
     <>
       {isLoading ? (
@@ -287,14 +318,17 @@ function Leaves(props) {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Staff Name</TableCell>
+<TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Start Date</TableCell>
                       <TableCell align="center">End Date</TableCell>
                       <TableCell align="center">Reason</TableCell>
@@ -302,7 +336,7 @@ function Leaves(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {staffLeaveList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow key={item._id}>
@@ -476,7 +510,7 @@ function Leaves(props) {
                   sx={{ width: "100%" }}
                   label="Staff ID"
                   placeholder="Staff Id"
-                  value={
+value={
                     editLeave
                       ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
                       : ""
