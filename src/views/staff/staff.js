@@ -1,14 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment/moment";
 import {
   Button,
+
+  Chip,
+
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Divider,
+
+  FormControlLabel,
+
   Grid,
   Table,
   TableBody,
@@ -19,6 +25,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import Switch from "@mui/material/Switch";
 import MainCard from "ui-component/cards/MainCard";
 import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
@@ -27,7 +35,6 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useEffect } from "react";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
@@ -80,18 +87,85 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
+const loaderSet = {
+  position: "absolute",
+  top: "60%",
+  left: "60%",
+};
+
+const IOSSwitch = styled((props) => (
+  <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
+))(({ theme }) => ({
+  width: 40,
+  height: 23,
+  padding: 0,
+  "& .MuiSwitch-switchBase": {
+    padding: 0,
+    margin: 2,
+    transitionDuration: "300ms",
+    "&.Mui-checked": {
+      transform: "translateX(16px)",
+      color: "#fff",
+      "& + .MuiSwitch-track": {
+        backgroundColor: theme.palette.mode === "dark" ? "#1e88e5" : "#1e88e5",
+        opacity: 1,
+        border: 0,
+      },
+      "&.Mui-disabled + .MuiSwitch-track": {
+        opacity: 0.5,
+      },
+    },
+    "&.Mui-focusVisible .MuiSwitch-thumb": {
+      color: "#33cf4d",
+      border: "6px solid #fff",
+    },
+    "&.Mui-disabled .MuiSwitch-thumb": {
+      color:
+        theme.palette.mode === "light"
+          ? theme.palette.grey[100]
+          : theme.palette.grey[600],
+    },
+    "&.Mui-disabled + .MuiSwitch-track": {
+      opacity: theme.palette.mode === "light" ? 0.7 : 0.3,
+    },
+  },
+  "& .MuiSwitch-thumb": {
+    boxSizing: "border-box",
+    width: 20,
+    height: 20,
+  },
+  "& .MuiSwitch-track": {
+    borderRadius: 26 / 2,
+    backgroundColor: theme.palette.mode === "light" ? "#E9E9EA" : "#39393D",
+    opacity: 1,
+    transition: theme.transitions.create(["background-color"], {
+      duration: 500,
+    }),
+  },
+}));
+
 const Staff = () => {
+  const token = localStorage.getItem("token");
+  const [open, setOpen] = useState(null);
   const [staff, setStaff] = useState(false);
   const [deleteStaffOpen, setDeleteStaffOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [editStaff, setEditStaff] = useState(false);
   const [editToStaff, setEditToStaff] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
   const [validateError, setValidateError] = useState({});
   const token = localStorage.getItem("token");
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
+  const [isChecked, setIsChecked] = useState(true);
+  const [editedJoinDate, setEditedJoinDate] = useState("");
+
+
   const [staffData, setStaffData] = useState({
-    staffId: "",
     firstName: "",
+    type: "",
     lastName: "",
     middleName: "",
     gender: "",
@@ -123,12 +197,26 @@ const Staff = () => {
     }));
   };
 
+
   const validateFields = () => {
     const errors = {};
     const phoneNumberPattern = /^\d{10}$/;
     const aadhaarPattern = /^\d{12}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     const ifscPattern = /^[A-Za-z]{4}\d{7}$/;
+
+  const handleSaveData = (event) => {
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+      data: staffData,
+    };
+
 
     if (!staffData.firstName) {
       errors.firstName = "First Name is required";
@@ -210,8 +298,10 @@ const Staff = () => {
   };
   // console.log("staff", staffData);
 
+
   const [staffDataList, setStaffDataList] = useState([]);
   useEffect(() => {
+  const getStaffList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -223,14 +313,68 @@ const Staff = () => {
     axios
       .request(config)
       .then((response) => {
-        // console.log(response.data);
+
         setStaffDataList(response.data.data);
+        setEditedJoinDate(response.data.data.joinDate);
         setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  useEffect(() => {
+    getStaffList();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(staffDataList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, staffDataList]);
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const numberQuery = Number(searchQuery);
+
+    const filteredList = staffDataList.filter((item) => {
+      console.log("Item Phone:", item.phone);
+      if (item.phone === numberQuery || item.firstName === query) {
+        return item.phone;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
+  };
+
+  const handleChecked = (event, staffId) => {
+    const newCheckedValue = event.target.checked;
+    const updatedStaffData = { isActive: newCheckedValue };
+    console.log(updatedStaffData);
+
+    const config = {
+      method: "put",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/${staffId}`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+      data: updatedStaffData,
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log("Status updated successfully:", response.data);
+        setIsChecked(newCheckedValue);
+      })
+      .catch((error) => {
+        console.log("Error updating status:", error);
+      });
+  };
 
   const staffDelete = (staffId) => {
     if (staffToDelete) {
@@ -297,7 +441,11 @@ const Staff = () => {
   };
 
   const handleEditClick = (item) => {
+    console.log("Join Date:", item.joinDate);
     setEditToStaff(item);
+    const formattedDate = moment(item.joinDate, "YYYY-MM-DD");
+    console.log("Formatted Date:", formattedDate);
+    setEditedJoinDate(formattedDate);
     setEditStaff(true);
   };
 
@@ -342,7 +490,10 @@ const Staff = () => {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -350,20 +501,29 @@ const Staff = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell align="center">Staff Name</TableCell>
+                      <TableCell align="center">Staff Type</TableCell>
                       <TableCell align="center">Position</TableCell>
                       <TableCell align="center">Phone Number</TableCell>
                       <TableCell align="center">Salary</TableCell>
                       <TableCell align="center">Join Date</TableCell>
+                      <TableCell align="center">Active</TableCell>
                       <TableCell align="center">Action</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {staffDataList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
-                          <TableRow>
+                          <TableRow key={item.staffId}>
                             <TableCell align="center">
                               {`${item.firstName} ${item.lastName}`}
+                            </TableCell>
+                            <TableCell align="center">
+                              <Chip
+                                label={item.type}
+                                color="primary"
+                                variant="outlined"
+                              />
                             </TableCell>
                             <TableCell align="center">
                               {item.position}
@@ -374,6 +534,19 @@ const Staff = () => {
                               {new Date(item.joinDate).toLocaleDateString(
                                 "en-us"
                               )}
+                            </TableCell>
+                            <TableCell align="center">
+                              <FormControlLabel
+                                control={
+                                  <IOSSwitch
+                                    sx={{ m: 1 }}
+                                    defaultChecked={item.isActive}
+                                    onChange={(event) =>
+                                      handleChecked(event, item._id)
+                                    }
+                                  />
+                                }
+                              ></FormControlLabel>
                             </TableCell>
                             <TableCell align="center">
                               <Button
@@ -417,9 +590,10 @@ const Staff = () => {
           <Box>
             <Grid container>
               <Grid container display="flex" justifyContent="space-between">
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ width: "100%" }}
+sx={{ mt: "8px" }}
+                    fullWidth
                     placeholder="First Name"
                     variant="outlined"
                     label="First Name"
@@ -429,9 +603,10 @@ const Staff = () => {
                     helperText={validateError.firstName}
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Middle Name"
                     variant="outlined"
                     label="Middle Name"
@@ -441,9 +616,10 @@ const Staff = () => {
                     helperText={validateError.lastName}
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Last Name"
                     variant="outlined"
                     label="Last Name"
@@ -451,29 +627,69 @@ const Staff = () => {
                     name="middleName"
                   />
                 </Grid>
-                <Grid item md={12}>
+
+                <Grid item md={6} sm={12} xs={12}>
+                  <TextField
+                    fullWidth
+                    placeholder="Staff Type"
+                    label="Staff Type"
+                    onChange={handleChangeValue}
+                    name="type"
+                    sx={{
+                      mt: "12px",
+                      marginRight: "10px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item md={6} sm={12} xs={12}>
+
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
-                        sx={{ width: "100%", mt: "4px" }}
+                        sx={{
+                          mt: "4px",
+                          marginLeft: "10px",
+                          "@media (max-width: 900px)": {
+                            marginLeft: 0,
+                          },
+                        }}
+                        fullWidth
                         label="Joining Date"
                         onChange={handleDatePicker}
                       />
                     </DemoContainer>
                   </LocalizationProvider>
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Gender"
                     label="Gender"
                     onChange={handleChangeValue}
                     name="gender"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Position"
                     label="Position"
                     onChange={handleChangeValue}
@@ -482,18 +698,33 @@ const Staff = () => {
                     helperText={validateError.position}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Email ID"
                     label="Email ID"
                     onChange={handleChangeValue}
                     name="email"
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Phone Number"
                     label="Phone Number"
                     onChange={handleChangeValue}
@@ -502,9 +733,15 @@ const Staff = () => {
                     helperText={validateError.phone}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Aadhaar Number"
                     label="Aadhaar Number"
                     onChange={handleChangeValue}
@@ -513,9 +750,18 @@ const Staff = () => {
                     helperText={validateError.aadhaarNo}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Pancard Number"
                     label="Pancard Number"
                     onChange={handleChangeValue}
@@ -524,9 +770,15 @@ const Staff = () => {
                     helperText={validateError.pancardNo}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Bank Name"
                     label="Bank Name"
                     onChange={handleChangeValue}
@@ -535,9 +787,18 @@ const Staff = () => {
                     helperText={validateError.bankName}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Account Number"
                     label="Account Number"
                     onChange={handleChangeValue}
@@ -546,9 +807,15 @@ const Staff = () => {
                     helperText={validateError.accountNo}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      "@media (max-width: 900px)": {
+                        marginX: 0,
+                      },
+                    }}
+                    fullWidth
                     placeholder="Ifsc Code"
                     label="Ifsc Code"
                     onChange={handleChangeValue}
@@ -557,9 +824,18 @@ const Staff = () => {
                     helperText={validateError.ifscCode}
                   />
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
                     placeholder="Salary"
                     label="Salary"
                     onChange={handleChangeValue}
@@ -568,18 +844,20 @@ const Staff = () => {
                     helperText={validateError.salary}
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Address"
                     label="Address"
                     onChange={handleChangeValue}
                     name="address"
                   />
                 </Grid>
-                <Grid item md={12}>
+                <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Description"
                     label="Description"
                     onChange={handleChangeValue}
@@ -705,6 +983,10 @@ const Staff = () => {
                   </LocalizationProvider>
                 </Grid>
                 <Grid item md={6}>
+          
+              <Grid display="contents" mt={2}>
+                <Grid md={6}>
+
                   <TextField
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Gender"
@@ -744,6 +1026,7 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
+
                 <Grid item md={6}>
                   <TextField
                     sx={{ mt: "12px", width: "96%" }}
@@ -795,6 +1078,25 @@ const Staff = () => {
                   />
                 </Grid>
                 <Grid item md={6}>
+
+              </Grid>
+              <Grid display="contents" mt={2}>
+                <Grid md={6}>
+                  <Box>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={["DatePicker"]}>
+                        <DatePicker
+                          sx={{ width: "96%", mt: "4px" }}
+                          label="Join Date"
+                          name="joinDate"
+                          value={editedJoinDate}
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  </Box>
+                </Grid>
+                <Grid md={6}>
+
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Salary"

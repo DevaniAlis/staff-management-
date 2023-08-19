@@ -89,11 +89,21 @@ function Salary(props) {
   const [editOpen, setEditOpen] = useState(false);
   const [editSalary, setEditSalary] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffSalary, setStaffSalary] = useState({
     staffId: null,
     salary: "",
     note: "",
   });
+
+  const [validationErrors, setValidationErrors] = useState({
+    staffId: "",
+    salary: "",
+    note: "",
+  });
+
+  const [datePickerError, setDatePickerError] = useState("");
 
   const addSalary = (ele) => {
     setStaffSalary({ ...staffSalary, [ele.target.name]: ele.target.value });
@@ -130,7 +140,7 @@ function Salary(props) {
     }));
   };
 
-  useEffect(() => {
+  const allSalaryList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -152,9 +162,27 @@ function Salary(props) {
         console.log(error);
         setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleSalary = () => {
+    const errors = {};
+
+    if (!staffSalary.staffId) {
+      errors.staffId = "Staff ID is required.";
+    }
+    if (!staffSalary.date) {
+      errors.date = "Salary Date is required.";
+    } else if (!moment(staffSalary.date).isValid()) {
+      errors.date = "Invalid Salary Date.";
+    }
+    if (!staffSalary.salary) {
+      errors.salary = "Salary amount is required.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -171,6 +199,7 @@ function Salary(props) {
       .then((response) => {
         console.log(JSON.stringify(response.data));
         window.location.reload();
+
       })
       .catch((error) => {
         console.log(error);
@@ -191,7 +220,7 @@ function Salary(props) {
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
+          console.log(response.data);
           window.location.reload();
         })
         .catch((error) => {
@@ -217,11 +246,11 @@ function Salary(props) {
         },
         data: editSalary,
       };
-      console.log(editSalary);
+
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
+          console.log(response.data);
           window.location.reload();
           setEditOpen(false);
         })
@@ -230,6 +259,7 @@ function Salary(props) {
         });
     }
   };
+
   console.log(editSalary);
   const handleSelectChangeValue = (event, newValue) => {
     setStaffSalary({
@@ -237,8 +267,8 @@ function Salary(props) {
       staffId: newValue ? newValue._id : null,
     });
   };
+
   const handleEditClick = (item) => {
-    console.log(item);
     setEditSalary(item);
     setEditOpen(true);
   };
@@ -249,6 +279,31 @@ function Salary(props) {
       ...prevEditSalary,
       [name]: value,
     }));
+  };
+
+  useEffect(() => {
+    allSalaryList();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(salaryList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, salaryList]);
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+
+    const filteredList = salaryList.filter((item) => {
+      const firstName = item.staffId.firstName.toLowerCase();
+      if (firstName === query) {
+        return item;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
   };
 
   return (
@@ -292,7 +347,10 @@ function Salary(props) {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -307,7 +365,7 @@ function Salary(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {salaryList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow key={item._id}>
@@ -362,6 +420,7 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
+
               <Grid md={12}>
                 <Autocomplete
                   disablePortal
@@ -387,13 +446,21 @@ function Salary(props) {
                   )}
                 />
               </Grid>
-              <Grid display="contents" mt={2}>
-                <Grid md={6} mt="4px">
+             <Grid display="contents" mt={2}>
+                <Grid md={6} sm={12} xs={12}>
+
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
-                          sx={{ width: "96%", mt: "4px" }}
+                          fullWidth
+                          sx={{
+                            mt: "4px",
+                            marginRight: "10px",
+                            "@media (max-width: 900px)": {
+                              marginRight: 0,
+                            },
+                          }}
                           label="Salary Date"
                           onChange={handleDatePicker}
                         />
@@ -401,17 +468,19 @@ function Salary(props) {
                     </LocalizationProvider>
                   </Box>
                 </Grid>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Salary"
                     label="Salary"
                     name="salary"
                     onChange={addSalary}
+                    error={!!validationErrors.salary}
+                    helperText={validationErrors.salary}
                   />
                 </Grid>
               </Grid>
-              <Grid md={12} mt="12px">
+              <Grid md={12} sm={12} xs={12} mt="12px">
                 <TextField
                   sx={{ width: "100%" }}
                   placeholder="Notes"
@@ -479,7 +548,7 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <TextField
                   sx={{ width: "100%" }}
                   placeholder="Staff Name"
@@ -489,12 +558,18 @@ function Salary(props) {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
-                          sx={{ width: "96%", mt: "4px" }}
+                          sx={{
+                            width: "96%",
+                            mt: "4px",
+                            "@media (max-width: 900px)": {
+                              width: "100%",
+                            },
+                          }}
                           label="Salary Date"
                           value={moment(editSalary?.date, 'YYYY-MM-DD')}
                           onChange={(newDate) =>
@@ -510,9 +585,10 @@ function Salary(props) {
                     </LocalizationProvider>
                   </Box>
                 </Grid>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    sx={{ mt: "12px" }}
+                    fullWidth
                     placeholder="Salary"
                     label="Salary"
                     name="salary"
@@ -521,9 +597,9 @@ function Salary(props) {
                   />
                 </Grid>
               </Grid>
-              <Grid md={12} mt="12px">
+              <Grid md={12} sm={12} xs={12} mt="12px">
                 <TextField
-                  sx={{ width: "100%" }}
+                  fullWidth
                   placeholder="Notes"
                   label="Notes"
                   name="note"

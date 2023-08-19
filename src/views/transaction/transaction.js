@@ -95,6 +95,10 @@ const Transaction = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
   const [validateError, setValidateError] = useState({});
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
+
   const token = localStorage.getItem("token");
   const [transactionsData, setTransactionsData] = useState({
     staffId: "",
@@ -109,6 +113,7 @@ const Transaction = () => {
       [event.target.name]: event.target.value,
     });
   };
+
 
   const handleSelectChangeValue = (event, newValue) => {
     setTransactionsData({
@@ -183,7 +188,8 @@ const Transaction = () => {
   }, []);
 
   const [transactionList, setTransactionList] = useState([]);
-  useEffect(() => {
+
+  const getTransactionList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -196,14 +202,42 @@ const Transaction = () => {
     axios
       .request(config)
       .then((response) => {
-        // console.log("response", response.data);
+
         setTransactionList(response.data.data);
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        console.log(error.response.data);
+        // if()
       });
+  };
+
+  useEffect(() => {
+    getTransactionList();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(transactionList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, transactionList]);
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    console.log(query);
+
+    const filteredList = transactionList.filter((item) => {
+      const firstName = (item.staffId.firstName).toLowerCase();
+      if (firstName === query) {
+        return item;
+      }
+      return false;
+    });
+    console.log("filteredList", filteredList);
+    setFilteredStaffDataList(filteredList);
+  };
 
   const transactionDelete = (staffId) => {
     if (transactionToDelete) {
@@ -223,7 +257,7 @@ const Transaction = () => {
           window.location.reload();
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.response.data);
         });
     }
   };
@@ -248,12 +282,11 @@ const Transaction = () => {
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
           window.location.reload();
           setTransaction(false);
         })
         .catch((error) => {
-          console.log(error);
+          // console.log(error.response.data);
         });
     }
   };
@@ -319,6 +352,7 @@ const Transaction = () => {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+
           <Box display="flex" justifyContent="space-between">
             <SearchSection />
             <FormControl
@@ -366,6 +400,12 @@ const Transaction = () => {
               </Select>
             </FormControl>
           </Box>
+
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -380,7 +420,7 @@ const Transaction = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {transactionList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow key={item._id}>
@@ -440,6 +480,7 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
+
               <Grid md={12}>
                 <Autocomplete
                   disablePortal
@@ -465,6 +506,9 @@ const Transaction = () => {
                 />
               </Grid>
               <Grid md={12} mt="4px">
+
+              <Grid md={12} sm={12} xs={12}>
+
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
@@ -478,16 +522,22 @@ const Transaction = () => {
                 </Box>
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        width: "100%",
+                      },
+                    }}
                     placeholder="Transaction Type"
                     label="Transaction Type"
                     onChange={handleChangeValue}
                     name="transactionType"
                   />
                 </Grid>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Amount"
@@ -499,7 +549,7 @@ const Transaction = () => {
                   />
                 </Grid>
               </Grid>
-              <Grid md={12} mt="12px">
+              <Grid md={12} sm={12} xs={12} mt="12px">
                 <TextField
                   sx={{ width: "100%" }}
                   placeholder="Description"
@@ -569,18 +619,19 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  fullWidth
                   placeholder="Staff Name"
                   label="Staff Name"
                   onChange={handleChangeValue}
                   value={`${editToTransaction?.staffId.firstName} ${editToTransaction?.staffId.lastName}`}
                 />
               </Grid>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%", mt: "12px " }}
+                  fullWidth
+                  sx={{ mt: "12px " }}
                   placeholder="Transaction Type"
                   label="Transaction Type"
                   value={editToTransaction?.transactionType || ""}
@@ -589,7 +640,9 @@ const Transaction = () => {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6} mt="4px">
+
+                <Grid md={6} sm={12} xs={12}>
+
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -615,9 +668,10 @@ const Transaction = () => {
                     </LocalizationProvider>
                   </Box>
                 </Grid>
-                <Grid md={6}>
+                <Grid md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "100%" }}
+                    fullWidth
+                    sx={{ mt: "12px" }}
                     placeholder="Amount"
                     label="Amount"
                     onChange={handleEditInputChange}

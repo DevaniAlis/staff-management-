@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import moment from "moment";
 import {
   Autocomplete,
@@ -27,10 +28,10 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useEffect } from "react";
-import axios from "axios";
 import { Oval } from "react-loader-spinner";
-import baseUrl from "../../views/baseUrl";
+
+import baseUrl from "../baseUrl";
+const token = localStorage.getItem("token");
 
 const displayStyle = {
   display: "flex",
@@ -87,11 +88,17 @@ function Leaves(props) {
   const [leaveToDelete, setLeaveToDElete] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editLeave, setEditLeave] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffLeave, setStaffLeave] = useState({
     staffId: null,
     reason: "",
   });
 
+  const [validationErrors, setValidationErrors] = useState({
+    staffId: "",
+    
+  });
   const addLeave = (event) => {
     const { name, value } = event.target;
     setStaffLeave((prevState) => ({
@@ -132,14 +139,16 @@ function Leaves(props) {
       });
   }, []);
 
-  const [staffLeaveList, setStaffLeaveList] = useState([]);
+ const [staffLeaveList, setStaffLeaveList] = useState([]);
   useEffect(() => {
+    const getLeaveList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
       url: `${baseUrl.url}/api/leave/list`,
       headers: {
         token: token,
+        "Content-Type": "application/json",
       },
     };
     setIsLoading(true);
@@ -153,7 +162,7 @@ function Leaves(props) {
         console.log(error);
         setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleLeave = () => {
     let config = {
@@ -169,13 +178,12 @@ function Leaves(props) {
     axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        console.log(response.data);
       })
       .catch((error) => {
         console.log(error);
       });
   };
-  console.log("staff leave", staffLeave);
 
   const deleteLeave = (staffId) => {
     if (leaveToDelete) {
@@ -191,7 +199,7 @@ function Leaves(props) {
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
+          console.log(response.data);
           window.location.reload();
         })
         .catch((error) => {
@@ -220,7 +228,7 @@ function Leaves(props) {
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
+ console.log(JSON.stringify(response.data));
           const updatedList = staffLeaveList.map((item) =>
             item._id === editLeave._id ? editLeave : item
           );
@@ -264,6 +272,31 @@ function Leaves(props) {
     }));
   };
 
+  useEffect(() => {
+    getLeaveList();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredStaffDataList(staffLeaveList);
+    } else {
+      handleSearch();
+    }
+  }, [searchQuery, staffLeaveList]);
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+
+    const filteredList = staffLeaveList.filter((item) => {
+      const firstName = (item.staffId.firstName).toLowerCase();
+      if (firstName === query) {
+        return item;
+      }
+      return false;
+    });
+    setFilteredStaffDataList(filteredList);
+  };
+
   return (
     <>
       {isLoading ? (
@@ -305,7 +338,10 @@ function Leaves(props) {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection />
+          <SearchSection
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -320,7 +356,7 @@ function Leaves(props) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {staffLeaveList.map((item) => {
+                    {filteredStaffDataList.map((item) => {
                       return (
                         <>
                           <TableRow key={item._id}>
@@ -377,6 +413,7 @@ function Leaves(props) {
         <DialogContent>
           <Box>
             <Grid container>
+
               <Grid md={12}>
                 <Autocomplete
                   disablePortal
@@ -396,6 +433,10 @@ function Leaves(props) {
                   onChange={(event, newValue) =>
                     handleSelectChangeValue(event, newValue)
                   }
+
+              <Grid md={12} sm={12} xs={12}>
+                <TextField
+
                   sx={{ width: "100%" }}
                   renderInput={(params) => (
                     <TextField {...params} label="Staff Name" name="staffId" />
@@ -403,54 +444,43 @@ function Leaves(props) {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6}>
-                  <Box>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DemoContainer components={["DatePicker"]}>
-                        <DatePicker
-                          sx={{ width: "96%", mt: "4px" }}
-                          label=" Leave From Date"
-                          value={
-                            editLeave?.startDate
-                              ? moment(
-                                  editLeave.startDate,
-                                  "DD-MMM-YYYY"
-                                ).toDate()
-                              : null
-                          }
-                          onChange={(newDate) =>
-                            handleDatePicker("startDate", newDate)
-                          }
-                        />
-                      </DemoContainer>
-                    </LocalizationProvider>
-                  </Box>
+<Grid md={6} sm={12} xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DatePicker"]}>
+                      <DatePicker
+                        sx={{
+                          width: "96%",
+                          mt: "4px",
+                          "@media (max-width: 900px)": {
+                            width: "100%",
+                          },
+                        }}
+                        label=" Leave From Date"
+                        value={editLeave?.startDate || null}
+                        onChange={(newDate) =>
+                          handleDatePicker("startDate", newDate)
+                        }
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
                 </Grid>
-                <Grid md={6}>
-                  <Box>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DemoContainer components={["DatePicker"]}>
-                        <DatePicker
-                          sx={{ width: "100%", mt: "4px" }}
-                          label="Leave To Date"
-                          value={
-                            editLeave?.endDate
-                              ? moment(
-                                  editLeave.endDate,
-                                  "DD-MMM-YYYY"
-                                ).toDate()
-                              : null
-                          }
-                          onChange={(newDate) =>
-                            handleDatePicker("endDate", newDate)
-                          }
-                        />
-                      </DemoContainer>
-                    </LocalizationProvider>
-                  </Box>
+                <Grid md={6} sm={12} xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DatePicker"]}>
+                      <DatePicker
+                        fullWidth
+                        sx={{ mt: "4px" }}
+                        label="Leave to Date"
+                        value={editLeave?.endDate || null}
+                        onChange={(newDate) =>
+                          handleDatePicker("endDate", newDate)
+                        }
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
                 </Grid>
               </Grid>
-              <Grid md={12} mt="12px">
+              <Grid md={12} sm={12} xs={12} mt="12px">
                 <TextField
                   sx={{ width: "100%" }}
                   placeholder="Leave Reason"
@@ -519,11 +549,13 @@ function Leaves(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid item md={12}>
+              <Grid item md={12} sm={12} xs={12}>
                 <TextField
+
                   sx={{ width: "100%" }}
                   label="Staff Name"
                   placeholder="Staff Name"
+
                   value={
                     editLeave && editLeave.staffId
                       ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
@@ -534,12 +566,18 @@ function Leaves(props) {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
-                          sx={{ width: "96%", mt: "4px" }}
+                          sx={{
+                            width: "96%",
+                            mt: "4px",
+                            "@media (max-width: 900px)": {
+                              width: "100%",
+                            },
+                          }}
                           label=" Leave From Date"
                           value={moment(editLeave?.startDate, 'YYYY-MM-DD')}
                           onChange={(newDate) =>
@@ -550,7 +588,7 @@ function Leaves(props) {
                     </LocalizationProvider>
                   </Box>
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -567,9 +605,9 @@ function Leaves(props) {
                   </Box>
                 </Grid>
               </Grid>
-              <Grid item md={12} mt="12px">
+              <Grid item md={12} sm={12} xs={12} mt="12px">
                 <TextField
-                  sx={{ width: "100%" }}
+                  fullWidth
                   placeholder="Leave Reason"
                   label="Leave Reason"
                   value={editLeave?.reason || ""}
