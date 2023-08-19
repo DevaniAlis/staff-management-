@@ -36,6 +36,7 @@ import { useEffect } from "react";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
+import { SingleBed } from "@mui/icons-material";
 
 // ==============================|| Employee ||============================== //
 
@@ -95,10 +96,10 @@ const Transaction = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
   const [validateError, setValidateError] = useState({});
-
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
-
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const token = localStorage.getItem("token");
   const [transactionsData, setTransactionsData] = useState({
     staffId: "",
@@ -122,15 +123,25 @@ const Transaction = () => {
   };
   // console.log(transactionsData);
 
-  const handleDatePicker = (ele) => {
-    const currentDate = new Date(ele);
-    const dateString = currentDate.toLocaleDateString("en-US");
-    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
-    setTransactionsData((prevState) => ({
-      ...prevState,
-      transactionDate: formattedDate,
-    }));
+  // const handleDatePicker = (ele) => {
+  //   const currentDate = new Date(ele);
+  //   const dateString = currentDate.toLocaleDateString("en-US");
+  //   const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+  //   setTransactionsData((prevState) => ({
+  //     ...prevState,
+  //     transactionDate: formattedDate,
+  //   }));
+  // };
+  const handleDatePicker = (selectedDate) => {
+    if (selectedDate) {
+      const formattedDate = moment(selectedDate).format("DD-MMM-YYYY");
+      setTransactionsData((prevState) => ({
+        ...prevState,
+        transactionDate: formattedDate,
+      }));
+    }
   };
+
   const validateFields = () => {
     const errors = {};
     if (!transactionsData.amount) {
@@ -192,7 +203,7 @@ const Transaction = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/transaction/list`,
+      url: `${baseUrl.url}/api/transaction/list?staffId=${transactionsData.staffId}&month=${selectedMonth}&year=${selectedYear}`,
       headers: {
         token: token,
         "Content-Type": "application/json",
@@ -206,13 +217,12 @@ const Transaction = () => {
       })
       .catch((error) => {
         console.log(error.response.data);
-        // if()
       });
   };
 
   useEffect(() => {
     getTransactionList();
-  }, []);
+  }, [selectedMonth, selectedYear, transactionsData.staffId]);
 
   useEffect(() => {
     if (searchQuery === "") {
@@ -224,16 +234,16 @@ const Transaction = () => {
 
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
-    console.log(query);
-
     const filteredList = transactionList.filter((item) => {
       const firstName = item.staffId.firstName.toLowerCase();
       if (firstName === query) {
-        return item;
+        return (
+          (selectedMonth === "" || item.month === selectedMonth) &&
+          (selectedYear === "" || item.year === selectedYear)
+        );
       }
       return false;
     });
-    console.log("filteredList", filteredList);
     setFilteredStaffDataList(filteredList);
   };
 
@@ -303,11 +313,56 @@ const Transaction = () => {
     setEditTransaction(true);
   };
 
-  const [age, setAge] = React.useState("");
+  useEffect(() => {
+    const filterData = () => {
+      const config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `${baseUrl.url}/api/transaction/list?staffId=${transactionsData.staffId}&month=${selectedMonth}&year=${selectedYear}`,
+        headers: {
+          token: token,
+          "Content-Type": "application/json",
+        },
+      };
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
-  };
+      axios
+        .request(config)
+        .then((response) => {
+          setTransactionList(response.data.data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.log(error.response.data);
+        });
+    };
+
+    if (selectedMonth !== "" && selectedYear !== "") {
+      filterData();
+    }
+  }, [selectedMonth, selectedYear, transactionsData.staffId]);
+
+  const months = [
+    { value: "01", label: "January" },
+    { value: "02", label: "February" },
+    { value: "03", label: "March" },
+    { value: "04", label: "April" },
+    { value: "05", label: "May" },
+    { value: "06", label: "June" },
+    { value: "07", label: "July" },
+    { value: "08", label: "August" },
+    { value: "09", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+  ];
+
+  const currentYear = new Date().getFullYear();
+  const years = [
+    { value: "", label: "All Years" },
+    { value: currentYear - 2, label: `${currentYear - 2}` },
+    { value: currentYear - 1, label: `${currentYear - 1}` },
+    { value: currentYear, label: `${currentYear}` },
+  ];
 
   return (
     <>
@@ -351,55 +406,58 @@ const Transaction = () => {
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
 
-          <Box display="flex" justifyContent="space-between">
-            <SearchSection
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Autocomplete
+              disablePortal
+              options={staffList}
+              getOptionLabel={(staff) => `${staff.firstName} ${staff.lastName}`}
+              getOptionSelected={(option, value) => option._id === value._id}
+              value={
+                staffList.find(
+                  (staff) => staff._id === transactionsData.staffId
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                setTransactionsData((prevData) => ({
+                  ...prevData,
+                  staffId: newValue ? newValue._id : "",
+                }));
+                setSelectedMonth("");
+                setSelectedYear("");
+              }}
+              sx={{ width: "400px" }}
+              renderInput={(params) => (
+                <TextField {...params} label="Staff Name" name="staffId" />
+              )}
             />
-            <FormControl
-              sx={{
-                width: "340px",
-                "@media (max-width: 1200px)": {
-                  marginX: "20px",
-                  width: "240px",
-                },
-              }}
-            >
-              <InputLabel id="demo-simple-select-label">Month</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Month"
-                onChange={handleChange}
-              >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl
-              sx={{
-                width: "340px",
-                "@media (max-width: 1200px)": {
-                  marginX: "20px",
-                  width: "230px",
-                },
-              }}
-            >
-              <InputLabel id="demo-simple-select-label">Year</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
-                label="Year"
-                onChange={handleChange}
-              >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
-            </FormControl>
+
+            <Autocomplete
+              sx={{ width: "350px" }}
+              disablePortal
+              options={months}
+              getOptionLabel={(month) => month.label}
+              value={months.find((month) => month.value === selectedMonth)}
+              onChange={(event, newValue) =>
+                setSelectedMonth(newValue?.value || "")
+              }
+              renderInput={(params) => <TextField {...params} label="Month" />}
+            />
+
+            <Autocomplete
+              sx={{ width: "350px" }}
+              disablePortal
+              options={years}
+              getOptionLabel={(year) => year.label}
+              value={years.find((year) => year.value === selectedYear)}
+              onChange={(event, newValue) =>
+                setSelectedYear(newValue?.value || "")
+              }
+              renderInput={(params) => <TextField {...params} label="Year" />}
+            />
           </Box>
 
           <Grid container spacing={gridSpacing}>
@@ -429,9 +487,12 @@ const Transaction = () => {
                               {item.transactionType}
                             </TableCell>
                             <TableCell align="center">
-                              {new Date(
+                              {/* {new Date(
                                 item.transactionDate
-                              ).toLocaleDateString("en-us")}
+                              ).toLocaleDateString("en-us")} */}
+                              {moment(item.transactionDate).format(
+                                "DD-MM-YYYY"
+                              )}
                             </TableCell>
                             <TableCell align="center">{item.amount}</TableCell>
                             <TableCell align="center">

@@ -13,8 +13,10 @@ import {
   InputLabel,
   MenuItem,
   OutlinedInput,
+  Paper,
   Select,
   Table,
+  TableBody,
   TableCell,
   TableContainer,
   TableHead,
@@ -33,6 +35,7 @@ import PrintProvider, { Print, NoPrint } from "react-easy-print";
 
 import baseUrl from "../baseUrl";
 const token = localStorage.getItem("token");
+import PrintIcon from "@mui/icons-material/Print";
 
 const months = [
   "January",
@@ -54,6 +57,22 @@ const displayStyle = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
+};
+
+const printDialog = {
+  padding: "8px 15px",
+};
+
+const detailsReport = {
+  fontWeight: 500,
+  fontSize: "16px",
+};
+
+const CancelDialog = {
+  padding: "5px 15px",
+  border: "1px solid #1E88E5",
+  color: "#1E88E5",
+  textTransform: "none",
 };
 
 function Report(props) {
@@ -121,6 +140,11 @@ function Report(props) {
     window.print();
   };
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleButtonClick = () => {
+    setDialogOpen(true);
+  };
   return (
     <PrintProvider>
       <NoPrint>
