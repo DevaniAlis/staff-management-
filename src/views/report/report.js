@@ -34,9 +34,9 @@ import axios from "axios";
 import PrintProvider, { Print, NoPrint } from "react-easy-print";
 
 import baseUrl from "../baseUrl";
-const token = localStorage.getItem("token");
 import PrintIcon from "@mui/icons-material/Print";
 
+const token = localStorage.getItem("token");
 const months = [
   "January",
   "February",
