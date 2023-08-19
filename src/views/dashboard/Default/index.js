@@ -29,7 +29,6 @@ const Dashboard = () => {
   const [totalStaff, setTotalStaff] = useState();
   const [totalTransaction, setTotalTransaction] = useState();
   const [totalSalary, setTotalSalary] = useState();
-  const [totalEverageSalary, setTotalEverageSalary] = useState();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -49,7 +48,6 @@ const Dashboard = () => {
         setTotalStaff(response.data.Data.totalStaff);
         setTotalTransaction(response.data.Data.totalTransaction);
         setTotalSalary(response.data.Data.totalSalary);
-        setTotalEverageSalary(response.data.Data.averageSalary);
       })
       .catch((error) => {
         if (error.response.data === "Invalid Token") {
@@ -66,7 +64,7 @@ const Dashboard = () => {
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
           <Grid item lg={4} md={6} sm={6} xs={12}>
-            <EarningCard isLoading={isLoading} totalSalary={totalSalary} />
+            <EarningCard isLoading={isLoading} totalTransaction={totalTransaction} />
           </Grid>
           <Grid item lg={4} md={6} sm={6} xs={12}>
             <TotalOrderLineChartCard
@@ -79,13 +77,7 @@ const Dashboard = () => {
               <Grid item sm={6} xs={12} md={6} lg={12}>
                 <TotalIncomeDarkCard
                   isLoading={isLoading}
-                  totalTransaction={totalTransaction}
-                />
-              </Grid>
-              <Grid item sm={6} xs={12} md={6} lg={12}>
-                <TotalIncomeLightCard
-                  isLoading={isLoading}
-                  averageSalary={totalEverageSalary}
+                  totalSalary={totalSalary}
                 />
               </Grid>
             </Grid>
