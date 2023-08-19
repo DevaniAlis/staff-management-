@@ -2,7 +2,6 @@
   "name": "staff-lending-fe",
   "version": "3.3.2",
   "private": true,
-  "homepage": "https://berrydashboard.io",
   "dependencies": {
     "@emotion/cache": "^11.9.3",
     "@emotion/react": "^11.11.1",
@@ -33,7 +32,7 @@
     "react-redux": "^8.0.2",
     "react-router": "6.3.0",
     "react-router-dom": "6.3.0",
-    "react-scripts": "^2.1.3",
+    "react-scripts": "^5.0.1",
     "redux": "^4.2.0",
     "rsuite": "^5.37.3",
     "yup": "^0.32.11"
