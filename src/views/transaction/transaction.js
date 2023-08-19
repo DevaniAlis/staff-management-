@@ -537,8 +537,9 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
+                  fullWidth
                   disablePortal
                   options={staffList}
                   getOptionLabel={(staff) =>
@@ -555,7 +556,6 @@ const Transaction = () => {
                   onChange={(event, newValue) =>
                     handleSelectChangeValue(event, newValue)
                   }
-                  sx={{ width: "100%" }}
                   renderInput={(params) => (
                     <TextField {...params} label="Staff Name" name="staffId" />
                   )}

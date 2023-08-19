@@ -419,8 +419,9 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
+                fullWidth
                   disablePortal
                   id="combo-box-demo"
                   options={staffList}
@@ -438,7 +439,6 @@ function Salary(props) {
                   onChange={(event, newValue) =>
                     handleSelectChangeValue(event, newValue)
                   }
-                  sx={{ width: "100%" }}
                   renderInput={(params) => (
                     <TextField {...params} label="Staff Name" name="staffId" />
                   )}

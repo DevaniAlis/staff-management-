@@ -11,7 +11,7 @@ import SkeletonEarningCard from "ui-component/cards/Skeleton/EarningCard";
 
 // assets
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import { IconCoinRupee } from "@tabler/icons";
+import { IconArrowsTransferUp } from "@tabler/icons";
 
 import CountUp from "react-countup";
 
@@ -53,7 +53,7 @@ const CardWrapper = styled(MainCard)(({ theme }) => ({
 
 // ===========================|| DASHBOARD DEFAULT - EARNING CARD ||=========================== //
 
-const EarningCard = ({ isLoading, totalSalary }) => {
+const EarningCard = ({ isLoading, totalTransaction }) => {
   const theme = useTheme();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -79,7 +79,7 @@ const EarningCard = ({ isLoading, totalSalary }) => {
                         mt: 1,
                       }}
                     >
-                      <IconCoinRupee fontSize="inherit" />
+                      <IconArrowsTransferUp fontSize="inherit" />
                     </Avatar>
                   </Grid>
                 </Grid>
@@ -96,20 +96,8 @@ const EarningCard = ({ isLoading, totalSalary }) => {
                         mb: 0.75,
                       }}
                     >
-                      <CountUp start={0} end={totalSalary} delay={0} />
+                      <CountUp start={0} end={totalTransaction} delay={0} />
                     </Typography>
-                  </Grid>
-                  <Grid item>
-                    <Avatar
-                      sx={{
-                        cursor: "pointer",
-                        ...theme.typography.smallAvatar,
-                        backgroundColor: theme.palette.secondary[200],
-                        color: theme.palette.secondary.dark,
-                      }}
-                    >
-                      <IconCoinRupee fontSize="inherit" />
-                    </Avatar>
                   </Grid>
                 </Grid>
               </Grid>
@@ -121,7 +109,7 @@ const EarningCard = ({ isLoading, totalSalary }) => {
                     color: theme.palette.secondary[200],
                   }}
                 >
-                  Total Salary
+                  Total Transaction
                 </Typography>
               </Grid>
             </Grid>

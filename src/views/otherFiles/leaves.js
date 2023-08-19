@@ -412,8 +412,9 @@ function Leaves(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
+              <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
+                fullWidth
                   disablePortal
                   id="combo-box-demo"
                   options={staffList}
