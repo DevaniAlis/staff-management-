@@ -3,18 +3,14 @@ import axios from "axios";
 import moment from "moment/moment";
 import {
   Button,
-
   Chip,
-
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Divider,
-
   FormControlLabel,
-
   Grid,
   Table,
   TableBody,
@@ -155,13 +151,11 @@ const Staff = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [validateError, setValidateError] = useState({});
-  const token = localStorage.getItem("token");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
   const [editedJoinDate, setEditedJoinDate] = useState("");
-
 
   const [staffData, setStaffData] = useState({
     firstName: "",
@@ -197,26 +191,12 @@ const Staff = () => {
     }));
   };
 
-
   const validateFields = () => {
     const errors = {};
     const phoneNumberPattern = /^\d{10}$/;
     const aadhaarPattern = /^\d{12}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     const ifscPattern = /^[A-Za-z]{4}\d{7}$/;
-
-  const handleSaveData = (event) => {
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/staff`,
-      headers: {
-        token: token,
-        "Content-Type": "application/json",
-      },
-      data: staffData,
-    };
-
 
     if (!staffData.firstName) {
       errors.firstName = "First Name is required";
@@ -298,9 +278,8 @@ const Staff = () => {
   };
   // console.log("staff", staffData);
 
-
   const [staffDataList, setStaffDataList] = useState([]);
-  useEffect(() => {
+
   const getStaffList = () => {
     let config = {
       method: "get",
@@ -313,7 +292,6 @@ const Staff = () => {
     axios
       .request(config)
       .then((response) => {
-
         setStaffDataList(response.data.data);
         setEditedJoinDate(response.data.data.joinDate);
         setIsLoading(false);
@@ -322,7 +300,6 @@ const Staff = () => {
         console.log(error);
       });
   };
-
   useEffect(() => {
     getStaffList();
   }, []);
@@ -592,7 +569,7 @@ const Staff = () => {
               <Grid container display="flex" justifyContent="space-between">
                 <Grid item md={12} sm={12} xs={12}>
                   <TextField
-sx={{ mt: "8px" }}
+                    sx={{ mt: "8px" }}
                     fullWidth
                     placeholder="First Name"
                     variant="outlined"
@@ -645,7 +622,6 @@ sx={{ mt: "8px" }}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
-
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
@@ -982,11 +958,9 @@ sx={{ mt: "8px" }}
                     </DemoContainer>
                   </LocalizationProvider>
                 </Grid>
-                <Grid item md={6}>
-          
+              </Grid>
               <Grid display="contents" mt={2}>
                 <Grid md={6}>
-
                   <TextField
                     sx={{ mt: "12px", width: "96%" }}
                     placeholder="Gender"
@@ -1077,26 +1051,9 @@ sx={{ mt: "8px" }}
                     onChange={handleEditInputChange}
                   />
                 </Grid>
-                <Grid item md={6}>
-
               </Grid>
               <Grid display="contents" mt={2}>
                 <Grid md={6}>
-                  <Box>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DemoContainer components={["DatePicker"]}>
-                        <DatePicker
-                          sx={{ width: "96%", mt: "4px" }}
-                          label="Join Date"
-                          name="joinDate"
-                          value={editedJoinDate}
-                        />
-                      </DemoContainer>
-                    </LocalizationProvider>
-                  </Box>
-                </Grid>
-                <Grid md={6}>
-
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Salary"

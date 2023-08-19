@@ -97,7 +97,6 @@ function Leaves(props) {
 
   const [validationErrors, setValidationErrors] = useState({
     staffId: "",
-    
   });
   const addLeave = (event) => {
     const { name, value } = event.target;
@@ -139,9 +138,9 @@ function Leaves(props) {
       });
   }, []);
 
- const [staffLeaveList, setStaffLeaveList] = useState([]);
-  useEffect(() => {
-    const getLeaveList = () => {
+  const [staffLeaveList, setStaffLeaveList] = useState([]);
+
+  const getLeaveList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -228,7 +227,7 @@ function Leaves(props) {
       axios
         .request(config)
         .then((response) => {
- console.log(JSON.stringify(response.data));
+          console.log(JSON.stringify(response.data));
           const updatedList = staffLeaveList.map((item) =>
             item._id === editLeave._id ? editLeave : item
           );
@@ -288,7 +287,7 @@ function Leaves(props) {
     const query = searchQuery.toLowerCase();
 
     const filteredList = staffLeaveList.filter((item) => {
-      const firstName = (item.staffId.firstName).toLowerCase();
+      const firstName = item.staffId.firstName.toLowerCase();
       if (firstName === query) {
         return item;
       }
@@ -413,7 +412,6 @@ function Leaves(props) {
         <DialogContent>
           <Box>
             <Grid container>
-
               <Grid md={12}>
                 <Autocomplete
                   disablePortal
@@ -433,18 +431,13 @@ function Leaves(props) {
                   onChange={(event, newValue) =>
                     handleSelectChangeValue(event, newValue)
                   }
-
-              <Grid md={12} sm={12} xs={12}>
-                <TextField
-
-                  sx={{ width: "100%" }}
                   renderInput={(params) => (
                     <TextField {...params} label="Staff Name" name="staffId" />
                   )}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-<Grid md={6} sm={12} xs={12}>
+                <Grid md={6} sm={12} xs={12}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
@@ -551,11 +544,9 @@ function Leaves(props) {
             <Grid container>
               <Grid item md={12} sm={12} xs={12}>
                 <TextField
-
                   sx={{ width: "100%" }}
                   label="Staff Name"
                   placeholder="Staff Name"
-
                   value={
                     editLeave && editLeave.staffId
                       ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
@@ -579,9 +570,14 @@ function Leaves(props) {
                             },
                           }}
                           label=" Leave From Date"
-                          value={moment(editLeave?.startDate, 'YYYY-MM-DD')}
+                          value={moment(editLeave?.startDate, "YYYY-MM-DD")}
                           onChange={(newDate) =>
-                            handleEditDatePicker("startDate", newDate)
+                            handleEditInputChange({
+                              target: {
+                                name: 'startDate',
+                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
+                              },
+                            })
                           }
                         />
                       </DemoContainer>
@@ -595,9 +591,14 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
-                          value={moment(editLeave?.endDate, 'YYYY-MM-DD')}
+                          value={moment(editLeave?.endDate, "YYYY-MM-DD")}
                           onChange={(newDate) =>
-                            handleEditDatePicker("endDate", newDate)
+                            handleEditInputChange({
+                              target: {
+                                name: 'endDate',
+                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
+                              },
+                            })
                           }
                         />
                       </DemoContainer>

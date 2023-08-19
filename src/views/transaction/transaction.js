@@ -114,7 +114,6 @@ const Transaction = () => {
     });
   };
 
-
   const handleSelectChangeValue = (event, newValue) => {
     setTransactionsData({
       ...transactionsData,
@@ -202,7 +201,6 @@ const Transaction = () => {
     axios
       .request(config)
       .then((response) => {
-
         setTransactionList(response.data.data);
         setIsLoading(false);
       })
@@ -229,7 +227,7 @@ const Transaction = () => {
     console.log(query);
 
     const filteredList = transactionList.filter((item) => {
-      const firstName = (item.staffId.firstName).toLowerCase();
+      const firstName = item.staffId.firstName.toLowerCase();
       if (firstName === query) {
         return item;
       }
@@ -354,7 +352,10 @@ const Transaction = () => {
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
 
           <Box display="flex" justifyContent="space-between">
-            <SearchSection />
+            <SearchSection
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
             <FormControl
               sx={{
                 width: "340px",
@@ -400,11 +401,6 @@ const Transaction = () => {
               </Select>
             </FormControl>
           </Box>
-
-          <SearchSection
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
 
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
@@ -480,7 +476,6 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
-
               <Grid md={12}>
                 <Autocomplete
                   disablePortal
@@ -505,10 +500,8 @@ const Transaction = () => {
                   )}
                 />
               </Grid>
-              <Grid md={12} mt="4px">
 
               <Grid md={12} sm={12} xs={12}>
-
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
@@ -640,9 +633,7 @@ const Transaction = () => {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-
                 <Grid md={6} sm={12} xs={12}>
-
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
