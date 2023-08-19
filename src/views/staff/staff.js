@@ -3,18 +3,19 @@ import axios from "axios";
 import moment from "moment/moment";
 import {
   Button,
+
   Chip,
+
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Divider,
+
   FormControlLabel,
+
   Grid,
-  IconButton,
-  MenuItem,
-  Popover,
   Table,
   TableBody,
   TableCell,
@@ -27,12 +28,7 @@ import {
 import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus,
-  IconDotsVertical,
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -157,10 +153,15 @@ const Staff = () => {
   const [editStaff, setEditStaff] = useState(false);
   const [editToStaff, setEditToStaff] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [validateError, setValidateError] = useState({});
+  const token = localStorage.getItem("token");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
   const [editedJoinDate, setEditedJoinDate] = useState("");
+
 
   const [staffData, setStaffData] = useState({
     firstName: "",
@@ -173,6 +174,7 @@ const Staff = () => {
     email: "",
     phone: "",
     address: "",
+    joinDate: "",
     aadhaarNo: "",
     pancardNo: "",
     bankName: "",
@@ -184,7 +186,7 @@ const Staff = () => {
   const handleChangeValue = (event) => {
     setStaffData({ ...staffData, [event.target.name]: event.target.value });
   };
-
+  // console.log("staffData", staffData);
   const handleDatePicker = (ele) => {
     const currentDate = new Date(ele);
     const dateString = currentDate.toLocaleDateString("en-US");
@@ -194,6 +196,14 @@ const Staff = () => {
       joinDate: formattedDate,
     }));
   };
+
+
+  const validateFields = () => {
+    const errors = {};
+    const phoneNumberPattern = /^\d{10}$/;
+    const aadhaarPattern = /^\d{12}$/;
+    const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    const ifscPattern = /^[A-Za-z]{4}\d{7}$/;
 
   const handleSaveData = (event) => {
     let config = {
@@ -207,18 +217,90 @@ const Staff = () => {
       data: staffData,
     };
 
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(JSON.stringify(response.data));
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
+    if (!staffData.firstName) {
+      errors.firstName = "First Name is required";
+    }
+
+    if (!staffData.lastName) {
+      errors.lastName = "Last Name is required";
+    }
+
+    if (!staffData.position) {
+      errors.position = "Position is required";
+    }
+
+    if (!staffData.phone) {
+      errors.phone = "Phone number is required.";
+    } else if (!phoneNumberPattern.test(staffData.phone)) {
+      errors.phone = "Invalid phone number.";
+    }
+
+    if (!staffData.salary) {
+      errors.salary = "Salary is required.";
+    } else if (isNaN(staffData.salary)) {
+      errors.salary = "Salary must be a valid number.";
+    }
+
+    if (!staffData.aadhaarNo) {
+      errors.aadhaarNo = "Aadhaar number is required.";
+    } else if (!aadhaarPattern.test(staffData.aadhaarNo)) {
+      errors.aadhaarNo = "Invalid Aadhaar number.";
+    }
+
+    if (!staffData.pancardNo) {
+      errors.pancardNo = "PAN Card number is required.";
+    } else if (!panPattern.test(staffData.pancardNo)) {
+      errors.pancardNo = "Invalid PAN Card number.";
+    }
+
+    if (!staffData.bankName) {
+      errors.bankName = "Bank Name is required";
+    }
+
+    if (!/^\d+$/.test(staffData.accountNo)) {
+      errors.accountNo = "Account Number should be a numeric value";
+    }
+
+    if (!staffData.ifscCode) {
+      errors.ifscCode = "IFSC Code is required.";
+    } else if (!ifscPattern.test(staffData.ifscCode)) {
+      errors.ifscCode = "Invalid IFSC Code.";
+    }
+
+    setValidateError(errors);
+
+    return Object.keys(errors).length === 0;
   };
 
-  const [staffDataList, setStaffDataList] = useState([]);
+  const handleSaveData = (event) => {
+    if (validateFields()) {
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: `${baseUrl.url}/api/staff`,
+        headers: {
+          token: token,
+          "Content-Type": "application/json",
+        },
+        data: staffData,
+      };
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+  // console.log("staff", staffData);
 
+
+  const [staffDataList, setStaffDataList] = useState([]);
+  useEffect(() => {
   const getStaffList = () => {
     let config = {
       method: "get",
@@ -228,10 +310,10 @@ const Staff = () => {
         token: token,
       },
     };
-
     axios
       .request(config)
       .then((response) => {
+
         setStaffDataList(response.data.data);
         setEditedJoinDate(response.data.data.joinDate);
         setIsLoading(false);
@@ -323,7 +405,7 @@ const Staff = () => {
     setDeleteStaffOpen(true);
   };
 
-  const handleStaffEdit = () => {
+  const handleEditStaff = () => {
     if (editToStaff) {
       let config = {
         method: "put",
@@ -341,7 +423,7 @@ const Staff = () => {
         .then((response) => {
           console.log(JSON.stringify(response.data));
           window.location.reload();
-          setStaff(false);
+          setEditStaff(false);
         })
         .catch((error) => {
           console.log(error);
@@ -351,8 +433,9 @@ const Staff = () => {
 
   const handleEditInputChange = (event) => {
     const { name, value } = event.target;
-    setEditToStaff((prevEditSalary) => ({
-      ...prevEditSalary,
+    console.log(event.target);
+    setEditToStaff((prevEditToStaff) => ({
+      ...prevEditToStaff,
       [name]: value,
     }));
   };
@@ -492,7 +575,7 @@ const Staff = () => {
           </Grid>
         </MainCard>
       )}
-      {/* start add Employees Dialog */}
+      {/* start add staff Dialog */}
       <Dialog
         open={staff}
         maxWidth="sm"
@@ -509,13 +592,15 @@ const Staff = () => {
               <Grid container display="flex" justifyContent="space-between">
                 <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "8px" }}
+sx={{ mt: "8px" }}
                     fullWidth
                     placeholder="First Name"
                     variant="outlined"
                     label="First Name"
                     onChange={handleChangeValue}
                     name="firstName"
+                    error={!!validateError.firstName}
+                    helperText={validateError.firstName}
                   />
                 </Grid>
                 <Grid item md={12} sm={12} xs={12}>
@@ -527,6 +612,8 @@ const Staff = () => {
                     label="Middle Name"
                     onChange={handleChangeValue}
                     name="lastName"
+                    error={!!validateError.lastName}
+                    helperText={validateError.lastName}
                   />
                 </Grid>
                 <Grid item md={12} sm={12} xs={12}>
@@ -540,6 +627,7 @@ const Staff = () => {
                     name="middleName"
                   />
                 </Grid>
+
                 <Grid item md={6} sm={12} xs={12}>
                   <TextField
                     fullWidth
@@ -557,6 +645,7 @@ const Staff = () => {
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
+
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
@@ -605,6 +694,8 @@ const Staff = () => {
                     label="Position"
                     onChange={handleChangeValue}
                     name="position"
+                    error={!!validateError.position}
+                    helperText={validateError.position}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -638,6 +729,8 @@ const Staff = () => {
                     label="Phone Number"
                     onChange={handleChangeValue}
                     name="phone"
+                    error={!!validateError.phone}
+                    helperText={validateError.phone}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -653,6 +746,8 @@ const Staff = () => {
                     label="Aadhaar Number"
                     onChange={handleChangeValue}
                     name="aadhaarNo"
+                    error={!!validateError.aadhaarNo}
+                    helperText={validateError.aadhaarNo}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -671,6 +766,8 @@ const Staff = () => {
                     label="Pancard Number"
                     onChange={handleChangeValue}
                     name="pancardNo"
+                    error={!!validateError.pancardNo}
+                    helperText={validateError.pancardNo}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -686,6 +783,8 @@ const Staff = () => {
                     label="Bank Name"
                     onChange={handleChangeValue}
                     name="bankName"
+                    error={!!validateError.bankName}
+                    helperText={validateError.bankName}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -704,6 +803,8 @@ const Staff = () => {
                     label="Account Number"
                     onChange={handleChangeValue}
                     name="accountNo"
+                    error={!!validateError.accountNo}
+                    helperText={validateError.accountNo}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -719,6 +820,8 @@ const Staff = () => {
                     label="Ifsc Code"
                     onChange={handleChangeValue}
                     name="ifscCode"
+                    error={!!validateError.ifscCode}
+                    helperText={validateError.ifscCode}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -737,6 +840,8 @@ const Staff = () => {
                     label="Salary"
                     onChange={handleChangeValue}
                     name="salary"
+                    error={!!validateError.salary}
+                    helperText={validateError.salary}
                   />
                 </Grid>
                 <Grid item md={12} sm={12} xs={12}>
@@ -776,7 +881,7 @@ const Staff = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* End Employees Dialog */}
+      {/* End staff Dialog */}
 
       {/* start delete staff data */}
       <Dialog open={deleteStaffOpen} onClose={() => setDeleteStaffOpen(false)}>
@@ -815,25 +920,85 @@ const Staff = () => {
         onClose={() => setEditStaff(false)}
       >
         <DialogTitle>
-          <Typography sx={{ fontSize: "20px" }}>Edit Transaction</Typography>
+          <Typography sx={{ fontSize: "20px" }}>Edit Staff</Typography>
         </DialogTitle>
         <Divider sx={{ marginY: "2px", color: "black" }} />
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12}>
-                <TextField
-                  fullWidth
-                  placeholder="Staff Name"
-                  label="Staff Name"
-                  onChange={handleChangeValue}
-                  value={`${editToStaff?.firstName} ${editToStaff?.lastName}`}
-                />
-              </Grid>
+              <Grid container display="flex" justifyContent="space-between">
+                <Grid item md={12}>
+                  <TextField
+                    sx={{ width: "100%" }}
+                    placeholder="First Name"
+                    variant="outlined"
+                    label="First Name"
+                    value={editToStaff?.firstName || ""}
+                    name="firstName"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={12}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Middle Name"
+                    variant="outlined"
+                    label="Middle Name"
+                    value={editToStaff?.middleName || ""}
+                    name="middleName"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={12}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Last Name"
+                    variant="outlined"
+                    label="Last Name"
+                    value={editToStaff?.lastName || ""}
+                    name="lastName"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={12} mt="4px">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DatePicker"]}>
+                      <DatePicker
+                        sx={{ width: "100%" }}
+                        label="Join Date"
+                        name="joinDate"
+                        value={moment(editToStaff?.joinDate, "YYYY-MM-DD")}
+                        onChange={(newDate) =>
+                          handleEditInputChange({
+                            target: {
+                              name: "joinDate",
+                              value: newDate
+                                ? newDate.format("YYYY-MM-DD")
+                                : "",
+                            },
+                          })
+                        }
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item md={6}>
+          
               <Grid display="contents" mt={2}>
                 <Grid md={6}>
+
                   <TextField
                     sx={{ mt: "12px", width: "96%" }}
+                    placeholder="Gender"
+                    label="Gender"
+                    value={editToStaff?.gender || ""}
+                    name="gender"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
                     placeholder="Position"
                     label="Position"
                     value={editToStaff?.position || ""}
@@ -841,7 +1006,17 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
-                <Grid md={6}>
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "96%" }}
+                    placeholder="Email ID"
+                    label="Email ID"
+                    value={editToStaff?.email || ""}
+                    name="email"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Phone Number"
@@ -851,6 +1026,59 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
+
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "96%" }}
+                    placeholder="Aadhaar Number"
+                    label="Aadhaar Number"
+                    value={editToStaff?.aadhaarNo || ""}
+                    name="aadhaarNo"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Pancard Number"
+                    label="Pancard Number"
+                    value={editToStaff?.pancardNo || ""}
+                    name="pancardNo"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "96%" }}
+                    placeholder="Bank Name"
+                    label="Bank Name"
+                    value={editToStaff?.bankName || ""}
+                    name="bankName"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Account Number"
+                    label="Account Number"
+                    value={editToStaff?.accountNo || ""}
+                    name="accountNo"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "96%" }}
+                    placeholder="Ifsc Code"
+                    label="Ifsc Code"
+                    value={editToStaff?.ifscCode || ""}
+                    name="ifscCode"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6}>
+
               </Grid>
               <Grid display="contents" mt={2}>
                 <Grid md={6}>
@@ -868,6 +1096,7 @@ const Staff = () => {
                   </Box>
                 </Grid>
                 <Grid md={6}>
+
                   <TextField
                     sx={{ mt: "12px", width: "100%" }}
                     placeholder="Salary"
@@ -877,19 +1106,38 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
+                <Grid item md={12}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Address"
+                    label="Address"
+                    value={editToStaff?.address || ""}
+                    name="address"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={12}>
+                  <TextField
+                    sx={{ mt: "12px", width: "100%" }}
+                    placeholder="Description"
+                    label="Description"
+                    value={editToStaff?.description || ""}
+                    name="description"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Box>
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
-          <Button onClick={handleStaffEdit} sx={saveButton} variant="contained">
+          <Button onClick={handleEditStaff} sx={saveButton} variant="contained">
             Save
           </Button>
           <Button
             sx={cancelButton}
             variant="outlined"
             onClick={() => {
-              // setEditSalary(null);
               setEditStaff(false);
             }}
           >

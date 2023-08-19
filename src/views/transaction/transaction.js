@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -9,10 +10,11 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  FormControl,
   Grid,
-  IconButton,
+  InputLabel,
   MenuItem,
-  Popover,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -23,12 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 import MainCard from "ui-component/cards/MainCard";
-import {
-  IconCirclePlus,
-  IconDotsVertical,
-  IconPencil,
-  IconTrash,
-} from "@tabler/icons";
+import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
@@ -90,18 +87,19 @@ const cancelButton = {
 };
 
 const Transaction = () => {
-  const [open, setOpen] = useState(null);
   const [transaction, setTransaction] = useState(false);
   const [transactionOpen, setTransactionOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [editTransaction, setEditTransaction] = useState(false);
   const [editToTransaction, setEditToTransaction] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [staffList, setStaffList] = useState([]);
+  const [validateError, setValidateError] = useState({});
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
 
   const token = localStorage.getItem("token");
-
   const [transactionsData, setTransactionsData] = useState({
     staffId: "",
     transactionType: "",
@@ -116,6 +114,15 @@ const Transaction = () => {
     });
   };
 
+
+  const handleSelectChangeValue = (event, newValue) => {
+    setTransactionsData({
+      ...transactionsData,
+      staffId: newValue ? newValue._id : "",
+    });
+  };
+  // console.log(transactionsData);
+
   const handleDatePicker = (ele) => {
     const currentDate = new Date(ele);
     const dateString = currentDate.toLocaleDateString("en-US");
@@ -125,29 +132,60 @@ const Transaction = () => {
       transactionDate: formattedDate,
     }));
   };
+  const validateFields = () => {
+    const errors = {};
+    if (!transactionsData.amount) {
+      errors.amount = "Amount is required";
+    }
+
+    setValidateError(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSaveData = (event) => {
+    if (validateFields()) {
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: `${baseUrl.url}/api/transaction`,
+        headers: {
+          token: token,
+          "Content-Type": "application/json",
+        },
+        data: transactionsData,
+      };
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  useEffect(() => {
     let config = {
-      method: "post",
+      method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/transaction`,
+      url: `${baseUrl.url}/api/staff/list`,
       headers: {
         token: token,
         "Content-Type": "application/json",
       },
-      data: transactionsData,
     };
-
     axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
-        window.location.reload();
+        setStaffList(response.data.data);
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
-  };
+  }, []);
 
   const [transactionList, setTransactionList] = useState([]);
 
@@ -161,10 +199,10 @@ const Transaction = () => {
         "Content-Type": "application/json",
       },
     };
-
     axios
       .request(config)
       .then((response) => {
+
         setTransactionList(response.data.data);
         setIsLoading(false);
       })
@@ -212,7 +250,6 @@ const Transaction = () => {
           "Content-Type": "application/json",
         },
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -230,7 +267,7 @@ const Transaction = () => {
     setTransactionOpen(true);
   };
 
-  const handleTransaction = (staffId) => {
+  const handleEditTransaction = () => {
     if (editToTransaction) {
       let config = {
         method: "put",
@@ -242,7 +279,6 @@ const Transaction = () => {
         },
         data: editToTransaction,
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -257,6 +293,7 @@ const Transaction = () => {
 
   const handleEditInputChange = (event) => {
     const { name, value } = event.target;
+    console.log(event.target);
     setEditToTransaction((prevEditSalary) => ({
       ...prevEditSalary,
       [name]: value,
@@ -266,6 +303,12 @@ const Transaction = () => {
   const handleEditClick = (item) => {
     setEditToTransaction(item);
     setEditTransaction(true);
+  };
+
+  const [age, setAge] = React.useState("");
+
+  const handleChange = (event) => {
+    setAge(event.target.value);
   };
 
   return (
@@ -309,10 +352,60 @@ const Transaction = () => {
             </Grid>
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+
+          <Box display="flex" justifyContent="space-between">
+            <SearchSection />
+            <FormControl
+              sx={{
+                width: "340px",
+                "@media (max-width: 1200px)": {
+                  marginX: "20px",
+                  width: "240px",
+                },
+              }}
+            >
+              <InputLabel id="demo-simple-select-label">Month</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={age}
+                label="Month"
+                onChange={handleChange}
+              >
+                <MenuItem value={10}>Ten</MenuItem>
+                <MenuItem value={20}>Twenty</MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl
+              sx={{
+                width: "340px",
+                "@media (max-width: 1200px)": {
+                  marginX: "20px",
+                  width: "230px",
+                },
+              }}
+            >
+              <InputLabel id="demo-simple-select-label">Year</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={age}
+                label="Year"
+                onChange={handleChange}
+              >
+                <MenuItem value={10}>Ten</MenuItem>
+                <MenuItem value={20}>Twenty</MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
           <SearchSection
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
           />
+
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -373,7 +466,7 @@ const Transaction = () => {
         </MainCard>
       )}
 
-      {/* start Transaction dialog */}
+      {/* start Add Transaction Dialog */}
       <Dialog
         open={transaction}
         maxWidth="sm"
@@ -387,16 +480,35 @@ const Transaction = () => {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12} sm={12} xs={12}>
-                <TextField
-                  fullWidth
-                  placeholder="Staff Id"
-                  label="Staff ID"
-                  onChange={handleChangeValue}
-                  name="staffId"
+
+              <Grid md={12}>
+                <Autocomplete
+                  disablePortal
+                  options={staffList}
+                  getOptionLabel={(staff) =>
+                    `${staff.firstName} ${staff.lastName}`
+                  }
+                  getOptionSelected={(option, value) =>
+                    option._id === value._id
+                  }
+                  value={
+                    staffList.find(
+                      (staff) => staff._id === transactionsData.staffId
+                    ) || null
+                  }
+                  onChange={(event, newValue) =>
+                    handleSelectChangeValue(event, newValue)
+                  }
+                  sx={{ width: "100%" }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Staff Name" name="staffId" />
+                  )}
                 />
               </Grid>
+              <Grid md={12} mt="4px">
+
               <Grid md={12} sm={12} xs={12}>
+
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
@@ -432,6 +544,8 @@ const Transaction = () => {
                     label="Amount"
                     onChange={handleChangeValue}
                     name="amount"
+                    error={!!validateError.amount}
+                    helperText={validateError.amount}
                   />
                 </Grid>
               </Grid>
@@ -460,7 +574,7 @@ const Transaction = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* End Transaction dialog */}
+      {/* End Add Transaction Dialog */}
 
       {/* start transaction delete data */}
       <Dialog open={transactionOpen} onClose={() => setTransactionOpen(false)}>
@@ -526,17 +640,29 @@ const Transaction = () => {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
+
                 <Grid md={6} sm={12} xs={12}>
+
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Transaction Date"
-                          // value={editSalary?.date || null}
-                          // onChange={(newDate) =>
-                          //   handleEditDatePicker("date", newDate)
-                          // }
+                          value={moment(
+                            editToTransaction?.transactionDate,
+                            "YYYY-MM-DD"
+                          )}
+                          onChange={(newDate) =>
+                            handleEditInputChange({
+                              target: {
+                                name: "transactionDate",
+                                value: newDate
+                                  ? newDate.format("YYYY-MM-DD")
+                                  : "",
+                              },
+                            })
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -559,7 +685,7 @@ const Transaction = () => {
         </DialogContent>
         <DialogActions sx={{ display: "flex" }}>
           <Button
-            onClick={handleTransaction}
+            onClick={handleEditTransaction}
             sx={saveButton}
             variant="contained"
           >
@@ -569,7 +695,7 @@ const Transaction = () => {
             sx={cancelButton}
             variant="outlined"
             onClick={() => {
-              // setEditSalary(null);
+              setEditTransaction(null);
               setEditTransaction(false);
             }}
           >

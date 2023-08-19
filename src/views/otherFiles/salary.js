@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -82,6 +83,7 @@ function Salary(props) {
   const [salaryOpen, setSalaryOpen] = useState(false);
   const token = localStorage.getItem("token");
   const [salaryList, setSalaryList] = useState([]);
+  const [staffList, setStaffList] = useState([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [salaryToDelete, setSalaryToDelete] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -90,9 +92,7 @@ function Salary(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffSalary, setStaffSalary] = useState({
-    firstName: "",
-    staffId: "",
-    date: "",
+    staffId: null,
     salary: "",
     note: "",
   });
@@ -109,21 +109,34 @@ function Salary(props) {
     setStaffSalary({ ...staffSalary, [ele.target.name]: ele.target.value });
   };
 
-  // const handleDatePicker = (type, newDate) => {
-  //   const currentDate = new Date(newDate);
-  //   const dateString = currentDate.toLocaleDateString("en-US");
-  //   const formattedDate = moment(dateString).format("DD-MM-YYYY");
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/list`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        setStaffList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
-  //   setStaffSalary((prevState) => ({
-  //     ...prevState,
-  //     [type]: formattedDate,
-  //   }));
-  // };
-  const handleDatePicker = (type, newDate) => {
-    const currentDate = new Date(newDate);
-    setEditSalary((prevState) => ({
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setStaffSalary((prevState) => ({
       ...prevState,
-      [type]: currentDate,
+      date: formattedDate,
     }));
   };
 
@@ -181,11 +194,12 @@ function Salary(props) {
       data: staffSalary,
     };
     setSalaryOpen(false);
-
     axios
       .request(config)
       .then((response) => {
-        console.log(response.data);
+        console.log(JSON.stringify(response.data));
+        window.location.reload();
+
       })
       .catch((error) => {
         console.log(error);
@@ -203,7 +217,6 @@ function Salary(props) {
           "Content-Type": "application/json",
         },
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -245,6 +258,14 @@ function Salary(props) {
           console.log(error);
         });
     }
+  };
+
+  console.log(editSalary);
+  const handleSelectChangeValue = (event, newValue) => {
+    setStaffSalary({
+      ...staffSalary,
+      staffId: newValue ? newValue._id : null,
+    });
   };
 
   const handleEditClick = (item) => {
@@ -355,9 +376,7 @@ function Salary(props) {
                             </TableCell>
                             <TableCell align="center">{item.salary}</TableCell>
                             <TableCell align="center">
-                              {new Date(item.date).getDate()}/
-                              {new Date(item.date).getMonth()}/
-                              {new Date(item.date).getFullYear()}
+                              {new Date(item.date).toLocaleDateString("en-us")}
                             </TableCell>
                             <TableCell align="center">{item.note}</TableCell>
                             <TableCell align="center">
@@ -387,7 +406,7 @@ function Salary(props) {
           </Grid>
         </MainCard>
       )}
-      {/* start salary dialog */}
+      {/* start Add salary dialog */}
       <Dialog
         open={salaryOpen}
         maxWidth="sm"
@@ -401,19 +420,35 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
-              <Grid md={12} sm={12} xs={12} mt="12px">
-                <TextField
+
+              <Grid md={12}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={staffList}
+                  getOptionLabel={(staff) =>
+                    `${staff.firstName} ${staff.lastName}`
+                  }
+                  getOptionSelected={(option, value) =>
+                    option._id === value._id
+                  }
+                  value={
+                    staffList.find(
+                      (staff) => staff._id === staffSalary.staffId
+                    ) || null
+                  }
+                  onChange={(event, newValue) =>
+                    handleSelectChangeValue(event, newValue)
+                  }
                   sx={{ width: "100%" }}
-                  placeholder="Staff Id"
-                  label="Staff ID"
-                  name="staffId"
-                  onChange={addSalary}
-                  error={!!validationErrors.staffId}
-                  helperText={validationErrors.staffId}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Staff Name" name="staffId" />
+                  )}
                 />
               </Grid>
-              <Grid display="contents" mt={2}>
+             <Grid display="contents" mt={2}>
                 <Grid md={6} sm={12} xs={12}>
+
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -427,9 +462,7 @@ function Salary(props) {
                             },
                           }}
                           label="Salary Date"
-                          onChange={(newDate) =>
-                            handleDatePicker("date", newDate)
-                          }
+                          onChange={handleDatePicker}
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -473,6 +506,7 @@ function Salary(props) {
         </DialogActions>
       </Dialog>
       {/* end salary dialog */}
+
       {/* delete staff salary data */}
       <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
         <DialogTitle sx={{ fontSize: "20px" }}>{"Delete"}</DialogTitle>
@@ -519,7 +553,7 @@ function Salary(props) {
                   sx={{ width: "100%" }}
                   placeholder="Staff Name"
                   label="Staff Name"
-                  value={`${editSalary?.staffId.firstName} ${editSalary?.staffId.lastName}`}
+                  value={`${editSalary?.staffId?.firstName || ""} ${editSalary?.staffId?.lastName || ""}`}
                   onChange={addSalary}
                 />
               </Grid>
@@ -537,10 +571,15 @@ function Salary(props) {
                             },
                           }}
                           label="Salary Date"
-                          // value={editSalary?.date || null}
-                          // onChange={(newDate) =>
-                          //   handleEditDatePicker("date", newDate)
-                          // }
+                          value={moment(editSalary?.date, 'YYYY-MM-DD')}
+                          onChange={(newDate) =>
+                            handleEditInputChange({
+                              target: {
+                                name: 'date',
+                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
+                              },
+                            })
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>

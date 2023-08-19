@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment";
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -90,11 +91,7 @@ function Leaves(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [staffLeave, setStaffLeave] = useState({
-    firstName: "",
-    lastName: "",
-    staffId: "",
-    startDate: "",
-    endDate: "",
+    staffId: null,
     reason: "",
   });
 
@@ -102,10 +99,6 @@ function Leaves(props) {
     staffId: "",
     
   });
-
-  // const addLeave = (ele) => {
-  //   setStaffLeave({ ...staffLeave, [ele.target.name]: ele.target.value });
-  // };
   const addLeave = (event) => {
     const { name, value } = event.target;
     setStaffLeave((prevState) => ({
@@ -114,26 +107,41 @@ function Leaves(props) {
     }));
   };
 
-  const handleDatePicker = (ele) => {
+  const handleDatePicker = (type, ele) => {
     const currentDate = new Date(ele);
     const dateString = currentDate.toLocaleDateString("en-US");
     const formattedDate = moment(dateString).format("DD-MMM-YYYY");
-    staffLeave((prevState) => ({
+    setStaffLeave((prevState) => ({
       ...prevState,
-      joinDate: formattedDate,
+      [type]: formattedDate,
     }));
   };
-  // const handleDatePicker = (type, newDate) => {
-  //   const currentDate = new Date(newDate);
-  //   setStaffLeave((prevState) => ({
-  //     ...prevState,
-  //     [type]: currentDate,
-  //   }));
-  // };
 
-  const [staffLeaveList, setStaffLeaveList] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  useEffect(() => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${baseUrl.url}/api/staff/list`,
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        setStaffList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
-  const getLeaveList = () => {
+ const [staffLeaveList, setStaffLeaveList] = useState([]);
+  useEffect(() => {
+    const getLeaveList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -167,7 +175,6 @@ function Leaves(props) {
       data: staffLeave,
     };
     setLeaveOpen(false);
-
     axios
       .request(config)
       .then((response) => {
@@ -189,7 +196,6 @@ function Leaves(props) {
           "Content-Type": "application/json",
         },
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -219,11 +225,15 @@ function Leaves(props) {
         },
         data: editLeave,
       };
-
       axios
         .request(config)
         .then((response) => {
-          console.log(response.data);
+ console.log(JSON.stringify(response.data));
+          const updatedList = staffLeaveList.map((item) =>
+            item._id === editLeave._id ? editLeave : item
+          );
+          setStaffLeaveList(updatedList);
+          window.location.reload();
           setEditOpen(false);
         })
         .catch((error) => {
@@ -232,15 +242,24 @@ function Leaves(props) {
     }
   };
 
+  const handleSelectChangeValue = (event, newValue) => {
+    setStaffLeave({
+      ...staffLeave,
+      staffId: newValue ? newValue._id : null,
+    });
+  };
+
   const handleEditClick = (item) => {
     setEditLeave(item);
     setEditOpen(true);
   };
 
-  const handleEditDatePicker = (type, newDate) => {
-    const formattedDate = moment(newDate).format("DD-MMM-YYYY");
-    setEditLeave((prevEditLeave) => ({
-      ...prevEditLeave,
+  const handleEditDatePicker = (type, ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setEditLeave((prevState) => ({
+      ...prevState,
       [type]: formattedDate,
     }));
   };
@@ -394,17 +413,38 @@ function Leaves(props) {
         <DialogContent>
           <Box>
             <Grid container>
+
+              <Grid md={12}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={staffList}
+                  getOptionLabel={(staff) =>
+                    `${staff.firstName} ${staff.lastName}`
+                  }
+                  getOptionSelected={(option, value) =>
+                    option._id === value._id
+                  }
+                  value={
+                    staffList.find(
+                      (staff) => staff._id === staffLeave.staffId
+                    ) || null
+                  }
+                  onChange={(event, newValue) =>
+                    handleSelectChangeValue(event, newValue)
+                  }
+
               <Grid md={12} sm={12} xs={12}>
                 <TextField
+
                   sx={{ width: "100%" }}
-                  label="Staff ID"
-                  placeholder="Staff Id"
-                  onChange={addLeave}
-                  name="staffId"
+                  renderInput={(params) => (
+                    <TextField {...params} label="Staff Name" name="staffId" />
+                  )}
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
+<Grid md={6} sm={12} xs={12}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
@@ -511,11 +551,13 @@ function Leaves(props) {
             <Grid container>
               <Grid item md={12} sm={12} xs={12}>
                 <TextField
-                  fullWidth
-                  label="Staff ID"
-                  placeholder="Staff Id"
+
+                  sx={{ width: "100%" }}
+                  label="Staff Name"
+                  placeholder="Staff Name"
+
                   value={
-                    editLeave
+                    editLeave && editLeave.staffId
                       ? `${editLeave.staffId.firstName} ${editLeave.staffId.lastName}`
                       : ""
                   }
@@ -537,6 +579,10 @@ function Leaves(props) {
                             },
                           }}
                           label=" Leave From Date"
+                          value={moment(editLeave?.startDate, 'YYYY-MM-DD')}
+                          onChange={(newDate) =>
+                            handleEditDatePicker("startDate", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -549,6 +595,10 @@ function Leaves(props) {
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
+                          value={moment(editLeave?.endDate, 'YYYY-MM-DD')}
+                          onChange={(newDate) =>
+                            handleEditDatePicker("endDate", newDate)
+                          }
                         />
                       </DemoContainer>
                     </LocalizationProvider>
