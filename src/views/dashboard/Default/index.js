@@ -52,7 +52,7 @@ const Dashboard = () => {
         setTotalEverageSalary(response.data.Data.averageSalary);
       })
       .catch((error) => {
-        if (error.response.data == "Invalid Token") {
+        if (error.response.data === "Invalid Token") {
           localStorage.clear();
           navigate = "/";
         } else {
