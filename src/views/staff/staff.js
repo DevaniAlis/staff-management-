@@ -83,12 +83,6 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
-const loaderSet = {
-  position: "absolute",
-  top: "60%",
-  left: "60%",
-};
-
 const IOSSwitch = styled((props) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
 ))(({ theme }) => ({
@@ -142,21 +136,16 @@ const IOSSwitch = styled((props) => (
 
 const Staff = () => {
   const token = localStorage.getItem("token");
-  const [open, setOpen] = useState(null);
   const [staff, setStaff] = useState(false);
   const [deleteStaffOpen, setDeleteStaffOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
   const [editStaff, setEditStaff] = useState(false);
   const [editToStaff, setEditToStaff] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
   const [validateError, setValidateError] = useState({});
-
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
-  const [editedJoinDate, setEditedJoinDate] = useState("");
-
   const [staffData, setStaffData] = useState({
     firstName: "",
     type: "",
@@ -180,7 +169,7 @@ const Staff = () => {
   const handleChangeValue = (event) => {
     setStaffData({ ...staffData, [event.target.name]: event.target.value });
   };
-  // console.log("staffData", staffData);
+
   const handleDatePicker = (ele) => {
     const currentDate = new Date(ele);
     const dateString = currentDate.toLocaleDateString("en-US");
@@ -276,10 +265,8 @@ const Staff = () => {
         });
     }
   };
-  // console.log("staff", staffData);
 
   const [staffDataList, setStaffDataList] = useState([]);
-
   const getStaffList = () => {
     let config = {
       method: "get",
@@ -293,7 +280,6 @@ const Staff = () => {
       .request(config)
       .then((response) => {
         setStaffDataList(response.data.data);
-        setEditedJoinDate(response.data.data.joinDate);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -364,7 +350,6 @@ const Staff = () => {
           "Content-Type": "application/json",
         },
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -394,7 +379,6 @@ const Staff = () => {
         },
         data: editToStaff,
       };
-
       axios
         .request(config)
         .then((response) => {
@@ -422,7 +406,6 @@ const Staff = () => {
     setEditToStaff(item);
     const formattedDate = moment(item.joinDate, "YYYY-MM-DD");
     console.log("Formatted Date:", formattedDate);
-    setEditedJoinDate(formattedDate);
     setEditStaff(true);
   };
 
@@ -496,11 +479,13 @@ const Staff = () => {
                               {`${item.firstName} ${item.lastName}`}
                             </TableCell>
                             <TableCell align="center">
-                              <Chip
-                                label={item.type}
-                                color="primary"
-                                variant="outlined"
-                              />
+                              {item.type && (
+                                <Chip
+                                  label={item.type}
+                                  color="primary"
+                                  variant="outlined"
+                                />
+                              )}
                             </TableCell>
                             <TableCell align="center">
                               {item.position}
@@ -508,9 +493,7 @@ const Staff = () => {
                             <TableCell align="center">{item.phone}</TableCell>
                             <TableCell align="center">{item.salary}</TableCell>
                             <TableCell align="center">
-                              {new Date(item.joinDate).toLocaleDateString(
-                                "en-us"
-                              )}
+                              {moment(item.joinDate).format("DD-MM-YYYY")}
                             </TableCell>
                             <TableCell align="center">
                               <FormControlLabel
@@ -604,7 +587,6 @@ const Staff = () => {
                     name="middleName"
                   />
                 </Grid>
-
                 <Grid item md={6} sm={12} xs={12}>
                   <TextField
                     fullWidth
@@ -621,13 +603,13 @@ const Staff = () => {
                     }}
                   />
                 </Grid>
-                <Grid item md={6} sm={12} xs={12}>
+                <Grid item md={6} sm={12} xs={12} mt="4px">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
                         sx={{
                           mt: "4px",
-                          marginLeft: "10px",
+                          marginLeft: "4px",
                           "@media (max-width: 900px)": {
                             marginLeft: 0,
                           },
@@ -936,7 +918,17 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
-                <Grid item md={12} mt="4px">
+                <Grid md={6}>
+                  <TextField
+                    sx={{ mt: "12px", width: "96%" }}
+                    placeholder="Staff Type"
+                    label="Staff Type"
+                    value={editToStaff?.type || ""}
+                    name="type"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6} mt="4px">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker

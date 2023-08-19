@@ -199,7 +199,6 @@ function Salary(props) {
       .then((response) => {
         console.log(JSON.stringify(response.data));
         window.location.reload();
-
       })
       .catch((error) => {
         console.log(error);
@@ -376,7 +375,7 @@ function Salary(props) {
                             </TableCell>
                             <TableCell align="center">{item.salary}</TableCell>
                             <TableCell align="center">
-                              {new Date(item.date).toLocaleDateString("en-us")}
+                              {moment(item.date).format("DD-MM-YYYY")}
                             </TableCell>
                             <TableCell align="center">{item.note}</TableCell>
                             <TableCell align="center">
@@ -420,7 +419,6 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
-
               <Grid md={12}>
                 <Autocomplete
                   disablePortal
@@ -446,9 +444,8 @@ function Salary(props) {
                   )}
                 />
               </Grid>
-             <Grid display="contents" mt={2}>
+              <Grid display="contents" mt={2}>
                 <Grid md={6} sm={12} xs={12}>
-
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -553,7 +550,9 @@ function Salary(props) {
                   sx={{ width: "100%" }}
                   placeholder="Staff Name"
                   label="Staff Name"
-                  value={`${editSalary?.staffId?.firstName || ""} ${editSalary?.staffId?.lastName || ""}`}
+                  value={`${editSalary?.staffId?.firstName || ""} ${
+                    editSalary?.staffId?.lastName || ""
+                  }`}
                   onChange={addSalary}
                 />
               </Grid>
@@ -571,12 +570,14 @@ function Salary(props) {
                             },
                           }}
                           label="Salary Date"
-                          value={moment(editSalary?.date, 'YYYY-MM-DD')}
+                          value={moment(editSalary?.date, "YYYY-MM-DD")}
                           onChange={(newDate) =>
                             handleEditInputChange({
                               target: {
-                                name: 'date',
-                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
+                                name: "date",
+                                value: newDate
+                                  ? newDate.format("YYYY-MM-DD")
+                                  : "",
                               },
                             })
                           }
