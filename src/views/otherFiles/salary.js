@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
+import dayjs from "dayjs";
 import {
   Autocomplete,
   Button,
@@ -421,7 +422,7 @@ function Salary(props) {
             <Grid container>
               <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
-                fullWidth
+                  fullWidth
                   disablePortal
                   id="combo-box-demo"
                   options={staffList}
@@ -445,16 +446,17 @@ function Salary(props) {
                 />
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
+                <Grid md={6} sm={12} xs={12} mt="4px">
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
                           fullWidth
                           sx={{
+                            width: "96%",
                             mt: "4px",
-                            marginRight: "10px",
                             "@media (max-width: 900px)": {
+                              width: "100%",
                               marginRight: 0,
                             },
                           }}
@@ -556,8 +558,8 @@ function Salary(props) {
                   onChange={addSalary}
                 />
               </Grid>
-              <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
+              <Grid display="contents">
+                <Grid md={6} sm={12} xs={12} mt="4px">
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -570,7 +572,9 @@ function Salary(props) {
                             },
                           }}
                           label="Salary Date"
-                          value={moment(editSalary?.date, "YYYY-MM-DD")}
+                          value={dayjs(
+                            moment(editSalary?.date).format("YYYY-MM-DD")
+                          )}
                           onChange={(newDate) =>
                             handleEditInputChange({
                               target: {

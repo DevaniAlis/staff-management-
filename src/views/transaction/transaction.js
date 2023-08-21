@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import moment from "moment";
+import dayjs from "dayjs";
 import {
   Autocomplete,
   Button,
@@ -10,11 +11,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -27,7 +24,6 @@ import {
 import MainCard from "ui-component/cards/MainCard";
 import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
-import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
@@ -36,7 +32,6 @@ import { useEffect } from "react";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
-import { SingleBed } from "@mui/icons-material";
 
 // ==============================|| Employee ||============================== //
 
@@ -94,6 +89,7 @@ const Transaction = () => {
   const [editTransaction, setEditTransaction] = useState(false);
   const [editToTransaction, setEditToTransaction] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
   const [validateError, setValidateError] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -116,22 +112,13 @@ const Transaction = () => {
   };
 
   const handleSelectChangeValue = (event, newValue) => {
-    setTransactionsData({
-      ...transactionsData,
+    setTransactionsData((prevData) => ({
+      ...prevData,
       staffId: newValue ? newValue._id : "",
-    });
+    }));
   };
   // console.log(transactionsData);
 
-  // const handleDatePicker = (ele) => {
-  //   const currentDate = new Date(ele);
-  //   const dateString = currentDate.toLocaleDateString("en-US");
-  //   const formattedDate = moment(dateString).format("DD-MMM-YYYY");
-  //   setTransactionsData((prevState) => ({
-  //     ...prevState,
-  //     transactionDate: formattedDate,
-  //   }));
-  // };
   const handleDatePicker = (selectedDate) => {
     if (selectedDate) {
       const formattedDate = moment(selectedDate).format("DD-MMM-YYYY");
@@ -198,8 +185,8 @@ const Transaction = () => {
   }, []);
 
   const [transactionList, setTransactionList] = useState([]);
-
   const getTransactionList = () => {
+    setTableLoading(true);
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -213,10 +200,11 @@ const Transaction = () => {
       .request(config)
       .then((response) => {
         setTransactionList(response.data.data);
-        setIsLoading(false);
+        setTableLoading(false);
       })
       .catch((error) => {
         console.log(error.response.data);
+        setTableLoading(false);
       });
   };
 
@@ -313,33 +301,33 @@ const Transaction = () => {
     setEditTransaction(true);
   };
 
-  useEffect(() => {
-    const filterData = () => {
-      const config = {
-        method: "get",
-        maxBodyLength: Infinity,
-        url: `${baseUrl.url}/api/transaction/list?staffId=${transactionsData.staffId}&month=${selectedMonth}&year=${selectedYear}`,
-        headers: {
-          token: token,
-          "Content-Type": "application/json",
-        },
-      };
+  // useEffect(() => {
+  //   const filterData = () => {
+  //     const config = {
+  //       method: "get",
+  //       maxBodyLength: Infinity,
+  //       url: `${baseUrl.url}/api/transaction/list?staffId=${transactionsData.staffId}&month=${selectedMonth}&year=${selectedYear}`,
+  //       headers: {
+  //         token: token,
+  //         "Content-Type": "application/json",
+  //       },
+  //     };
 
-      axios
-        .request(config)
-        .then((response) => {
-          setTransactionList(response.data.data);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.log(error.response.data);
-        });
-    };
+  //     axios
+  //       .request(config)
+  //       .then((response) => {
+  //         setTransactionList(response.data.data);
+  //         setIsLoading(false);
+  //       })
+  //       .catch((error) => {
+  //         console.log(error.response.data);
+  //       });
+  //   };
 
-    if (selectedMonth !== "" && selectedYear !== "") {
-      filterData();
-    }
-  }, [selectedMonth, selectedYear, transactionsData.staffId]);
+  //   if (selectedMonth !== "" && selectedYear !== "") {
+  //     filterData();
+  //   }
+  // }, [selectedMonth, selectedYear, transactionsData.staffId]);
 
   const months = [
     { value: "01", label: "January" },
@@ -357,12 +345,22 @@ const Transaction = () => {
   ];
 
   const currentYear = new Date().getFullYear();
-  const years = [
-    { value: "", label: "All Years" },
-    { value: currentYear - 2, label: `${currentYear - 2}` },
-    { value: currentYear - 1, label: `${currentYear - 1}` },
-    { value: currentYear, label: `${currentYear}` },
-  ];
+  // const years = [
+  //   { value: "", label: "All Years" },
+  //   { value: currentYear - 3, label: `${currentYear - 3}` },
+  //   { value: currentYear - 2, label: `${currentYear - 2}` },
+  //   { value: currentYear - 1, label: `${currentYear - 1}` },
+  //   { value: currentYear, label: `${currentYear}` },
+  // ];
+  const yearRange = 4;
+
+  const years = [];
+  for (let i = 0; i <= yearRange; i++) {
+    const year = currentYear - i;
+    years.push({ value: year, label: `${year}` });
+  }
+
+  console.log(years);
 
   return (
     <>
@@ -463,60 +461,80 @@ const Transaction = () => {
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="center">Staff Name</TableCell>
-                      <TableCell align="center">Transaction Type</TableCell>
-                      <TableCell align="center">Transaction Date</TableCell>
-                      <TableCell align="center">Amount</TableCell>
-                      <TableCell align="center">Action</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredStaffDataList.map((item) => {
-                      return (
-                        <>
-                          <TableRow key={item._id}>
-                            <TableCell align="center">
-                              {item.staffId
-                                ? `${item.staffId.firstName} ${item.staffId.lastName}`
-                                : ""}
-                            </TableCell>
-                            <TableCell align="center">
-                              {item.transactionType}
-                            </TableCell>
-                            <TableCell align="center">
-                              {/* {new Date(
-                                item.transactionDate
-                              ).toLocaleDateString("en-us")} */}
-                              {moment(item.transactionDate).format(
-                                "DD-MM-YYYY"
-                              )}
-                            </TableCell>
-                            <TableCell align="center">{item.amount}</TableCell>
-                            <TableCell align="center">
-                              <Button
-                                onClick={() => handleEditClick(item)}
-                                disableRipple
-                                sx={hoverEffect}
-                              >
-                                <IconPencil />
-                              </Button>
-                              <Button
-                                onClick={() => handleTransactionOpen(item._id)}
-                                disableRipple
-                                sx={hoverEffect}
-                              >
-                                <IconTrash style={{ color: "#e51e25" }} />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        </>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                {tableLoading ? (
+                  <Oval
+                    height={50}
+                    width={50}
+                    color="#673ab7"
+                    wrapperStyle={{
+                      position: "absolute",
+                      top: "52%",
+                      left: "55%",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                    visible={true}
+                    ariaLabel="oval-loading"
+                    secondaryColor="#673ab7"
+                    strokeWidth={2}
+                    strokeWidthSecondary={2}
+                  />
+                ) : (
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="center">Staff Name</TableCell>
+                        <TableCell align="center">Transaction Type</TableCell>
+                        <TableCell align="center">Transaction Date</TableCell>
+                        <TableCell align="center">Amount</TableCell>
+                        <TableCell align="center">Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredStaffDataList.map((item) => {
+                        return (
+                          <>
+                            <TableRow key={item._id}>
+                              <TableCell align="center">
+                                {item.staffId
+                                  ? `${item.staffId.firstName} ${item.staffId.lastName}`
+                                  : ""}
+                              </TableCell>
+                              <TableCell align="center">
+                                {item.transactionType}
+                              </TableCell>
+                              <TableCell align="center">
+                                {moment(item.transactionDate).format(
+                                  "DD-MM-YYYY"
+                                )}
+                              </TableCell>
+                              <TableCell align="center">
+                                {item.amount}
+                              </TableCell>
+                              <TableCell align="center">
+                                <Button
+                                  onClick={() => handleEditClick(item)}
+                                  disableRipple
+                                  sx={hoverEffect}
+                                >
+                                  <IconPencil />
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    handleTransactionOpen(item._id)
+                                  }
+                                  disableRipple
+                                  sx={hoverEffect}
+                                >
+                                  <IconTrash style={{ color: "#e51e25" }} />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          </>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
               </TableContainer>
             </Grid>
           </Grid>
@@ -562,7 +580,7 @@ const Transaction = () => {
                 />
               </Grid>
 
-              <Grid md={12} sm={12} xs={12}>
+              <Grid md={12} sm={12} xs={12} mt="3px">
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
@@ -693,17 +711,16 @@ const Transaction = () => {
                   onChange={handleEditInputChange}
                 />
               </Grid>
-              <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
+              <Grid display="contents">
+                <Grid md={6} sm={12} xs={12} mt="4px">
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
                           sx={{ width: "96%", mt: "4px" }}
                           label="Transaction Date"
-                          value={moment(
-                            editToTransaction?.transactionDate,
-                            "YYYY-MM-DD"
+                          value={dayjs(
+                            moment(editToTransaction?.transactionDate).format("YYYY-MM-DD")
                           )}
                           onChange={(newDate) =>
                             handleEditInputChange({

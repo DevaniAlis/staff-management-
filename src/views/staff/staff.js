@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment/moment";
+import dayjs from "dayjs";
 import {
   Button,
   Chip,
@@ -13,6 +14,9 @@ import {
   FormControl,
   FormControlLabel,
   Grid,
+  InputLabel,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -30,7 +34,6 @@ import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
 
@@ -147,11 +150,7 @@ const Staff = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
-  const [editedJoinDate, setEditedJoinDate] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
-  const [error, setError] = useState(false);
-  const [helperText, setHelperText] = useState("");
-
   const [staffData, setStaffData] = useState({
     firstName: "",
     type: "",
@@ -245,7 +244,6 @@ const Staff = () => {
     }
 
     setValidateError(errors);
-
     return Object.keys(errors).length === 0;
   };
 
@@ -610,39 +608,42 @@ const Staff = () => {
                     }}
                   />
                 </Grid>
-                  <Grid item md={6} sm={12} xs={12} mt="4px">
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                      
-                        sx={{
-                          mt: "12px",
-                          marginLeft: "10px",
-                          width: "96%",
-                          "@media (max-width: 900px)": {
-                            marginLeft: 0,
-                            width: "100%",
-                          },
-                        }}
-                        fullWidth
-                        label="Joining Date"
-                        onChange={handleDatePicker}
-                      />
-                    </LocalizationProvider>
-                  </Grid>
                 <Grid item md={6} sm={12} xs={12}>
-                  <TextField
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      sx={{
+                        mt: "12px",
+                        marginLeft: "10px",
+                        width: "96%",
+                        "@media (max-width: 900px)": {
+                          marginLeft: 0,
+                          width: "100%",
+                        },
+                      }}
+                      fullWidth
+                      label="Joining Date"
+                      onChange={handleDatePicker}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item md={6} sm={12} xs={12} mt="12px">
+                  <Box
                     sx={{
-                      mt: "12px",
+                      minWidth: 120,
                       "@media (max-width: 900px)": {
                         marginX: 0,
                       },
                     }}
-                    fullWidth
-                    placeholder="Gender"
-                    label="Gender"
-                    onChange={handleChangeValue}
-                    name="gender"
-                  />
+                  >
+                    <FormControl fullWidth>
+                      <InputLabel>Gender</InputLabel>
+                      <Select label="Gender" onChange={handleChangeValue}>
+                        <MenuItem value="male">Male</MenuItem>
+                        <MenuItem value="female">Female</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
                   <TextField
@@ -928,9 +929,16 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
-                <Grid md={6}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "12px", width: "96%" }}
+                    sx={{
+                      mt: "12px",
+                      width: "100%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
                     placeholder="Staff Type"
                     label="Staff Type"
                     value={editToStaff?.type || ""}
@@ -938,7 +946,7 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
-                <Grid item md={6} mt="4px">
+                <Grid item md={6}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       sx={{
@@ -953,7 +961,9 @@ const Staff = () => {
                       fullWidth
                       label="Join Date"
                       name="joinDate"
-                      value={moment(editToStaff?.joinDate, "YYYY-MM-DD")}
+                      value={dayjs(
+                        moment(editToStaff?.joinDate).format("YYYY-MM-DD")
+                      )}
                       onChange={(newDate) =>
                         handleEditInputChange({
                           target: {
@@ -966,22 +976,31 @@ const Staff = () => {
                   </LocalizationProvider>
                 </Grid>
               </Grid>
-              <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
-                  <TextField
+              <Grid display="contents">
+                <Grid md={6} sm={12} xs={12} mt="12px">
+                  <Box
                     sx={{
-                      mt: "12px",
+                      minWidth: 120,
                       "@media (max-width: 900px)": {
+                        width: "100%",
                         marginX: 0,
                       },
                     }}
-                    fullWidth
-                    placeholder="Gender"
-                    label="Gender"
-                    value={editToStaff?.gender || ""}
-                    name="gender"
-                    onChange={handleEditInputChange}
-                  />
+                  >
+                    <FormControl fullWidth>
+                      <InputLabel>Gender</InputLabel>
+                      <Select
+                        label="Gender"
+                        value={editToStaff ? editToStaff.gender : ""}
+                        onChange={handleEditInputChange}
+                        name="gender"
+                      >
+                        <MenuItem value="male">Male</MenuItem>
+                        <MenuItem value="female">Female</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
                   <TextField
