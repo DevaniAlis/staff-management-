@@ -31,6 +31,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
+import { useNavigate } from "react-router";
 const token = localStorage.getItem("token");
 
 const displayStyle = {
@@ -81,6 +82,7 @@ const hoverEffect = {
 };
 
 function Leaves(props) {
+  const navigate = useNavigate()
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
@@ -178,6 +180,7 @@ function Leaves(props) {
       .request(config)
       .then((response) => {
         console.log(response.data);
+        navigate(0)
       })
       .catch((error) => {
         console.log(error);
