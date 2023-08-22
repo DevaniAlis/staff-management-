@@ -67,7 +67,7 @@ const ProfileSection = () => {
   const navigate = useNavigate();
   const handleLogOut = () => {
     localStorage.clear()
-    navigate("/");
+    navigate(0);
   }
 
   return (

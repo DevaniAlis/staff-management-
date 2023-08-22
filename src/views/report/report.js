@@ -8,13 +8,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
-  OutlinedInput,
-  Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -35,22 +29,9 @@ import PrintProvider, { Print, NoPrint } from "react-easy-print";
 
 import baseUrl from "../baseUrl";
 import PrintIcon from "@mui/icons-material/Print";
+import { Oval } from "react-loader-spinner";
 
 const token = localStorage.getItem("token");
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 // css
 const displayStyle = {
@@ -59,21 +40,27 @@ const displayStyle = {
   justifyContent: "space-between",
 };
 
-const printDialog = {
-  padding: "8px 15px",
-};
+const months = [
+  { value: "1", label: "January" },
+  { value: "2", label: "February" },
+  { value: "3", label: "March" },
+  { value: "4", label: "April" },
+  { value: "5", label: "May" },
+  { value: "6", label: "June" },
+  { value: "7", label: "July" },
+  { value: "8", label: "August" },
+  { value: "9", label: "September" },
+  { value: "10", label: "October" },
+  { value: "11", label: "November" },
+  { value: "12", label: "December" },
+];
 
-const detailsReport = {
-  fontWeight: 500,
-  fontSize: "16px",
-};
-
-const CancelDialog = {
-  padding: "5px 15px",
-  border: "1px solid #1E88E5",
-  color: "#1E88E5",
-  textTransform: "none",
-};
+const currentYear = new Date().getFullYear();
+const years = [
+  { value: currentYear - 2, label: `${currentYear - 2}` },
+  { value: currentYear - 1, label: `${currentYear - 1}` },
+  { value: currentYear, label: `${currentYear}` },
+];
 
 const dummyReportData = {
   No: "1",
@@ -104,43 +91,22 @@ const dummyReportData = {
 function Report(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
+
   const [salarySlip , setSalarySlip] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // Set default current month
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Set default current year
+
   const [reportList, setReportList] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [staffId, setStaffId] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const currentMonth = new Date().getMonth();
-    setSelectedMonth(currentMonth);
-    setSelectedYear(new Date().getFullYear());
-    handleReportList(currentMonth);
-    if (searchQuery === "") {
-      setFilteredStaffDataList(reportList);
-    } else {
-      handleSearch();
-    }
-  }, [searchQuery, reportList]);
-
-  const handleSearch = () => {
-    const query = searchQuery.toLowerCase();
-
-    const filteredList = reportList.filter((item) => {
-      if (item.staffName === query) {
-        return item;
-      }
-      return false;
-    });
-    console.log(filteredList);
-    setFilteredStaffDataList(filteredList);
-  };
-
-  const handleReportList = (value) => {
-    console.log(value);
-    setSelectedMonth(value);
+  const handleReportList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/report/staffWise?month=${value + 1}`,
+      url: `${baseUrl.url}/api/report/staffWise?month=${selectedMonth}&year=${selectedYear}&staffId=${staffId}`,
       headers: {
         token: token,
       },
@@ -150,18 +116,62 @@ function Report(props) {
       .then((response) => {
         console.log(response.data);
         setReportList(response.data.data);
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
+
   const salary = () =>{
 
   }
 
+  useEffect(() => {
+    handleReportList();
+  }, [selectedMonth, selectedYear, reportList.staffId]);
+
+  useEffect(() => {
+    const debouncedSearch = setTimeout(() => {
+      if (searchQuery === "") {
+        setFilteredStaffDataList(reportList);
+      } else {
+        handleSearch();
+      }
+    }, 300);
+    return () => clearTimeout(debouncedSearch);
+  }, [searchQuery, reportList]);
+
+  useEffect(() => {
+    setIsLoading(true);
+  }, [selectedMonth, selectedYear]);
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const filteredList = reportList.filter((item) =>
+      item.staffName.toLowerCase().includes(query)
+    );
+    console.log("filteredList: ", filteredList);
+    setFilteredStaffDataList(filteredList);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClickClose = () => {
+    setOpen(false);
+  };
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleMonthChange = (newValue) => {
+    const selectedMonthValue = newValue ? parseInt(newValue.value) : null;
+
+    // Update the selected month state
+    setSelectedMonth(selectedMonthValue);
   };
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -169,6 +179,7 @@ function Report(props) {
   const handleButtonClick = () => {
     setDialogOpen(true);
   };
+
   return (
     <PrintProvider>
       <NoPrint>
@@ -197,36 +208,25 @@ function Report(props) {
               xs={12}
               sx={{
                 marginLeft: "150px",
-                "@media (max-width: 1200px)": {
+                "@media (max-width: 900px)": {
                   marginX: "20px",
                 },
               }}
             >
-              <FormControl
-                fullWidth
-                sx={{
-                  "@media (max-width: 1200px)": {
-                    marginX: "20px",
-                    marginTop: "14px",
-                  },
-                }}
-              >
-                <InputLabel id="demo-simple-select-label">Months</InputLabel>
-                <Select
-                  fullWidth
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={selectedMonth}
-                  label="Months"
-                  onChange={(e) => handleReportList(e.target.value)}
-                >
-                  {months.map((month, index) => (
-                    <MenuItem key={index} value={index}>
-                      {month}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                disablePortal
+                options={months}
+                getOptionLabel={(month) => month.label}
+                value={months.find((month) => month.value === selectedMonth)}
+                onChange={(event, newValue) =>
+                  // console.log(newValue)
+                  // setSelectedMonth(newValue)
+                  handleMonthChange(newValue)
+                }
+                renderInput={(params) => (
+                  <TextField {...params} label="Month" />
+                )}
+              />
             </Grid>
             <Grid
               md={3}
@@ -239,63 +239,73 @@ function Report(props) {
                 },
               }}
             >
-              <FormControl
-                fullWidth
-                sx={{
-                  "@media (max-width: 1200px)": {
-                    marginX: "20px",
-                    marginTop: "14px",
-                  },
-                }}
-              >
-                <InputLabel id="demo-simple-select-label">Year</InputLabel>
-                <Select
-                  fullWidth
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={selectedYear}
-                  label="Months"
-                  onChange={(e) => handleReportList(e.target.value)}
-                >
-                  <MenuItem value={2023}>2023</MenuItem>
-                  <MenuItem value={2022}>2022</MenuItem>
-                  <MenuItem value={2021}>2021</MenuItem>
-                </Select>
-              </FormControl>
+              <Autocomplete
+                disablePortal
+                options={years}
+                getOptionLabel={(year) => year.label}
+                value={years.find((year) => year.value === selectedYear)}
+                onChange={(event, newValue) =>
+                  setSelectedYear(newValue?.value || "")
+                }
+                renderInput={(params) => <TextField {...params} label="Year" />}
+              />
             </Grid>
           </Grid>
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell align="center">Staff Name</TableCell>
-                      <TableCell align="center">Salary</TableCell>
-                      <TableCell align="center">Transaction</TableCell>
-                      <TableCell align="center">Actual Salary</TableCell>
-                      <TableCell align="center">
-                        <Button variant="contained" onClick={handleButtonClick}>
-                          Contained
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    {filteredStaffDataList.map((item) => {
-                      return (
-                        <TableRow>
-                          <TableCell align="center">{item.staffName}</TableCell>
-                          <TableCell align="center">{item.salary}</TableCell>
-                          <TableCell align="center">
-                            {item.transactionTotal}
-                          </TableCell>
-                          <TableCell align="center">
-                            {item.actualSalary}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableHead>
-                </Table>
+ {isLoading ? (
+                  <Oval
+                    height={50}
+                    width={50}
+                    color="#673ab7"
+                    wrapperStyle={{
+                      position: "absolute",
+                      top: "52%",
+                      left: "55%",
+                    }}
+                    wrapperClass=""
+                    visible={true}
+                    ariaLabel="oval-loading"
+                    secondaryColor="#673ab7"
+                    strokeWidth={2}
+                    strokeWidthSecondary={2}
+                  />
+                ) : (
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="center">Staff Name</TableCell>
+                        <TableCell align="center">Salary</TableCell>
+                        <TableCell align="center">Transaction</TableCell>
+                        <TableCell align="center">Actual Salary</TableCell>
+                        <TableCell align="center">
+                          <Button variant="outlined" onClick={handleClickOpen}>
+                            Open alert dialog
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredStaffDataList.map((item) => {
+                        return (
+                          <TableRow>
+                            <TableCell align="center">
+                              {item.staffName}
+                            </TableCell>
+                            <TableCell align="center">{item.salary}</TableCell>
+                            <TableCell align="center">
+                              {item.transactionTotal}
+                            </TableCell>
+                            <TableCell align="center">
+                              {item.actualSalary}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
               </TableContainer>
             </Grid>
           </Grid>
@@ -309,6 +319,7 @@ function Report(props) {
           <DialogTitle fontSize="18px">Salary Slip</DialogTitle>
           <DialogContent>
             <Print single name="foo">
+
               <Box>
                 <Typography sx={detailsReport}>
                   No. : {dummyReportData.No}
@@ -423,6 +434,7 @@ function Report(props) {
                   <TableCell>{dummyReportData.balance}</TableCell>
                 </TableRow>
               </Box>
+
             </Print>
           </DialogContent>
           <DialogActions
