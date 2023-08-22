@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment";
+import dayjs from "dayjs";
 import {
   Autocomplete,
   Button,
@@ -417,7 +418,7 @@ function Leaves(props) {
             <Grid container>
               <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
-                fullWidth
+                  fullWidth
                   disablePortal
                   id="combo-box-demo"
                   options={staffList}
@@ -440,8 +441,8 @@ function Leaves(props) {
                   )}
                 />
               </Grid>
-              <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
+              <Grid display="contents">
+                <Grid md={6} sm={12} xs={12} mt="4px">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
@@ -461,12 +462,12 @@ function Leaves(props) {
                     </DemoContainer>
                   </LocalizationProvider>
                 </Grid>
-                <Grid md={6} sm={12} xs={12}>
+                <Grid md={6} sm={12} xs={12} mt="4px">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
                         fullWidth
-                        sx={{ mt: "4px" }}
+                        sx={{ width: "100%" }}
                         label="Leave to Date"
                         value={editLeave?.endDate || null}
                         onChange={(newDate) =>
@@ -560,8 +561,8 @@ function Leaves(props) {
                   onChange={addLeave}
                 />
               </Grid>
-              <Grid display="contents" mt={2}>
-                <Grid item md={6} sm={12} xs={12}>
+              <Grid display="contents">
+                <Grid item md={6} sm={12} xs={12} mt="4px">
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
@@ -574,12 +575,16 @@ function Leaves(props) {
                             },
                           }}
                           label=" Leave From Date"
-                          value={moment(editLeave?.startDate, "YYYY-MM-DD")}
+                          value={dayjs(
+                            moment(editLeave?.startDate).format("YYYY-MM-DD")
+                          )}
                           onChange={(newDate) =>
                             handleEditInputChange({
                               target: {
-                                name: 'startDate',
-                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
+                                name: "startDate",
+                                value: newDate
+                                  ? newDate.format("YYYY-MM-DD")
+                                  : "",
                               },
                             })
                           }
@@ -588,19 +593,23 @@ function Leaves(props) {
                     </LocalizationProvider>
                   </Box>
                 </Grid>
-                <Grid item md={6} sm={12} xs={12}>
+                <Grid item md={6} sm={12} xs={12} mt="4px">
                   <Box>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={["DatePicker"]}>
                         <DatePicker
                           sx={{ width: "100%", mt: "4px" }}
                           label="Leave to Date"
-                          value={moment(editLeave?.endDate, "YYYY-MM-DD")}
+                          value={dayjs(
+                            moment(editLeave?.endDate).format("YYYY-MM-DD")
+                          )}
                           onChange={(newDate) =>
                             handleEditInputChange({
                               target: {
-                                name: 'endDate',
-                                value: newDate ? newDate.format('YYYY-MM-DD') : ''
+                                name: "endDate",
+                                value: newDate
+                                  ? newDate.format("YYYY-MM-DD")
+                                  : "",
                               },
                             })
                           }
