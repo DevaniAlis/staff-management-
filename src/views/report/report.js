@@ -5,10 +5,10 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   Grid,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -91,11 +91,6 @@ const dummyReportData = {
 function Report(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
-
-  const [salarySlip , setSalarySlip] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // Set default current month
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Set default current year
-
   const [reportList, setReportList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -123,10 +118,7 @@ function Report(props) {
       });
   };
 
-
-  const salary = () =>{
-
-  }
+  const salary = () => {};
 
   useEffect(() => {
     handleReportList();
@@ -157,10 +149,7 @@ function Report(props) {
   };
 
   const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClickClose = () => {
-    setOpen(false);
+    setDialogOpen(true);
   };
 
   const handlePrint = () => {
@@ -175,10 +164,6 @@ function Report(props) {
   };
 
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleButtonClick = () => {
-    setDialogOpen(true);
-  };
 
   return (
     <PrintProvider>
@@ -208,8 +193,13 @@ function Report(props) {
               xs={12}
               sx={{
                 marginLeft: "150px",
+                "@media (max-width: 1200px)": {
+                  marginX: "20px",
+                  marginLeft: "105px",
+                },
                 "@media (max-width: 900px)": {
                   marginX: "20px",
+                  marginY: "18px",
                 },
               }}
             >
@@ -219,9 +209,7 @@ function Report(props) {
                 getOptionLabel={(month) => month.label}
                 value={months.find((month) => month.value === selectedMonth)}
                 onChange={(event, newValue) =>
-                  // console.log(newValue)
-                  // setSelectedMonth(newValue)
-                  handleMonthChange(newValue)
+                  setSelectedMonth(newValue?.value || "")
                 }
                 renderInput={(params) => (
                   <TextField {...params} label="Month" />
@@ -236,6 +224,10 @@ function Report(props) {
                 marginLeft: "20px",
                 "@media (max-width: 1200px)": {
                   marginX: "20px",
+                },
+                "@media (max-width: 1166px)": {
+                  marginX: "20px",
+                  marginY: "10px",
                 },
               }}
             >
@@ -254,7 +246,7 @@ function Report(props) {
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
- {isLoading ? (
+                {isLoading ? (
                   <Oval
                     height={50}
                     width={50}
@@ -319,18 +311,13 @@ function Report(props) {
           <DialogTitle fontSize="18px">Salary Slip</DialogTitle>
           <DialogContent>
             <Print single name="foo">
-
               <Box>
-                <Typography sx={detailsReport}>
-                  No. : {dummyReportData.No}
-                </Typography>
-                <Typography sx={detailsReport}>
-                  Name : {dummyReportData.staffName}
-                </Typography>
-                <Typography sx={detailsReport}>
+                <Typography>No. : {dummyReportData.No}</Typography>
+                <Typography>Name : {dummyReportData.staffName}</Typography>
+                <Typography>
                   Date Of Start Work : {dummyReportData.dateOfStartWork}
                 </Typography>
-                <Typography sx={detailsReport}>
+                <Typography>
                   End Of Work : {dummyReportData.endOfWork}
                 </Typography>
               </Box>
@@ -394,33 +381,31 @@ function Report(props) {
                     <Table size="small">
                       <TableBody>
                         <TableRow>
-                          <TableCell sx={detailsReport}>Days Worked</TableCell>
+                          <TableCell>Days Worked</TableCell>
                           <TableCell>{dummyReportData.daysWorked}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell sx={detailsReport}>Holidays</TableCell>
+                          <TableCell>Holidays</TableCell>
                           <TableCell>{dummyReportData.holidays}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell sx={detailsReport}>
-                            Net Days Worked
-                          </TableCell>
+                          <TableCell>Net Days Worked</TableCell>
                           <TableCell>{dummyReportData.netDaysWorked}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell sx={detailsReport}>Holidays</TableCell>
+                          <TableCell>Holidays</TableCell>
                           <TableCell>{dummyReportData.holidays2}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell sx={detailsReport}>Work</TableCell>
+                          <TableCell>Work</TableCell>
                           <TableCell>{dummyReportData.work}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell sx={detailsReport}>Transaction</TableCell>
+                          <TableCell>Transaction</TableCell>
                           <TableCell>{dummyReportData.transaction}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell sx={detailsReport}>Balance</TableCell>
+                          <TableCell>Balance</TableCell>
                           <TableCell>{dummyReportData.balance}</TableCell>
                         </TableRow>
                       </TableBody>
@@ -430,17 +415,16 @@ function Report(props) {
               </Grid>
               <Box>
                 <TableRow>
-                  <TableCell sx={detailsReport}>Final Amount</TableCell>
+                  <TableCell>Final Amount</TableCell>
                   <TableCell>{dummyReportData.balance}</TableCell>
                 </TableRow>
               </Box>
-
             </Print>
           </DialogContent>
           <DialogActions
             sx={{ pr: 2, pb: 2, display: "flex", alignItems: "center" }}
           >
-            <Button sx={printDialog} variant="contained" color="primary">
+            <Button variant="contained" color="primary">
               <PrintIcon sx={{ fontSize: "18px" }} />
               <Typography
                 onClick={handlePrint}
@@ -451,7 +435,6 @@ function Report(props) {
             </Button>
             <Button
               variant="outlined"
-              style={CancelDialog}
               onClick={() => setDialogOpen(false)}
               autoFocus
             >

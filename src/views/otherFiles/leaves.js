@@ -83,7 +83,7 @@ const hoverEffect = {
 };
 
 function Leaves(props) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
@@ -181,7 +181,7 @@ function Leaves(props) {
       .request(config)
       .then((response) => {
         console.log(response.data);
-        navigate(0)
+        navigate(0);
       })
       .catch((error) => {
         console.log(error);
@@ -289,65 +289,58 @@ function Leaves(props) {
 
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
-
-    const filteredList = staffLeaveList.filter((item) => {
-      const firstName = item.staffId.firstName.toLowerCase();
-      if (firstName === query) {
-        return item;
-      }
-      return false;
-    });
+    const filteredList = staffLeaveList.filter((item) => item.staffId.firstName.includes(query) );
     setFilteredStaffDataList(filteredList);
   };
 
   return (
     <>
-      {isLoading ? (
-        <Oval
-          height={50}
-          width={50}
-          color="#673ab7"
-          wrapperStyle={{
-            position: "absolute",
-            top: "52%",
-            left: "55%",
-          }}
-          wrapperClass=""
-          visible={true}
-          ariaLabel="oval-loading"
-          secondaryColor="#673ab7"
-          strokeWidth={2}
-          strokeWidthSecondary={2}
-        />
-      ) : (
-        <MainCard>
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <Box>
-                <Typography variant="h3" gutterBottom>
-                  Leave Details
-                </Typography>
-              </Box>
-              <Box>
-                <Button
-                  variant="contained"
-                  sx={addButtonStyle}
-                  startIcon={<IconCirclePlus />}
-                  onClick={() => setLeaveOpen(true)}
-                >
-                  Add Leave
-                </Button>
-              </Box>
-            </Grid>
+      <MainCard>
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <Box>
+              <Typography variant="h3" gutterBottom>
+                Leave Details
+              </Typography>
+            </Box>
+            <Box>
+              <Button
+                variant="contained"
+                sx={addButtonStyle}
+                startIcon={<IconCirclePlus />}
+                onClick={() => setLeaveOpen(true)}
+              >
+                Add Leave
+              </Button>
+            </Box>
           </Grid>
-          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+        </Grid>
+        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+        <SearchSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+              {isLoading ? (
+                <Oval
+                  height={50}
+                  width={50}
+                  color="#673ab7"
+                  wrapperStyle={{
+                    position: "absolute",
+                    top: "52%",
+                    left: "55%",
+                  }}
+                  wrapperClass=""
+                  visible={true}
+                  ariaLabel="oval-loading"
+                  secondaryColor="#673ab7"
+                  strokeWidth={2}
+                  strokeWidthSecondary={2}
+                />
+              ) : (
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -397,11 +390,12 @@ function Leaves(props) {
                     })}
                   </TableBody>
                 </Table>
-              </TableContainer>
-            </Grid>
+              )}
+            </TableContainer>
           </Grid>
-        </MainCard>
-      )}
+        </Grid>
+      </MainCard>
+
       {/* start add leave dialog */}
       <Dialog
         open={leaveOpen}

@@ -82,6 +82,16 @@ const cancelButton = {
   color: "#000000",
 };
 
+const autoPikerStyle = {
+  width: "96%",
+  marginX: "20px",
+  "@media (max-width: 900px)": {
+    marginX: "20px",
+    marginY: "6px",
+    width: "100%",
+  },
+};
+
 const Transaction = () => {
   const [transaction, setTransaction] = useState(false);
   const [transactionOpen, setTransactionOpen] = useState(false);
@@ -301,34 +311,6 @@ const Transaction = () => {
     setEditTransaction(true);
   };
 
-  // useEffect(() => {
-  //   const filterData = () => {
-  //     const config = {
-  //       method: "get",
-  //       maxBodyLength: Infinity,
-  //       url: `${baseUrl.url}/api/transaction/list?staffId=${transactionsData.staffId}&month=${selectedMonth}&year=${selectedYear}`,
-  //       headers: {
-  //         token: token,
-  //         "Content-Type": "application/json",
-  //       },
-  //     };
-
-  //     axios
-  //       .request(config)
-  //       .then((response) => {
-  //         setTransactionList(response.data.data);
-  //         setIsLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         console.log(error.response.data);
-  //       });
-  //   };
-
-  //   if (selectedMonth !== "" && selectedYear !== "") {
-  //     filterData();
-  //   }
-  // }, [selectedMonth, selectedYear, transactionsData.staffId]);
-
   const months = [
     { value: "01", label: "January" },
     { value: "02", label: "February" },
@@ -345,13 +327,6 @@ const Transaction = () => {
   ];
 
   const currentYear = new Date().getFullYear();
-  // const years = [
-  //   { value: "", label: "All Years" },
-  //   { value: currentYear - 3, label: `${currentYear - 3}` },
-  //   { value: currentYear - 2, label: `${currentYear - 2}` },
-  //   { value: currentYear - 1, label: `${currentYear - 1}` },
-  //   { value: currentYear, label: `${currentYear}` },
-  // ];
   const yearRange = 4;
 
   const years = [];
@@ -360,186 +335,167 @@ const Transaction = () => {
     years.push({ value: year, label: `${year}` });
   }
 
-  console.log(years);
-
   return (
     <>
-      {isLoading ? (
-        <Oval
-          height={50}
-          width={50}
-          color="#673ab7"
-          wrapperStyle={{
-            position: "absolute",
-            top: "52%",
-            left: "55%",
-          }}
-          wrapperClass=""
-          visible={true}
-          ariaLabel="oval-loading"
-          secondaryColor="#673ab7"
-          strokeWidth={2}
-          strokeWidthSecondary={2}
-        />
-      ) : (
-        <MainCard>
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <Box>
-                <Typography variant="h3" gutterBottom>
-                  Transaction
-                </Typography>
-              </Box>
-              <Box>
-                <Button
-                  variant="contained"
-                  onClick={() => setTransaction(true)}
-                  sx={addButtonStyle}
-                  startIcon={<IconCirclePlus />}
-                >
-                  Add Transaction
-                </Button>
-              </Box>
-            </Grid>
+      <MainCard>
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <Box>
+              <Typography variant="h3" gutterBottom>
+                Transaction
+              </Typography>
+            </Box>
+            <Box>
+              <Button
+                variant="contained"
+                onClick={() => setTransaction(true)}
+                sx={addButtonStyle}
+                startIcon={<IconCirclePlus />}
+              >
+                Add Transaction
+              </Button>
+            </Box>
           </Grid>
-          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+        </Grid>
+        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
 
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Autocomplete
-              disablePortal
-              options={staffList}
-              getOptionLabel={(staff) => `${staff.firstName} ${staff.lastName}`}
-              getOptionSelected={(option, value) => option._id === value._id}
-              value={
-                staffList.find(
-                  (staff) => staff._id === transactionsData.staffId
-                ) || null
-              }
-              onChange={(event, newValue) => {
-                setTransactionsData((prevData) => ({
-                  ...prevData,
-                  staffId: newValue ? newValue._id : "",
-                }));
-                setSelectedMonth("");
-                setSelectedYear("");
-              }}
-              sx={{ width: "400px" }}
-              renderInput={(params) => (
-                <TextField {...params} label="Staff Name" name="staffId" />
-              )}
-            />
-
-            <Autocomplete
-              sx={{ width: "350px" }}
-              disablePortal
-              options={months}
-              getOptionLabel={(month) => month.label}
-              value={months.find((month) => month.value === selectedMonth)}
-              onChange={(event, newValue) =>
-                setSelectedMonth(newValue?.value || "")
-              }
-              renderInput={(params) => <TextField {...params} label="Month" />}
-            />
-
-            <Autocomplete
-              sx={{ width: "350px" }}
-              disablePortal
-              options={years}
-              getOptionLabel={(year) => year.label}
-              value={years.find((year) => year.value === selectedYear)}
-              onChange={(event, newValue) =>
-                setSelectedYear(newValue?.value || "")
-              }
-              renderInput={(params) => <TextField {...params} label="Year" />}
-            />
-          </Box>
-
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
-                {tableLoading ? (
-                  <Oval
-                    height={50}
-                    width={50}
-                    color="#673ab7"
-                    wrapperStyle={{
-                      position: "absolute",
-                      top: "52%",
-                      left: "55%",
-                      transform: "translate(-50%, -50%)",
-                    }}
-                    visible={true}
-                    ariaLabel="oval-loading"
-                    secondaryColor="#673ab7"
-                    strokeWidth={2}
-                    strokeWidthSecondary={2}
-                  />
-                ) : (
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align="center">Staff Name</TableCell>
-                        <TableCell align="center">Transaction Type</TableCell>
-                        <TableCell align="center">Transaction Date</TableCell>
-                        <TableCell align="center">Amount</TableCell>
-                        <TableCell align="center">Action</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredStaffDataList.map((item) => {
-                        return (
-                          <>
-                            <TableRow key={item._id}>
-                              <TableCell align="center">
-                                {item.staffId
-                                  ? `${item.staffId.firstName} ${item.staffId.lastName}`
-                                  : ""}
-                              </TableCell>
-                              <TableCell align="center">
-                                {item.transactionType}
-                              </TableCell>
-                              <TableCell align="center">
-                                {moment(item.transactionDate).format(
-                                  "DD-MM-YYYY"
-                                )}
-                              </TableCell>
-                              <TableCell align="center">
-                                {item.amount}
-                              </TableCell>
-                              <TableCell align="center">
-                                <Button
-                                  onClick={() => handleEditClick(item)}
-                                  disableRipple
-                                  sx={hoverEffect}
-                                >
-                                  <IconPencil />
-                                </Button>
-                                <Button
-                                  onClick={() =>
-                                    handleTransactionOpen(item._id)
-                                  }
-                                  disableRipple
-                                  sx={hoverEffect}
-                                >
-                                  <IconTrash style={{ color: "#e51e25" }} />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          </>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Grid container>
+            <Grid md={4} sm={12} xs={12}>
+              <Autocomplete
+                disablePortal
+                options={staffList}
+                getOptionLabel={(staff) =>
+                  `${staff.firstName} ${staff.lastName}`
+                }
+                getOptionSelected={(option, value) => option._id === value._id}
+                value={
+                  staffList.find(
+                    (staff) => staff._id === transactionsData.staffId
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setTransactionsData((prevData) => ({
+                    ...prevData,
+                    staffId: newValue ? newValue._id : "",
+                  }));
+                  setSelectedMonth("");
+                  setSelectedYear("");
+                }}
+                sx={autoPikerStyle}
+                renderInput={(params) => (
+                  <TextField {...params} label="Staff Name" name="staffId" />
                 )}
-              </TableContainer>
+              />
+            </Grid>
+            <Grid md={4} sm={12} xs={12}>
+              <Autocomplete
+                sx={autoPikerStyle}
+                disablePortal
+                options={months}
+                getOptionLabel={(month) => month.label}
+                value={months.find((month) => month.value === selectedMonth)}
+                onChange={(event, newValue) =>
+                  setSelectedMonth(newValue?.value || "")
+                }
+                renderInput={(params) => (
+                  <TextField {...params} label="Month" />
+                )}
+              />
+            </Grid>
+            <Grid md={4} sm={12} xs={12}>
+              <Autocomplete
+                sx={autoPikerStyle}
+                disablePortal
+                options={years}
+                getOptionLabel={(year) => year.label}
+                value={years.find((year) => year.value === selectedYear)}
+                onChange={(event, newValue) =>
+                  setSelectedYear(newValue?.value || "")
+                }
+                renderInput={(params) => <TextField {...params} label="Year" />}
+              />
             </Grid>
           </Grid>
-        </MainCard>
-      )}
+        </Box>
+
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+              {tableLoading ? (
+                <Oval
+                  height={50}
+                  width={50}
+                  color="#673ab7"
+                  wrapperStyle={{
+                    position: "absolute",
+                    top: "52%",
+                    left: "55%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                  visible={true}
+                  ariaLabel="oval-loading"
+                  secondaryColor="#673ab7"
+                  strokeWidth={2}
+                  strokeWidthSecondary={2}
+                />
+              ) : (
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell align="center">Staff Name</TableCell>
+                      <TableCell align="center">Transaction Type</TableCell>
+                      <TableCell align="center">Transaction Date</TableCell>
+                      <TableCell align="center">Amount</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredStaffDataList.map((item) => {
+                      return (
+                        <>
+                          <TableRow key={item._id}>
+                            <TableCell align="center">
+                              {item.staffId
+                                ? `${item.staffId.firstName} ${item.staffId.lastName}`
+                                : ""}
+                            </TableCell>
+                            <TableCell align="center">
+                              {item.transactionType}
+                            </TableCell>
+                            <TableCell align="center">
+                              {moment(item.transactionDate).format(
+                                "DD-MM-YYYY"
+                              )}
+                            </TableCell>
+                            <TableCell align="center">{item.amount}</TableCell>
+                            <TableCell align="center">
+                              <Button
+                                onClick={() => handleEditClick(item)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconPencil />
+                              </Button>
+                              <Button
+                                onClick={() => handleTransactionOpen(item._id)}
+                                disableRipple
+                                sx={hoverEffect}
+                              >
+                                <IconTrash style={{ color: "#e51e25" }} />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </TableContainer>
+          </Grid>
+        </Grid>
+      </MainCard>
 
       {/* start Add Transaction Dialog */}
       <Dialog
@@ -720,7 +676,9 @@ const Transaction = () => {
                           sx={{ width: "96%", mt: "4px" }}
                           label="Transaction Date"
                           value={dayjs(
-                            moment(editToTransaction?.transactionDate).format("YYYY-MM-DD")
+                            moment(editToTransaction?.transactionDate).format(
+                              "YYYY-MM-DD"
+                            )
                           )}
                           onChange={(newDate) =>
                             handleEditInputChange({

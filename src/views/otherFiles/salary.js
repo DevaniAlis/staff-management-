@@ -296,64 +296,60 @@ function Salary(props) {
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
 
-    const filteredList = salaryList.filter((item) => {
-      const firstName = item.staffId.firstName.toLowerCase();
-      if (firstName === query) {
-        return item;
-      }
-      return false;
-    });
+    const filteredList = salaryList.filter((item) =>
+      item.staffId.firstName.toLowerCase().includes(query)
+    );
     setFilteredStaffDataList(filteredList);
   };
 
   return (
     <>
-      {isLoading ? (
-        <Oval
-          height={50}
-          width={50}
-          color="#673ab7"
-          wrapperStyle={{
-            position: "absolute",
-            top: "52%",
-            left: "55%",
-          }}
-          wrapperClass=""
-          visible={true}
-          ariaLabel="oval-loading"
-          secondaryColor="#673ab7"
-          strokeWidth={2}
-          strokeWidthSecondary={2}
-        />
-      ) : (
-        <MainCard>
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <Box>
-                <Typography variant="h3" gutterBottom>
-                  Salary Details
-                </Typography>
-              </Box>
-              <Box>
-                <Button
-                  variant="contained"
-                  onClick={() => setSalaryOpen(true)}
-                  sx={addButtonStyle}
-                  startIcon={<IconCirclePlus />}
-                >
-                  Add Salary
-                </Button>
-              </Box>
-            </Grid>
+      <MainCard>
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <Box>
+              <Typography variant="h3" gutterBottom>
+                Salary Details
+              </Typography>
+            </Box>
+            <Box>
+              <Button
+                variant="contained"
+                onClick={() => setSalaryOpen(true)}
+                sx={addButtonStyle}
+                startIcon={<IconCirclePlus />}
+              >
+                Add Salary
+              </Button>
+            </Box>
           </Grid>
-          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+        </Grid>
+        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+        <SearchSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+              {isLoading ? (
+                <Oval
+                  height={50}
+                  width={50}
+                  color="#673ab7"
+                  wrapperStyle={{
+                    position: "absolute",
+                    top: "52%",
+                    left: "55%",
+                  }}
+                  wrapperClass=""
+                  visible={true}
+                  ariaLabel="oval-loading"
+                  secondaryColor="#673ab7"
+                  strokeWidth={2}
+                  strokeWidthSecondary={2}
+                />
+              ) : (
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -401,11 +397,12 @@ function Salary(props) {
                     })}
                   </TableBody>
                 </Table>
-              </TableContainer>
-            </Grid>
+              )}
+            </TableContainer>
           </Grid>
-        </MainCard>
-      )}
+        </Grid>
+      </MainCard>
+
       {/* start Add salary dialog */}
       <Dialog
         open={salaryOpen}
