@@ -119,14 +119,14 @@ const Transaction = () => {
   };
   // console.log(transactionsData);
 
-  const handleDatePicker = (selectedDate) => {
-    if (selectedDate) {
-      const formattedDate = moment(selectedDate).format("DD-MMM-YYYY");
-      setTransactionsData((prevState) => ({
-        ...prevState,
-        transactionDate: formattedDate,
-      }));
-    }
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setTransactionsData((prevState) => ({
+      ...prevState,
+      transactionDate: formattedDate,
+    }));
   };
 
   const validateFields = () => {
@@ -301,34 +301,6 @@ const Transaction = () => {
     setEditTransaction(true);
   };
 
-  // useEffect(() => {
-  //   const filterData = () => {
-  //     const config = {
-  //       method: "get",
-  //       maxBodyLength: Infinity,
-  //       url: `${baseUrl.url}/api/transaction/list?staffId=${transactionsData.staffId}&month=${selectedMonth}&year=${selectedYear}`,
-  //       headers: {
-  //         token: token,
-  //         "Content-Type": "application/json",
-  //       },
-  //     };
-
-  //     axios
-  //       .request(config)
-  //       .then((response) => {
-  //         setTransactionList(response.data.data);
-  //         setIsLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         console.log(error.response.data);
-  //       });
-  //   };
-
-  //   if (selectedMonth !== "" && selectedYear !== "") {
-  //     filterData();
-  //   }
-  // }, [selectedMonth, selectedYear, transactionsData.staffId]);
-
   const months = [
     { value: "01", label: "January" },
     { value: "02", label: "February" },
@@ -359,8 +331,6 @@ const Transaction = () => {
     const year = currentYear - i;
     years.push({ value: year, label: `${year}` });
   }
-
-  console.log(years);
 
   return (
     <>
@@ -696,6 +666,7 @@ const Transaction = () => {
                   fullWidth
                   placeholder="Staff Name"
                   label="Staff Name"
+                  sx={{ pointerEvents: "none", cursor: "default" }}
                   onChange={handleChangeValue}
                   value={`${editToTransaction?.staffId.firstName} ${editToTransaction?.staffId.lastName}`}
                 />
@@ -720,7 +691,9 @@ const Transaction = () => {
                           sx={{ width: "96%", mt: "4px" }}
                           label="Transaction Date"
                           value={dayjs(
-                            moment(editToTransaction?.transactionDate).format("YYYY-MM-DD")
+                            moment(editToTransaction?.transactionDate).format(
+                              "YYYY-MM-DD"
+                            )
                           )}
                           onChange={(newDate) =>
                             handleEditInputChange({

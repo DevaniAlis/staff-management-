@@ -5,10 +5,10 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   Grid,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -18,15 +18,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import moment from "moment/moment";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { gridSpacing } from "store/constant";
 import MainCard from "ui-component/cards/MainCard";
 import axios from "axios";
-
 import PrintProvider, { Print, NoPrint } from "react-easy-print";
-
 import baseUrl from "../baseUrl";
 import PrintIcon from "@mui/icons-material/Print";
 import { Oval } from "react-loader-spinner";
@@ -38,6 +37,32 @@ const displayStyle = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
+};
+
+const printButton = {
+  "&:hover": {
+    backgroundColor: "#2196f3",
+  },
+  margin: "10px",
+  width: "100px",
+  marginLeft: "0px",
+  backgroundColor: "#2196f3",
+};
+
+const cancelButton = {
+  "&:hover": {
+    border: "1px solid #2196f3",
+    backgroundColor: "none",
+  },
+  margin: "10px",
+  width: "100px",
+  border: "1px solid #2196f3",
+  color: "#2196f3",
+};
+
+const detailsReport = {
+  fontWeight: 500,
+  fontSize: "14px",
 };
 
 const months = [
@@ -62,51 +87,23 @@ const years = [
   { value: currentYear, label: `${currentYear}` },
 ];
 
-const dummyReportData = {
-  No: "1",
-  staffName: "John Doe",
-  dateOfStartWork: "2023-01-01",
-  endOfWork: "2023-08-31",
-  leaveDetails: [
-    { date: "2023-08-01", days: 0 },
-    { date: "2023-08-01", days: 1 },
-    { date: "2023-08-01", days: 2 },
-    { date: "2023-08-01", days: 3 },
-  ],
-  transactionDetails: [
-    { date: "2023-08-01", totalUpdate: 2, monthlySalary: "3000" },
-    { date: "2023-08-01", totalUpdate: 3, monthlySalary: "3000" },
-    { date: "2023-08-01", totalUpdate: 4, monthlySalary: "3000" },
-    { date: "2023-08-01", totalUpdate: 5, monthlySalary: "3000" },
-  ],
-  daysWorked: 30,
-  holidays: 0,
-  netDaysWorked: 30,
-  holidays2: 8767,
-  work: 7500,
-  transaction: 7200,
-  balance: 9067,
-};
-
 function Report(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
-
-  const [salarySlip , setSalarySlip] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // Set default current month
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Set default current year
-
   const [reportList, setReportList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [staffId, setStaffId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [reportData, setReportData] = useState([]);
+  const [isLoadingStaffData, setIsLoadingStaffData] = useState(false);
 
   const handleReportList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/report/staffWise?month=${selectedMonth}&year=${selectedYear}&staffId=${staffId}`,
+      url: `${baseUrl.url}/api/report/staffWise?month=${selectedMonth}&year=${selectedYear}`,
       headers: {
         token: token,
       },
@@ -122,11 +119,6 @@ function Report(props) {
         console.log(error);
       });
   };
-
-
-  const salary = () =>{
-
-  }
 
   useEffect(() => {
     handleReportList();
@@ -156,13 +148,6 @@ function Report(props) {
     setFilteredStaffDataList(filteredList);
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClickClose = () => {
-    setOpen(false);
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -174,10 +159,29 @@ function Report(props) {
     setSelectedMonth(selectedMonthValue);
   };
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleButtonClick = () => {
+  const handleButtonClick = (staffId) => {
     setDialogOpen(true);
+    setIsLoadingStaffData(true);
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `https://staff-lending-be.onrender.com/api/salarySlip?staffId=${staffId}&month=${selectedMonth}&year=${selectedYear}`,
+      headers: {
+        token: token,
+      },
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data);
+        setReportData(response.data.data);
+        setIsLoadingStaffData(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoadingStaffData(false);
+      });
   };
 
   return (
@@ -254,7 +258,7 @@ function Report(props) {
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
- {isLoading ? (
+                {isLoading ? (
                   <Oval
                     height={50}
                     width={50}
@@ -279,17 +283,16 @@ function Report(props) {
                         <TableCell align="center">Salary</TableCell>
                         <TableCell align="center">Transaction</TableCell>
                         <TableCell align="center">Actual Salary</TableCell>
-                        <TableCell align="center">
-                          <Button variant="outlined" onClick={handleClickOpen}>
-                            Open alert dialog
-                          </Button>
-                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {filteredStaffDataList.map((item) => {
                         return (
-                          <TableRow>
+                          <TableRow
+                            key={item.staffId}
+                            onClick={() => handleButtonClick(item.staffId)}
+                            style={{ cursor: "pointer" }}
+                          >
                             <TableCell align="center">
                               {item.staffName}
                             </TableCell>
@@ -318,129 +321,200 @@ function Report(props) {
         >
           <DialogTitle fontSize="18px">Salary Slip</DialogTitle>
           <DialogContent>
-            <Print single name="foo">
-
-              <Box>
-                <Typography sx={detailsReport}>
-                  No. : {dummyReportData.No}
-                </Typography>
-                <Typography sx={detailsReport}>
-                  Name : {dummyReportData.staffName}
-                </Typography>
-                <Typography sx={detailsReport}>
-                  Date Of Start Work : {dummyReportData.dateOfStartWork}
-                </Typography>
-                <Typography sx={detailsReport}>
-                  End Of Work : {dummyReportData.endOfWork}
-                </Typography>
-              </Box>
-              <Divider sx={{ height: 1, bgcolor: "black", m: "20px" }} />
-              <Grid container spacing={4} pt={2}>
-                <Grid item md={3}>
-                  <Typography sx={{ fontWeight: 500, fontSize: "18px" }}>
-                    Leave Details
-                  </Typography>
-                  <TableContainer component={Paper}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Date</TableCell>
-                          <TableCell>Days</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {dummyReportData.leaveDetails.map((leave, index) => (
-                          <TableRow key={index}>
-                            <TableCell align="center">{leave.date}</TableCell>
-                            <TableCell align="center">{leave.days}</TableCell>
+            {isLoadingStaffData ? (
+              <Oval
+                height={50}
+                width={50}
+                color="#673ab7"
+                wrapperStyle={{
+                  position: "absolute",
+                  top: "30%",
+                  left: "50%",
+                }}
+                wrapperClass=""
+                visible={true}
+                ariaLabel="oval-loading"
+                secondaryColor="#673ab7"
+                strokeWidth={2}
+                strokeWidthSecondary={2}
+              />
+            ) : (
+              <Print single name="foo">
+                {reportData.map((item) => {
+                  return (
+                    <>
+                      <Box key={item.staffId}>
+                        <Box display="flex" alignItems="center">
+                          <Typography sx={detailsReport}>Name :</Typography>
+                          <Typography ml={1}>{item.staffName}</Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center">
+                          <Typography sx={detailsReport}>
+                            Date Of Start Work :
+                          </Typography>
+                          <Typography>
+                            {moment(item.dateOfStartWork).format("DD-MM-YYYY")}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center">
+                          <Typography sx={detailsReport}>
+                            End Of Work :
+                          </Typography>
+                          <Typography>
+                            {moment(item.dateOfEndWork).format("DD-MM-YYYY")}
+                          </Typography>
+                        </Box>
+                        <Divider
+                          sx={{ height: 1, bgcolor: "black", m: "20px" }}
+                        />
+                        <Grid container spacing={4} pt={2}>
+                          <Grid item md={3}>
+                            <Typography
+                              sx={{ fontWeight: 500, fontSize: "16px" }}
+                            >
+                              Leave Details
+                            </Typography>
+                            <TableContainer component={Paper}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Date</TableCell>
+                                    <TableCell>Days</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {item.leaveData.leaves.map((leave) => (
+                                    <TableRow key={leave.startDate}>
+                                      <TableCell>
+                                        {moment(leave.startDate).format(
+                                          "DD-MM-YYYY"
+                                        )}
+                                      </TableCell>
+                                      <TableCell>{leave.days}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Grid>
+                          <Grid item md={9}>
+                            <Typography
+                              sx={{ fontWeight: 500, fontSize: "16px" }}
+                            >
+                              Transaction Details
+                            </Typography>
+                            <TableContainer component={Paper}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Transaction Date</TableCell>
+                                    <TableCell>Amount</TableCell>
+                                    <TableCell>Monthly Salary</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {item.transactionData.transactions.map(
+                                    (transactions) => (
+                                      <TableRow
+                                        key={transactions.transactionDate}
+                                      >
+                                        <TableCell>
+                                          {moment(
+                                            transactions.transactionDate
+                                          ).format("DD-MM-YYYY")}
+                                        </TableCell>
+                                        <TableCell>
+                                          {transactions.amount}
+                                        </TableCell>
+                                        <TableCell>
+                                          {item.transactionData.total}
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Grid>
+                        </Grid>
+                        <Divider
+                          sx={{ height: 1, bgcolor: "black", m: "20px" }}
+                        />
+                        <Grid container justifyContent="end">
+                          <Grid md={4}>
+                            <TableContainer component={Paper}>
+                              <Table size="small">
+                                <TableBody>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Days Worked
+                                    </TableCell>
+                                    <TableCell>30</TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Leave
+                                    </TableCell>
+                                    <TableCell>
+                                      {item.leaveData.total}
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Net Days Worked
+                                    </TableCell>
+                                    <TableCell>{item.netDaysWorked}</TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Pending Amount
+                                    </TableCell>
+                                    <TableCell>0</TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Salary
+                                    </TableCell>
+                                    <TableCell>{item.salary}</TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Total Transaction Amount 
+                                    </TableCell>
+                                    <TableCell>
+                                      {item.transactionData.total}
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow>
+                                    <TableCell sx={detailsReport}>
+                                      Balance
+                                    </TableCell>
+                                    <TableCell>{item.actualSalary}</TableCell>
+                                  </TableRow>
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Grid>
+                        </Grid>
+                        <Box>
+                          <TableRow>
+                            <TableCell sx={detailsReport}>
+                              Final Amount :
+                            </TableCell>
+                            <TableCell>{item.actualSalary}</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-                <Grid item md={9}>
-                  <Typography sx={{ fontWeight: 500, fontSize: "18px" }}>
-                    Transaction Details
-                  </Typography>
-                  <TableContainer component={Paper}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Date of Update</TableCell>
-                          <TableCell>Total Update</TableCell>
-                          <TableCell>Monthly Salary</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {dummyReportData.transactionDetails.map(
-                          (transaction) => (
-                            <TableRow key={transaction.date}>
-                              <TableCell>{transaction.date}</TableCell>
-                              <TableCell>{transaction.totalUpdate}</TableCell>
-                              <TableCell>{transaction.monthlySalary}</TableCell>
-                            </TableRow>
-                          )
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-              </Grid>
-              <Divider sx={{ height: 1, bgcolor: "black", m: "20px" }} />
-              <Grid container justifyContent="end">
-                <Grid md={4}>
-                  <TableContainer component={Paper}>
-                    <Table size="small">
-                      <TableBody>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>Days Worked</TableCell>
-                          <TableCell>{dummyReportData.daysWorked}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>Holidays</TableCell>
-                          <TableCell>{dummyReportData.holidays}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>
-                            Net Days Worked
-                          </TableCell>
-                          <TableCell>{dummyReportData.netDaysWorked}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>Holidays</TableCell>
-                          <TableCell>{dummyReportData.holidays2}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>Work</TableCell>
-                          <TableCell>{dummyReportData.work}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>Transaction</TableCell>
-                          <TableCell>{dummyReportData.transaction}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell sx={detailsReport}>Balance</TableCell>
-                          <TableCell>{dummyReportData.balance}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-              </Grid>
-              <Box>
-                <TableRow>
-                  <TableCell sx={detailsReport}>Final Amount</TableCell>
-                  <TableCell>{dummyReportData.balance}</TableCell>
-                </TableRow>
-              </Box>
-
-            </Print>
+                        </Box>
+                      </Box>
+                    </>
+                  );
+                })}
+              </Print>
+            )}
           </DialogContent>
           <DialogActions
             sx={{ pr: 2, pb: 2, display: "flex", alignItems: "center" }}
           >
-            <Button sx={printDialog} variant="contained" color="primary">
+            <Button variant="contained" color="primary" sx={printButton}>
               <PrintIcon sx={{ fontSize: "18px" }} />
               <Typography
                 onClick={handlePrint}
@@ -450,8 +524,8 @@ function Report(props) {
               </Typography>
             </Button>
             <Button
+              sx={cancelButton}
               variant="outlined"
-              style={CancelDialog}
               onClick={() => setDialogOpen(false)}
               autoFocus
             >
