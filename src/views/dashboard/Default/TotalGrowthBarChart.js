@@ -6,7 +6,7 @@ import baseUrl from "../../baseUrl";
 
 // material-ui
 import { useTheme } from "@mui/material/styles";
-import { Grid, MenuItem, TextField, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 
 // third-party
 import ApexCharts from "apexcharts";
@@ -17,31 +17,12 @@ import SkeletonTotalGrowthBarChart from "ui-component/cards/Skeleton/TotalGrowth
 import MainCard from "ui-component/cards/MainCard";
 import { gridSpacing } from "store/constant";
 
-// chart data
-import chartData from "./chart-data/total-growth-bar-chart";
-
 const token = localStorage.getItem("token");
-
-const status = [
-  {
-    value: "today",
-    label: "Today",
-  },
-  {
-    value: "month",
-    label: "This Month",
-  },
-  {
-    value: "year",
-    label: "This Year",
-  },
-];
 
 // ==============================|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||============================== //
 
 const TotalGrowthBarChart = ({ isLoading }) => {
   const [chartDataList, setChartDataList] = useState([]);
-  const [value, setValue] = useState("today");
   const theme = useTheme();
   const customization = useSelector((state) => state.customization);
 
@@ -55,6 +36,78 @@ const TotalGrowthBarChart = ({ isLoading }) => {
   const primaryDark = theme.palette.primary.dark;
   const secondaryMain = theme.palette.secondary.main;
   const secondaryLight = theme.palette.secondary.light;
+
+  const [chartData, setChartData] = useState({
+    height: 480,
+    type: "bar",
+    options: {
+      chart: {
+        id: "bar-chart",
+        stacked: true,
+        toolbar: {
+          show: true,
+        },
+        zoom: {
+          enabled: true,
+        },
+      },
+      responsive: [
+        {
+          breakpoint: 480,
+          options: {
+            legend: {
+              position: "bottom",
+              offsetX: -10,
+              offsetY: 0,
+            },
+          },
+        },
+      ],
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          columnWidth: "80%",
+        },
+        style: {
+          borderRadius: 5
+        }
+      },
+      xaxis: {
+        type: "category",
+        categories: [],
+      },
+      legend: {
+        show: true,
+        fontSize: "14px",
+        fontWeight: "800px",
+        fontFamily: `'Roboto', sans-serif`,
+        position: "bottom",
+        offsetX: 20,
+        labels: {
+          useSeriesColors: false,
+        },
+        markers: {
+          width: 16,
+          height: 16,
+          radius: 5,
+        },
+        itemMargin: {
+          horizontal: 15,
+          vertical: 8,
+        },
+      },
+      fill: {
+        type: "solid",
+      },
+      dataLabels: {
+        enabled: true,
+      },
+      grid: {
+        show: true,
+      },
+    },
+    series: [],
+  });
 
   useEffect(() => {
     let config = {
@@ -71,6 +124,25 @@ const TotalGrowthBarChart = ({ isLoading }) => {
       .then((response) => {
         console.log(response.data.data);
         setChartDataList(response.data.data);
+
+        // Extracting months and updating x-axis categories
+        const months = response.data.data.map((item) => item.month); // Assuming month is the property name
+        setChartData((prevChartData) => ({
+          ...prevChartData,
+          options: {
+            ...prevChartData.options,
+            xaxis: {
+              ...prevChartData.options.xaxis,
+              categories: months,
+            },
+          },
+          series: [
+            {
+              name: "Transaction Amount",
+              data: response.data.data.map((item) => item.amount),
+            },
+          ],
+        }));
       })
       .catch((error) => {
         console.log(error);
@@ -80,31 +152,19 @@ const TotalGrowthBarChart = ({ isLoading }) => {
   useEffect(() => {
     const newChartData = {
       ...chartData.options,
-      colors: [primary200, primaryDark, secondaryMain, secondaryLight],
+      colors: secondaryMain,
       xaxis: {
         labels: {
           style: {
-            colors: [
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-              primary,
-            ],
+            colors: grey500,
           },
         },
       },
       yaxis: {
         labels: {
           style: {
-            colors: [primary],
+            colors: grey500,
+            fontWeight: 700,
           },
         },
       },
@@ -117,6 +177,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
       legend: {
         labels: {
           colors: grey500,
+          fontWeight: 700,
         },
       },
     };
@@ -161,29 +222,10 @@ const TotalGrowthBarChart = ({ isLoading }) => {
                     </Grid>
                   </Grid>
                 </Grid>
-                <Grid item>
-                  <TextField
-                    id="standard-select-currency"
-                    select
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                  >
-                    {status.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              {/* {...chartData}   */}
-              <Chart
-                options={chartDataList}
-                series={chartDataList}
-                type="bar"
-              />
+              <Chart {...chartData} />
             </Grid>
           </Grid>
         </MainCard>

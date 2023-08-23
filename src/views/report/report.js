@@ -94,14 +94,13 @@ function Report(props) {
   const [reportList, setReportList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [staffId, setStaffId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   const handleReportList = () => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/report/staffWise?month=${selectedMonth}&year=${selectedYear}&staffId=${staffId}`,
+      url: `${baseUrl.url}/api/report/staffWise?month=${selectedMonth}&year=${selectedYear}`,
       headers: {
         token: token,
       },
@@ -117,8 +116,6 @@ function Report(props) {
         console.log(error);
       });
   };
-
-  const salary = () => {};
 
   useEffect(() => {
     handleReportList();
@@ -156,12 +153,6 @@ function Report(props) {
     window.print();
   };
 
-  const handleMonthChange = (newValue) => {
-    const selectedMonthValue = newValue ? parseInt(newValue.value) : null;
-
-    // Update the selected month state
-    setSelectedMonth(selectedMonthValue);
-  };
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
