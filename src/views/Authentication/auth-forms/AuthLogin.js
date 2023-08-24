@@ -6,6 +6,7 @@ import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Button,
+  CircularProgress,
   Divider,
   FormControl,
   Grid,
@@ -26,7 +27,7 @@ import baseUrl from "../../baseUrl";
 
 const FirebaseLogin = ({ ...others }) => {
   const theme = useTheme();
-
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -51,6 +52,7 @@ const FirebaseLogin = ({ ...others }) => {
   };
 
   const handleSubmit = (event) => {
+    setLoading(true);
     event.preventDefault();
     let config = {
       method: "post",
@@ -67,7 +69,8 @@ const FirebaseLogin = ({ ...others }) => {
       .then((response) => {
         console.log(response.data);
         setToken(response.data.data);
-        localStorage.setItem("token", response.data.data)
+        localStorage.setItem("token", response.data.data);
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
@@ -150,7 +153,11 @@ const FirebaseLogin = ({ ...others }) => {
               variant="contained"
               color="secondary"
             >
-              Sign in
+              {loading ? (
+                <CircularProgress color="inherit" />
+              ) : (
+                <span>SIGN IN</span>
+              )}
             </Button>
           </Box>
         </FormControl>

@@ -65,6 +65,16 @@ const detailsReport = {
   fontSize: "14px",
 };
 
+const autoPikerStyle = {
+  width: "96%",
+  marginX: "20px",
+  "@media (max-width: 900px)": {
+    marginX: "20px",
+    marginY: "6px",
+    width: "100%",
+  },
+};
+
 const months = [
   { value: "1", label: "January" },
   { value: "2", label: "February" },
@@ -155,7 +165,7 @@ function Report(props) {
     window.print();
   };
 
-const handleButtonClick = (staffId) => {
+  const handleButtonClick = (staffId) => {
     setDialogOpen(true);
     setIsLoadingStaffData(true);
     let config = {
@@ -195,69 +205,47 @@ const handleButtonClick = (staffId) => {
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
 
-          <Grid container>
-            <Grid md={3} sm={12} xs={12} marginRight={"20px"}>
-              <SearchSection
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-              />
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Grid container alignItems="center">
+              <Grid md={4} sm={12} xs={12}>
+                <SearchSection 
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                />
+              </Grid>
+              <Grid md={4} sm={12} xs={12}>
+                <Autocomplete
+                  sx={autoPikerStyle}
+                  disablePortal
+                  options={months}
+                  getOptionLabel={(month) => month.label}
+                  value={months.find((month) => month.value === selectedMonth)}
+                  onChange={(event, newValue) =>
+                    setSelectedMonth(newValue?.value || "")
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Month" />
+                  )}
+                />
+              </Grid>
+              <Grid md={4} sm={12} xs={12}>
+                <Autocomplete
+                  sx={autoPikerStyle}
+                  disablePortal
+                  options={years}
+                  getOptionLabel={(year) => year.label}
+                  value={years.find((year) => year.value === selectedYear)}
+                  onChange={(event, newValue) =>
+                    setSelectedYear(newValue?.value || "")
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Year" />
+                  )}
+                />
+              </Grid>
             </Grid>
-            <Grid
-              md={3}
-              sm={12}
-              xs={12}
-              sx={{
-                marginLeft: "150px",
-                "@media (max-width: 1200px)": {
-                  marginX: "20px",
-                  marginLeft: "105px",
-                },
-                "@media (max-width: 900px)": {
-                  marginX: "20px",
-                  marginY: "18px",
-                },
-              }}
-            >
-              <Autocomplete
-                disablePortal
-                options={months}
-                getOptionLabel={(month) => month.label}
-                value={months.find((month) => month.value === selectedMonth)}
-                onChange={(event, newValue) =>
-                  setSelectedMonth(newValue?.value || "")
-                }
-                renderInput={(params) => (
-                  <TextField {...params} label="Month" />
-                )}
-              />
-            </Grid>
-            <Grid
-              md={3}
-              sm={12}
-              xs={12}
-              sx={{
-                marginLeft: "20px",
-                "@media (max-width: 1200px)": {
-                  marginX: "20px",
-                },
-                "@media (max-width: 1166px)": {
-                  marginX: "20px",
-                  marginY: "10px",
-                },
-              }}
-            >
-              <Autocomplete
-                disablePortal
-                options={years}
-                getOptionLabel={(year) => year.label}
-                value={years.find((year) => year.value === selectedYear)}
-                onChange={(event, newValue) =>
-                  setSelectedYear(newValue?.value || "")
-                }
-                renderInput={(params) => <TextField {...params} label="Year" />}
-              />
-            </Grid>
-          </Grid>
+          </Box>
+
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -482,7 +470,7 @@ const handleButtonClick = (staffId) => {
                                   </TableRow>
                                   <TableRow>
                                     <TableCell sx={detailsReport}>
-                                      Total Transaction Amount 
+                                      Total Transaction Amount
                                     </TableCell>
                                     <TableCell>
                                       {item.transactionData.total}
