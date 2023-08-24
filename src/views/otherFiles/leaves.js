@@ -543,7 +543,11 @@ function Leaves(props) {
             <Grid container>
               <Grid item md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  sx={{
+                    width: "100%",
+                    pointerEvents: "none",
+                    cursor: "default",
+                  }}
                   label="Staff Name"
                   placeholder="Staff Name"
                   value={

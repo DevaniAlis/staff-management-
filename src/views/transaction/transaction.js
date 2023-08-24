@@ -129,14 +129,14 @@ const Transaction = () => {
   };
   // console.log(transactionsData);
 
-  const handleDatePicker = (selectedDate) => {
-    if (selectedDate) {
-      const formattedDate = moment(selectedDate).format("DD-MMM-YYYY");
-      setTransactionsData((prevState) => ({
-        ...prevState,
-        transactionDate: formattedDate,
-      }));
-    }
+  const handleDatePicker = (ele) => {
+    const currentDate = new Date(ele);
+    const dateString = currentDate.toLocaleDateString("en-US");
+    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
+    setTransactionsData((prevState) => ({
+      ...prevState,
+      transactionDate: formattedDate,
+    }));
   };
 
   const validateFields = () => {
@@ -652,6 +652,7 @@ const Transaction = () => {
                   fullWidth
                   placeholder="Staff Name"
                   label="Staff Name"
+                  sx={{ pointerEvents: "none", cursor: "default" }}
                   onChange={handleChangeValue}
                   value={`${editToTransaction?.staffId.firstName} ${editToTransaction?.staffId.lastName}`}
                 />
