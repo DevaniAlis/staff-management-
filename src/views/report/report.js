@@ -155,9 +155,6 @@ function Report(props) {
     window.print();
   };
 
-
-
-  const [dialogOpen, setDialogOpen] = useState(false);
 const handleButtonClick = (staffId) => {
     setDialogOpen(true);
     setIsLoadingStaffData(true);
