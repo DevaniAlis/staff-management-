@@ -549,7 +549,11 @@ function Salary(props) {
             <Grid container>
               <Grid md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  sx={{
+                    width: "100%",
+                    pointerEvents: "none",
+                    cursor: "default",
+                  }}
                   placeholder="Staff Name"
                   label="Staff Name"
                   value={`${editSalary?.staffId?.firstName || ""} ${

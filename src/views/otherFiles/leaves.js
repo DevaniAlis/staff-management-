@@ -83,7 +83,7 @@ const hoverEffect = {
 };
 
 function Leaves(props) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
@@ -181,7 +181,7 @@ function Leaves(props) {
       .request(config)
       .then((response) => {
         console.log(response.data);
-        navigate(0)
+        navigate(0);
       })
       .catch((error) => {
         console.log(error);
@@ -549,7 +549,11 @@ function Leaves(props) {
             <Grid container>
               <Grid item md={12} sm={12} xs={12}>
                 <TextField
-                  sx={{ width: "100%" }}
+                  sx={{
+                    width: "100%",
+                    pointerEvents: "none",
+                    cursor: "default",
+                  }}
                   label="Staff Name"
                   placeholder="Staff Name"
                   value={

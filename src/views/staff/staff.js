@@ -557,7 +557,6 @@ const Staff = () => {
               <Grid container display="flex" justifyContent="space-between">
                 <Grid item md={12} sm={12} xs={12}>
                   <TextField
-                    sx={{ mt: "8px" }}
                     fullWidth
                     placeholder="First Name"
                     variant="outlined"
