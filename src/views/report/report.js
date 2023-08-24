@@ -93,7 +93,6 @@ function Report(props) {
   const [reportList, setReportList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [staffId, setStaffId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [reportData, setReportData] = useState([]);
@@ -148,18 +147,18 @@ function Report(props) {
     setFilteredStaffDataList(filteredList);
   };
 
+  const handleClickOpen = () => {
+    setDialogOpen(true);
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
-  const handleMonthChange = (newValue) => {
-    const selectedMonthValue = newValue ? parseInt(newValue.value) : null;
 
-    // Update the selected month state
-    setSelectedMonth(selectedMonthValue);
-  };
 
-  const handleButtonClick = (staffId) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+const handleButtonClick = (staffId) => {
     setDialogOpen(true);
     setIsLoadingStaffData(true);
     let config = {
@@ -212,8 +211,13 @@ function Report(props) {
               xs={12}
               sx={{
                 marginLeft: "150px",
+                "@media (max-width: 1200px)": {
+                  marginX: "20px",
+                  marginLeft: "105px",
+                },
                 "@media (max-width: 900px)": {
                   marginX: "20px",
+                  marginY: "18px",
                 },
               }}
             >
@@ -223,9 +227,7 @@ function Report(props) {
                 getOptionLabel={(month) => month.label}
                 value={months.find((month) => month.value === selectedMonth)}
                 onChange={(event, newValue) =>
-                  // console.log(newValue)
-                  // setSelectedMonth(newValue)
-                  handleMonthChange(newValue)
+                  setSelectedMonth(newValue?.value || "")
                 }
                 renderInput={(params) => (
                   <TextField {...params} label="Month" />
@@ -240,6 +242,10 @@ function Report(props) {
                 marginLeft: "20px",
                 "@media (max-width: 1200px)": {
                   marginX: "20px",
+                },
+                "@media (max-width: 1166px)": {
+                  marginX: "20px",
+                  marginY: "10px",
                 },
               }}
             >

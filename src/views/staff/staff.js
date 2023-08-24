@@ -25,6 +25,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
@@ -32,13 +33,13 @@ import MainCard from "ui-component/cards/MainCard";
 import { IconCirclePlus, IconPencil, IconTrash } from "@tabler/icons";
 import { gridSpacing } from "store/constant";
 import SearchSection from "layout/MainLayout/Header/SearchSection";
-import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
-// ==============================|| Employee ||============================== //
+
+// ==============================|| Employee  ||============================== //
 
 const displayStyle = {
   display: "flex",
@@ -296,24 +297,21 @@ const Staff = () => {
   }, []);
 
   useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredStaffDataList(staffDataList);
-    } else {
-      handleSearch();
-    }
+    const debouncedSearch = setTimeout(() => {
+      if (searchQuery === "") {
+        setFilteredStaffDataList(staffDataList);
+      } else {
+        handleSearch();
+      }
+    }, 300);
+    return () => clearTimeout(debouncedSearch);
   }, [searchQuery, staffDataList]);
+
+  console.log("staffDataList", staffDataList);
 
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
-    const numberQuery = Number(searchQuery);
-
-    const filteredList = staffDataList.filter((item) => {
-      console.log("Item Phone:", item.phone);
-      if (item.phone === numberQuery || item.firstName === query) {
-        return item.phone;
-      }
-      return false;
-    });
+    const filteredList = staffDataList.filter((item) => item.firstName.includes(query) );
     setFilteredStaffDataList(filteredList);
   };
 
@@ -416,52 +414,52 @@ const Staff = () => {
 
   return (
     <>
-      {isLoading ? (
-        <Oval
-          height={50}
-          width={50}
-          color="#673ab7"
-          wrapperStyle={{
-            position: "absolute",
-            top: "52%",
-            left: "55%",
-          }}
-          wrapperClass=""
-          visible={true}
-          ariaLabel="oval-loading"
-          secondaryColor="#673ab7"
-          strokeWidth={2}
-          strokeWidthSecondary={2}
-        />
-      ) : (
-        <MainCard>
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <Box>
-                <Typography variant="h3" gutterBottom>
-                  Staff
-                </Typography>
-              </Box>
-              <Box>
-                <Button
-                  variant="contained"
-                  onClick={() => setStaff(true)}
-                  sx={addButtonStyle}
-                  startIcon={<IconCirclePlus />}
-                >
-                  Add Staff
-                </Button>
-              </Box>
-            </Grid>
+      <MainCard>
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <Box>
+              <Typography variant="h3" gutterBottom>
+                Staff
+              </Typography>
+            </Box>
+            <Box>
+              <Button
+                variant="contained"
+                onClick={() => setStaff(true)}
+                sx={addButtonStyle}
+                startIcon={<IconCirclePlus />}
+              >
+                Add Staff
+              </Button>
+            </Box>
           </Grid>
-          <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-          <SearchSection
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-          <Grid container spacing={gridSpacing}>
-            <Grid item xs={12} sm={12} sx={displayStyle}>
-              <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+        </Grid>
+        <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
+        <SearchSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+        <Grid container spacing={gridSpacing}>
+          <Grid item xs={12} sm={12} sx={displayStyle}>
+            <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
+              {isLoading ? (
+                <Oval
+                  height={50}
+                  width={50}
+                  color="#673ab7"
+                  wrapperStyle={{
+                    position: "absolute",
+                    top: "52%",
+                    left: "55%",
+                  }}
+                  wrapperClass="loader-wrapper"
+                  visible={true}
+                  ariaLabel="oval-loading"
+                  secondaryColor="#673ab7"
+                  strokeWidth={2}
+                  strokeWidthSecondary={2}
+                />
+              ) : (
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -535,11 +533,12 @@ const Staff = () => {
                     })}
                   </TableBody>
                 </Table>
-              </TableContainer>
-            </Grid>
+              )}
+            </TableContainer>
           </Grid>
-        </MainCard>
-      )}
+        </Grid>
+      </MainCard>
+
       {/* start add staff Dialog */}
       <Dialog
         open={staff}
