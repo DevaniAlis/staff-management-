@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 // third party
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import React from "react";
 
 // project imports
 import * as serviceWorker from 'serviceWorker';
@@ -19,7 +20,9 @@ const root =  document.getElementById('root');
 render(
   <Provider store={store}>
     <BrowserRouter basename={config.basename}>
+    <React.StrictMode>
       <App />
+    </React.StrictMode>
     </BrowserRouter>
   </Provider>
 , root);
