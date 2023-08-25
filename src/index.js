@@ -20,9 +20,7 @@ const root =  document.getElementById('root');
 render(
   <Provider store={store}>
     <BrowserRouter basename={config.basename}>
-    <React.StrictMode>
       <App />
-    </React.StrictMode>
     </BrowserRouter>
   </Provider>
 , root);
