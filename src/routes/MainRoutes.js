@@ -9,14 +9,8 @@ import { Navigate, Route, Routes } from "react-router";
 const isTokenAvailable = localStorage.getItem("token");
 
 // Protected route component to handle access based on token
-const ProtectedRoute = ({ element: Element, ...rest }) => {
-  return isTokenAvailable ? (
-    <Routes>
-      <Route {...rest} element={<Element />} />
-    </Routes>
-  ) : (
-    <Navigate to="/" />
-  );
+const ProtectedRoute = ({ children }) => {
+  return !isTokenAvailable ? <Navigate to="/" /> : children
 };
 
 // dashboard routing
@@ -40,27 +34,27 @@ const MainRoutes = {
   children: [
     {
       path: "/dashboard",
-      element: <ProtectedRoute path="" element={DashboardDefault} />,
+      element: <ProtectedRoute> <DashboardDefault/> </ProtectedRoute>,
     },
     {
       path: "/staff",
-      element: <ProtectedRoute path="" element={Staff} />,
+      element: <ProtectedRoute> <Staff/></ProtectedRoute>,
     },
     {
-      path: "transaction",
-      element: <ProtectedRoute path="" element={Transaction} />,
+      path: "/transaction",
+      element: <ProtectedRoute><Transaction/></ProtectedRoute>,
     },
     {
-      path: "leaves",
-      element: <ProtectedRoute path="" element={Leaves} />,
+      path: "/leaves",
+      element: <ProtectedRoute><Leaves/></ProtectedRoute>,
     },
     {
-      path: "salary",
-      element: <ProtectedRoute path="" element={Salary} />,
+      path: "/salary",
+      element: <ProtectedRoute><Salary/></ProtectedRoute>,
     },
     {
-      path: "report",
-      element: <ProtectedRoute path="" element={Report} />,
+      path: "/report",
+      element: <ProtectedRoute><Report/></ProtectedRoute>,
     },
   ],
 };
