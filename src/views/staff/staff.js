@@ -38,6 +38,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
 
 import baseUrl from "../baseUrl";
+import { useNavigate } from "react-router";
 
 // ==============================|| Employee  ||============================== //
 
@@ -49,6 +50,7 @@ const displayStyle = {
 
 const addButtonStyle = {
   justifyContent: "flex-end",
+  backgroundColor : "#5e35b1"
 };
 
 const saveButton = {
@@ -102,7 +104,7 @@ const IOSSwitch = styled((props) => (
       transform: "translateX(16px)",
       color: "#fff",
       "& + .MuiSwitch-track": {
-        backgroundColor: theme.palette.mode === "dark" ? "#1e88e5" : "#1e88e5",
+        backgroundColor: "#5e35b1", // Change the background color here
         opacity: 1,
         border: 0,
       },
@@ -139,8 +141,10 @@ const IOSSwitch = styled((props) => (
   },
 }));
 
+
 const Staff = () => {
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
   const [staff, setStaff] = useState(false);
   const [deleteStaffOpen, setDeleteStaffOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
@@ -192,7 +196,7 @@ const Staff = () => {
     const phoneNumberPattern = /^\d{10}$/;
     const aadhaarPattern = /^\d{12}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    const ifscPattern = /^[A-Za-z]{4}\d{7}$/;
+    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
     if (!staffData.firstName) {
       errors.firstName = "First Name is required";
@@ -264,14 +268,13 @@ const Staff = () => {
         .request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
-          window.location.reload();
+          navigate(0);
         })
         .catch((error) => {
           console.log(error);
         });
     }
   };
-
   const [staffDataList, setStaffDataList] = useState([]);
   const getStaffList = () => {
     let config = {
@@ -307,11 +310,11 @@ const Staff = () => {
     return () => clearTimeout(debouncedSearch);
   }, [searchQuery, staffDataList]);
 
-  console.log("staffDataList", staffDataList);
-
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
-    const filteredList = staffDataList.filter((item) => item.firstName.includes(query) );
+    const filteredList = staffDataList.filter((item) =>
+      item.firstName.includes(query)
+    );
     setFilteredStaffDataList(filteredList);
   };
 
@@ -357,7 +360,7 @@ const Staff = () => {
         .request(config)
         .then((response) => {
           console.log(JSON.stringify(response.data));
-          window.location.reload();
+          navigate(0);
         })
         .catch((error) => {
           console.log(error);
@@ -385,8 +388,8 @@ const Staff = () => {
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
-          window.location.reload();
+          console.log(response.data);
+          navigate(0);
           setEditStaff(false);
         })
         .catch((error) => {
@@ -397,7 +400,6 @@ const Staff = () => {
 
   const handleEditInputChange = (event) => {
     const { name, value } = event.target;
-    console.log(event.target);
     setEditToStaff((prevEditToStaff) => ({
       ...prevEditToStaff,
       [name]: value,
@@ -424,6 +426,7 @@ const Staff = () => {
             </Box>
             <Box>
               <Button
+
                 variant="contained"
                 onClick={() => setStaff(true)}
                 sx={addButtonStyle}
@@ -484,8 +487,10 @@ const Staff = () => {
                             <TableCell align="center">
                               {item.type && (
                                 <Chip
+                                  sx={{
+                                    color: "#5e35b1",
+                                  }}
                                   label={item.type}
-                                  color="primary"
                                   variant="outlined"
                                 />
                               )}
@@ -515,6 +520,7 @@ const Staff = () => {
                               <Button
                                 onClick={() => handleEditClick(item)}
                                 disableRipple
+                                style={{ color: '#5e35b1' }}
                                 sx={hoverEffect}
                               >
                                 <IconPencil />
@@ -574,9 +580,7 @@ const Staff = () => {
                     variant="outlined"
                     label="Middle Name"
                     onChange={handleChangeValue}
-                    name="lastName"
-                    error={!!validateError.lastName}
-                    helperText={validateError.lastName}
+                    name="middleName"
                   />
                 </Grid>
                 <Grid item md={12} sm={12} xs={12}>
@@ -587,7 +591,9 @@ const Staff = () => {
                     variant="outlined"
                     label="Last Name"
                     onChange={handleChangeValue}
-                    name="middleName"
+                    name="lastName"
+                    error={!!validateError.lastName}
+                    helperText={validateError.lastName}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -635,10 +641,21 @@ const Staff = () => {
                   >
                     <FormControl fullWidth>
                       <InputLabel>Gender</InputLabel>
-                      <Select label="Gender" onChange={handleChangeValue}>
-                        <MenuItem value="male">Male</MenuItem>
-                        <MenuItem value="female">Female</MenuItem>
-                        <MenuItem value="other">Other</MenuItem>
+                      <Select
+                      defaultValue={"male"}
+                        name="gender"
+                        label="Gender"
+                        onChange={handleChangeValue}
+                      >
+                        <MenuItem name="gender" value="male">
+                          Male
+                        </MenuItem>
+                        <MenuItem name="gender" value="female">
+                          Female
+                        </MenuItem>
+                        <MenuItem name="gender" value="other">
+                          Other
+                        </MenuItem>
                       </Select>
                     </FormControl>
                   </Box>

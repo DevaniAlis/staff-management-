@@ -39,10 +39,6 @@ const MainRoutes = {
   element: <MainLayout />,
   children: [
     {
-      path: "/",
-      element: <DashboardDefault />,
-    },
-    {
       path: "/dashboard",
       element: <ProtectedRoute path="" element={DashboardDefault} />,
     },

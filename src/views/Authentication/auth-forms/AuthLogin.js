@@ -44,7 +44,7 @@ const FirebaseLogin = ({ ...others }) => {
   const [token, setToken] = useState();
 
   if (token) {
-    window.location.href = "/dashboard";
+    window.location.href = "/";
   }
 
   const handleChange = (event) => {

@@ -80,13 +80,16 @@ const ProfileSection = () => {
           borderRadius: "27px",
           transition: "all .2s ease-in-out",
           borderColor: theme.palette.primary.light,
-          backgroundColor: theme.palette.primary.light,
+          "& svg": {
+            stroke: "#5e35b1",
+          },
+          backgroundColor: "#ede7f6",
           '&[aria-controls="menu-list-grow"], &:hover': {
-            borderColor: theme.palette.primary.main,
-            background: `${theme.palette.primary.main}!important`,
-            color: theme.palette.primary.light,
+            borderColor: "#ede7f6",
+            background: "#ede7f6",
+            color: "#ede7f6",
             "& svg": {
-              stroke: theme.palette.primary.light,
+              stroke: "#5e35b1",
             },
           },
           "& .MuiChip-label": {
