@@ -23,8 +23,9 @@ const token = localStorage.getItem("token");
 
 // ==============================|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||============================== //
 
-const TotalGrowthBarChart = ({ isLoading, totalTransaction }) => {
+const TotalGrowthBarChart = ({ isLoading }) => {
   const [chartDataList, setChartDataList] = useState([]);
+  const [TransactionTotal, setTransactionTotal] = useState("");
   const theme = useTheme();
   const customization = useSelector((state) => state.customization);
 
@@ -124,8 +125,8 @@ const TotalGrowthBarChart = ({ isLoading, totalTransaction }) => {
     axios
       .request(config)
       .then((response) => {
-        console.log(response.data.data);
         setChartDataList(response.data.data);
+        setTransactionTotal(response.data.total);
 
         // Extracting months and updating x-axis categories
         const months = response.data.data.map((item) => item.month); // Assuming month is the property name
@@ -227,7 +228,7 @@ const TotalGrowthBarChart = ({ isLoading, totalTransaction }) => {
                     >
                       <IconCurrencyRupee marginRight={2} />
                       <Typography variant="h3">
-                        <CountUp start={0} end={totalTransaction} delay={0} />
+                        <CountUp start={0} end={TransactionTotal} delay={0} />
                       </Typography>
                     </Grid>
                   </Grid>

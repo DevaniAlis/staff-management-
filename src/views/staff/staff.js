@@ -204,7 +204,7 @@ const Staff = () => {
   const validateFields = () => {
     const errors = {};
     const phoneNumberPattern = /^\d{10}$/;
-    const aadhaarPattern = /^\d{12}$/;
+    const aadhaarPattern = /^[0-9]{9,18}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
@@ -302,7 +302,12 @@ const Staff = () => {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        if (error.response.data === "Invalid Token") {
+          localStorage.clear();
+          navigate = "/";
+        } else {
+          console.error("Error:", error);
+        }
       });
   };
   useEffect(() => {
@@ -652,7 +657,6 @@ const Staff = () => {
                     <FormControl fullWidth>
                       <InputLabel>Gender</InputLabel>
                       <Select
-                        defaultValue={"male"}
                         name="gender"
                         label="Gender"
                         onChange={handleChangeValue}

@@ -32,6 +32,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
 import baseUrl from "../../views/baseUrl";
 import { makeStyles } from "@mui/styles";
+import { useNavigate } from "react-router";
 
 const displayStyle = {
   display: "flex",
@@ -62,7 +63,7 @@ const cancelButton = {
   margin: "10px",
   width: "100px",
   border: "1px solid #5e35b1",
-  color:"#5e35b1",
+  color: "#5e35b1",
 };
 
 const editDialog = {
@@ -94,6 +95,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Salary(props) {
+  const navigate = useNavigate();
   const classes = useStyles();
   const [salaryOpen, setSalaryOpen] = useState(false);
   const token = localStorage.getItem("token");
@@ -141,7 +143,12 @@ function Salary(props) {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        if (error.response.data === "Invalid Token") {
+          localStorage.clear();
+          navigate = "/";
+        } else {
+          console.error("Error:", error);
+        }
       });
   }, []);
 

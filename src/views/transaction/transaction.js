@@ -29,8 +29,9 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from "@mui/styles";
 import baseUrl from "../baseUrl";
+import { useNavigate } from "react-router";
 
 // ==============================|| Employee ||============================== //
 
@@ -81,7 +82,7 @@ const cancelButton = {
   margin: "10px",
   width: "100px",
   border: "1px solid #5e35b1",
-  color:"#5e35b1",
+  color: "#5e35b1",
 };
 
 const autoPikerStyle = {
@@ -98,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
   customButton: {
     backgroundColor: "#5e35b1",
     color: theme.palette.common.white,
-    '&:hover': {
+    "&:hover": {
       backgroundColor: "#5e35b1", // Change to your desired hover color
     },
   },
@@ -106,6 +107,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Transaction = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const [transaction, setTransaction] = useState(false);
   const [transactionOpen, setTransactionOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
@@ -203,7 +205,12 @@ const Transaction = () => {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        if (error.response.data === "Invalid Token") {
+          localStorage.clear();
+          navigate = "/";
+        } else {
+          console.error("Error:", error);
+        }
       });
   }, []);
 

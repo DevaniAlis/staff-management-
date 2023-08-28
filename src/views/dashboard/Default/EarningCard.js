@@ -11,7 +11,7 @@ import SkeletonEarningCard from "ui-component/cards/Skeleton/EarningCard";
 
 // assets
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import { IconArrowsTransferUp } from "@tabler/icons";
+import { IconArrowsTransferUp, IconCurrencyRupee } from "@tabler/icons";
 
 import CountUp from "react-countup";
 
@@ -86,7 +86,13 @@ const EarningCard = ({ isLoading, totalTransaction }) => {
               </Grid>
               <Grid item>
                 <Grid container alignItems="center">
-                  <Grid item>
+                  <Grid
+                    item
+                    display={"flex"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
+                  >
+                    <IconCurrencyRupee marginRight={2} />
                     <Typography
                       sx={{
                         fontSize: "2.125rem",

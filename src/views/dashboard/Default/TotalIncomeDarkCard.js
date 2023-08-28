@@ -11,7 +11,7 @@ import SkeletonEarningCard from "ui-component/cards/Skeleton/EarningCard";
 
 // assets
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import { IconCoinRupee } from "@tabler/icons";
+import { IconCoinRupee, IconCurrencyRupee } from "@tabler/icons";
 
 import CountUp from "react-countup";
 
@@ -86,7 +86,13 @@ const TotalIncomeDarkCard = ({ isLoading, totalSalary }) => {
               </Grid>
               <Grid item>
                 <Grid container alignItems="center">
-                  <Grid item>
+                  <Grid
+                    item
+                    display={"flex"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
+                  >
+                    <IconCurrencyRupee marginRight={2} />
                     <Typography
                       sx={{
                         fontSize: "2.125rem",
@@ -98,18 +104,6 @@ const TotalIncomeDarkCard = ({ isLoading, totalSalary }) => {
                     >
                       <CountUp start={0} end={totalSalary} delay={0} />
                     </Typography>
-                  </Grid>
-                  <Grid item>
-                    <Avatar
-                      sx={{
-                        cursor: "pointer",
-                        ...theme.typography.smallAvatar,
-                        backgroundColor: theme.palette.secondary[200],
-                        color: theme.palette.secondary.dark,
-                      }}
-                    >
-                      <IconCoinRupee fontSize="inherit" />
-                    </Avatar>
                   </Grid>
                 </Grid>
               </Grid>
