@@ -90,10 +90,11 @@ const months = [
   { value: "12", label: "December" },
 ];
 
+const startYear = 2020;
 const currentYear = new Date().getFullYear();
 const years = [];
 
-for (let i = currentYear; i >= currentYear - 5; i--) {
+for (let i = currentYear; i >= startYear; i--) {
   years.push({ value: i, label: `${i}` });
 }
 

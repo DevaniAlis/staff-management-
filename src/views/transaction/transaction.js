@@ -346,13 +346,12 @@ const Transaction = () => {
     { value: "12", label: "December" },
   ];
 
+  const startYear = 2020;
   const currentYear = new Date().getFullYear();
-  const yearRange = 4;
-
   const years = [];
-  for (let i = 0; i <= yearRange; i++) {
-    const year = currentYear - i;
-    years.push({ value: year, label: `${year}` });
+
+  for (let i = currentYear; i >= startYear; i--) {
+    years.push({ value: i, label: `${i}` });
   }
 
   return (
