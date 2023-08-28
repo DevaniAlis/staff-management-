@@ -87,7 +87,7 @@ const Dashboard = () => {
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
           <Grid item xs={12} md={12}>
-            <TotalGrowthBarChart isLoading={isLoading} />
+            <TotalGrowthBarChart isLoading={isLoading} totalTransaction={totalTransaction}/>
           </Grid>
         </Grid>
       </Grid>

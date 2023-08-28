@@ -30,7 +30,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Oval } from "react-loader-spinner";
-
+import { makeStyles } from "@mui/styles";
 import baseUrl from "../baseUrl";
 import { useNavigate } from "react-router";
 const token = localStorage.getItem("token");
@@ -43,35 +43,38 @@ const displayStyle = {
 
 const addButtonStyle = {
   justifyContent: "flex-end",
+  backgroundColor: "#5e35b1",
 };
 
 const saveButton = {
   "&:hover": {
-    backgroundColor: "#1E88E5",
+    backgroundColor: "#5e35b1",
   },
   margin: "10px",
   width: "100px",
   marginLeft: "0px",
-  backgroundColor: "#1E88E5",
+  backgroundColor: "#5e35b1",
 };
 
 const cancelButton = {
   "&:hover": {
-    border: "1px solid #1E88E5",
+    border: "1px solid #5e35b1",
     backgroundColor: "none",
   },
   margin: "10px",
   width: "100px",
-  border: "1px solid #1E88E5",
-  color: "#000000",
+  border: "1px solid #5e35b1",
+  color:"#5e35b1",
 };
 
 const editDialog = {
-  color: "#000000",
+  color: "#5e35b1",
+  borderColor: "#5e35b1",
 };
 
 const deleteDialog = {
   padding: "5px 20px",
+  backgroundColor:"#5e35b1",
 };
 
 const hoverEffect = {
@@ -82,7 +85,18 @@ const hoverEffect = {
   minWidth: "35px",
 };
 
+const useStyles = makeStyles((theme) => ({
+  customButton: {
+    backgroundColor: "#5e35b1",
+    color: theme.palette.common.white,
+    "&:hover": {
+      backgroundColor: "#5e35b1", // Change to your desired hover color
+    },
+  },
+}));
+
 function Leaves(props) {
+  const classes = useStyles();
   const navigate = useNavigate();
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -289,7 +303,9 @@ function Leaves(props) {
 
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
-    const filteredList = staffLeaveList.filter((item) => item.staffId.firstName.includes(query) );
+    const filteredList = staffLeaveList.filter((item) =>
+      item.staffId.firstName.includes(query)
+    );
     setFilteredStaffDataList(filteredList);
   };
 
@@ -309,6 +325,7 @@ function Leaves(props) {
                 sx={addButtonStyle}
                 startIcon={<IconCirclePlus />}
                 onClick={() => setLeaveOpen(true)}
+                className={classes.customButton}
               >
                 Add Leave
               </Button>
@@ -372,6 +389,7 @@ function Leaves(props) {
                               <Button
                                 onClick={() => handleEditClick(item)}
                                 disableRipple
+                                style={{ color: "#5e35b1" }}
                                 sx={hoverEffect}
                               >
                                 <IconPencil />

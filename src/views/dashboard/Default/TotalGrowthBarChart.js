@@ -16,12 +16,14 @@ import Chart from "react-apexcharts";
 import SkeletonTotalGrowthBarChart from "ui-component/cards/Skeleton/TotalGrowthBarChart";
 import MainCard from "ui-component/cards/MainCard";
 import { gridSpacing } from "store/constant";
+import CountUp from "react-countup";
+import { IconCurrencyRupee } from "@tabler/icons";
 
 const token = localStorage.getItem("token");
 
 // ==============================|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||============================== //
 
-const TotalGrowthBarChart = ({ isLoading }) => {
+const TotalGrowthBarChart = ({ isLoading, totalTransaction }) => {
   const [chartDataList, setChartDataList] = useState([]);
   const theme = useTheme();
   const customization = useSelector((state) => state.customization);
@@ -66,11 +68,11 @@ const TotalGrowthBarChart = ({ isLoading }) => {
       plotOptions: {
         bar: {
           horizontal: true,
-          columnWidth: "80%",
+          columnWidth: "100%",
         },
         style: {
-          borderRadius: 5
-        }
+          borderRadius: 5,
+        },
       },
       xaxis: {
         type: "category",
@@ -217,8 +219,16 @@ const TotalGrowthBarChart = ({ isLoading }) => {
                     <Grid item>
                       <Typography variant="subtitle2">Total Growth</Typography>
                     </Grid>
-                    <Grid item>
-                      <Typography variant="h3">$2,324.00</Typography>
+                    <Grid
+                      item
+                      display={"flex"}
+                      alignItems={"center"}
+                      justifyContent={"space-between"}
+                    >
+                      <IconCurrencyRupee marginRight={2} />
+                      <Typography variant="h3">
+                        <CountUp start={0} end={totalTransaction} delay={0} />
+                      </Typography>
                     </Grid>
                   </Grid>
                 </Grid>

@@ -29,7 +29,6 @@ import PrintProvider, { Print, NoPrint } from "react-easy-print";
 import baseUrl from "../baseUrl";
 import PrintIcon from "@mui/icons-material/Print";
 import { Oval } from "react-loader-spinner";
-
 const token = localStorage.getItem("token");
 
 // css
@@ -41,23 +40,23 @@ const displayStyle = {
 
 const printButton = {
   "&:hover": {
-    backgroundColor: "#2196f3",
+    backgroundColor: "#5e35b1",
   },
   margin: "10px",
   width: "100px",
   marginLeft: "0px",
-  backgroundColor: "#2196f3",
+  backgroundColor: "#5e35b1",
 };
 
 const cancelButton = {
   "&:hover": {
-    border: "1px solid #2196f3",
+    border: "1px solid #5e35b1",
     backgroundColor: "none",
   },
   margin: "10px",
   width: "100px",
-  border: "1px solid #2196f3",
-  color: "#2196f3",
+  border: "1px solid #5e35b1",
+  color: "#5e35b1",
 };
 
 const detailsReport = {
@@ -91,11 +90,12 @@ const months = [
 ];
 
 const currentYear = new Date().getFullYear();
-const years = [
-  { value: currentYear - 2, label: `${currentYear - 2}` },
-  { value: currentYear - 1, label: `${currentYear - 1}` },
-  { value: currentYear, label: `${currentYear}` },
-];
+const years = [];
+
+for (let i = currentYear; i >= currentYear - 5; i--) {
+  years.push({ value: i, label: `${i}` });
+}
+
 
 function Report(props) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,17 +205,30 @@ function Report(props) {
           </Grid>
           <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
 
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Grid container alignItems="center">
               <Grid md={4} sm={12} xs={12}>
-                <SearchSection 
+                <SearchSection
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                 />
               </Grid>
               <Grid md={4} sm={12} xs={12}>
+                <style>
+                  {`
+                      .MuiAutocomplete-listbox li:hover
+                      {
+                        color: #5e35b1;
+                      },
+                  `}
+                </style>
                 <Autocomplete
                   sx={autoPikerStyle}
+                  clearIcon={null}
                   disablePortal
                   options={months}
                   getOptionLabel={(month) => month.label}
@@ -231,6 +244,7 @@ function Report(props) {
               <Grid md={4} sm={12} xs={12}>
                 <Autocomplete
                   sx={autoPikerStyle}
+                  clearIcon={null}
                   disablePortal
                   options={years}
                   getOptionLabel={(year) => year.label}
@@ -320,7 +334,7 @@ function Report(props) {
                 wrapperStyle={{
                   position: "absolute",
                   top: "30%",
-                  left: "50%",
+                  left: "46%",
                 }}
                 wrapperClass=""
                 visible={true}
