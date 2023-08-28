@@ -4,6 +4,7 @@ import axios from "axios";
 // material-ui
 import { useTheme } from "@mui/material/styles";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -14,6 +15,7 @@ import {
   InputAdornment,
   InputLabel,
   OutlinedInput,
+  Snackbar,
   Typography,
 } from "@mui/material";
 
@@ -29,8 +31,14 @@ const FirebaseLogin = ({ ...others }) => {
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const handleMouseDownPassword = (event) => {
@@ -74,11 +82,28 @@ const FirebaseLogin = ({ ...others }) => {
       })
       .catch((error) => {
         console.log(error);
+        if (error.response.data.status == false) {
+          setSnackbarOpen(true);
+        }
       });
   };
 
   return (
     <>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          please Enter Valid Username and Password
+        </Alert>
+      </Snackbar>
       <Grid container direction="column" justifyContent="center" spacing={2}>
         <Grid item xs={12}>
           <Box
