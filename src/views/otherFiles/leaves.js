@@ -64,7 +64,7 @@ const cancelButton = {
   margin: "10px",
   width: "100px",
   border: "1px solid #5e35b1",
-  color:"#5e35b1",
+  color: "#5e35b1",
 };
 
 const editDialog = {
@@ -74,7 +74,7 @@ const editDialog = {
 
 const deleteDialog = {
   padding: "5px 20px",
-  backgroundColor:"#5e35b1",
+  backgroundColor: "#5e35b1",
 };
 
 const hoverEffect = {
@@ -151,7 +151,12 @@ function Leaves(props) {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        if (error.response.data === "Invalid Token") {
+          localStorage.clear();
+          navigate = "/";
+        } else {
+          console.error("Error:", error);
+        }
       });
   }, []);
 

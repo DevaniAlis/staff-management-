@@ -29,6 +29,7 @@ import PrintProvider, { Print, NoPrint } from "react-easy-print";
 import baseUrl from "../baseUrl";
 import PrintIcon from "@mui/icons-material/Print";
 import { Oval } from "react-loader-spinner";
+import { useNavigate } from "react-router";
 const token = localStorage.getItem("token");
 
 // css
@@ -96,8 +97,8 @@ for (let i = currentYear; i >= currentYear - 5; i--) {
   years.push({ value: i, label: `${i}` });
 }
 
-
 function Report(props) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [reportList, setReportList] = useState([]);
@@ -157,10 +158,6 @@ function Report(props) {
     setFilteredStaffDataList(filteredList);
   };
 
-  const handleClickOpen = () => {
-    setDialogOpen(true);
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -171,7 +168,7 @@ function Report(props) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://staff-lending-be.onrender.com/api/salarySlip?staffId=${staffId}&month=${selectedMonth}&year=${selectedYear}`,
+      url: `${baseUrl.url}/api/salarySlip?staffId=${staffId}&month=${selectedMonth}&year=${selectedYear}`,
       headers: {
         token: token,
       },
@@ -180,13 +177,18 @@ function Report(props) {
     axios
       .request(config)
       .then((response) => {
-        console.log(response.data);
+        console.log(response.data.data);
         setReportData(response.data.data);
         setIsLoadingStaffData(false);
       })
       .catch((error) => {
-        console.log(error);
         setIsLoadingStaffData(false);
+        if (error.response.data === "Invalid Token") {
+          localStorage.clear();
+          navigate = "/";
+        } else {
+          console.error("Error:", error);
+        }
       });
   };
 
