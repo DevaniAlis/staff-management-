@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment";
 import dayjs from "dayjs";
@@ -28,9 +28,8 @@ import { Box } from "@mui/system";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { useEffect } from "react";
 import { Oval } from "react-loader-spinner";
-
+import { makeStyles } from '@mui/styles';
 import baseUrl from "../baseUrl";
 
 // ==============================|| Employee ||============================== //
@@ -43,16 +42,17 @@ const displayStyle = {
 
 const addButtonStyle = {
   justifyContent: "flex-end",
+  backgroundColor: "#5e35b1",
 };
 
 const saveButton = {
   "&:hover": {
-    backgroundColor: "#1E88E5",
+    backgroundColor: "#5e35b1",
   },
   margin: "10px",
   width: "100px",
   marginLeft: "0px",
-  backgroundColor: "#1E88E5",
+  backgroundColor: "#5e35b1",
 };
 
 const hoverEffect = {
@@ -64,22 +64,24 @@ const hoverEffect = {
 };
 
 const editDialog = {
-  color: "#000000",
+  color: "#5e35b1",
+  borderColor: "#5e35b1",
 };
 
 const deleteDialog = {
+  backgroundColor: "#5e35b1",
   padding: "5px 20px",
 };
 
 const cancelButton = {
   "&:hover": {
-    border: "1px solid #1E88E5",
+    border: "1px solid #5e35b1",
     backgroundColor: "none",
   },
   margin: "10px",
   width: "100px",
-  border: "1px solid #1E88E5",
-  color: "#000000",
+  border: "1px solid #5e35b1",
+  color:"#5e35b1",
 };
 
 const autoPikerStyle = {
@@ -92,7 +94,18 @@ const autoPikerStyle = {
   },
 };
 
+const useStyles = makeStyles((theme) => ({
+  customButton: {
+    backgroundColor: "#5e35b1",
+    color: theme.palette.common.white,
+    '&:hover': {
+      backgroundColor: "#5e35b1", // Change to your desired hover color
+    },
+  },
+}));
+
 const Transaction = () => {
+  const classes = useStyles();
   const [transaction, setTransaction] = useState(false);
   const [transactionOpen, setTransactionOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
@@ -351,6 +364,7 @@ const Transaction = () => {
                 onClick={() => setTransaction(true)}
                 sx={addButtonStyle}
                 startIcon={<IconCirclePlus />}
+                className={classes.customButton}
               >
                 Add Transaction
               </Button>
@@ -362,8 +376,17 @@ const Transaction = () => {
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Grid container>
             <Grid md={4} sm={12} xs={12}>
+              <style>
+                {`
+                      .MuiAutocomplete-listbox li:hover
+                      {
+                        color: #5e35b1;
+                      },
+                  `}
+              </style>
               <Autocomplete
                 disablePortal
+                clearIcon={null}
                 options={staffList}
                 getOptionLabel={(staff) =>
                   `${staff.firstName} ${staff.lastName}`
@@ -390,6 +413,7 @@ const Transaction = () => {
             </Grid>
             <Grid md={4} sm={12} xs={12}>
               <Autocomplete
+                clearIcon={null}
                 sx={autoPikerStyle}
                 disablePortal
                 options={months}
@@ -406,6 +430,7 @@ const Transaction = () => {
             <Grid md={4} sm={12} xs={12}>
               <Autocomplete
                 sx={autoPikerStyle}
+                clearIcon={null}
                 disablePortal
                 options={years}
                 getOptionLabel={(year) => year.label}
@@ -473,6 +498,7 @@ const Transaction = () => {
                               <Button
                                 onClick={() => handleEditClick(item)}
                                 disableRipple
+                                style={{ color: "#5e35b1" }}
                                 sx={hoverEffect}
                               >
                                 <IconPencil />
