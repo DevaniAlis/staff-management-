@@ -84,6 +84,7 @@ const FirebaseLogin = ({ ...others }) => {
         console.log(error);
         if (error.response.data.status == false) {
           setSnackbarOpen(true);
+          setLoading(false);
         }
       });
   };
@@ -123,7 +124,7 @@ const FirebaseLogin = ({ ...others }) => {
           justifyContent="center"
         >
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1">Sign in with UserName</Typography>
+            <Typography variant="subtitle1">Sign in with Username</Typography>
           </Box>
         </Grid>
       </Grid>

@@ -120,7 +120,7 @@ const Transaction = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const token = localStorage.getItem("token");
   const [transactionsData, setTransactionsData] = useState({
     staffId: "",
@@ -311,9 +311,6 @@ const Transaction = () => {
           window.location.reload();
           setTransaction(false);
         })
-        .catch((error) => {
-          // console.log(error.response.data);
-        });
     }
   };
 
