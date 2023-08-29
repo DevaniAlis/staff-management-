@@ -146,8 +146,6 @@ function Salary(props) {
         if (error.response.data === "Invalid Token") {
           localStorage.clear();
           navigate = "/";
-        } else {
-          console.error("Error:", error);
         }
       });
   }, []);
@@ -181,7 +179,6 @@ function Salary(props) {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
         setIsLoading(false);
       });
   };
@@ -189,14 +186,6 @@ function Salary(props) {
   const handleSalary = () => {
     const errors = {};
 
-    if (!staffSalary.staffId) {
-      errors.staffId = "Staff ID is required.";
-    }
-    if (!staffSalary.date) {
-      errors.date = "Salary Date is required.";
-    } else if (!moment(staffSalary.date).isValid()) {
-      errors.date = "Invalid Salary Date.";
-    }
     if (!staffSalary.salary) {
       errors.salary = "Salary amount is required.";
     }
@@ -219,12 +208,8 @@ function Salary(props) {
     axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
         window.location.reload();
       })
-      .catch((error) => {
-        console.log(error);
-      });
   };
 
   const deleteSalary = (staffId) => {
@@ -241,12 +226,8 @@ function Salary(props) {
       axios
         .request(config)
         .then((response) => {
-          console.log(response.data);
           window.location.reload();
         })
-        .catch((error) => {
-          console.log(error);
-        });
     }
   };
 
@@ -271,17 +252,11 @@ function Salary(props) {
       axios
         .request(config)
         .then((response) => {
-          console.log(response.data);
           window.location.reload();
           setEditOpen(false);
         })
-        .catch((error) => {
-          console.log(error);
-        });
     }
   };
-
-  console.log(editSalary);
   const handleSelectChangeValue = (event, newValue) => {
     setStaffSalary({
       ...staffSalary,

@@ -90,10 +90,11 @@ const months = [
   { value: "12", label: "December" },
 ];
 
+const startYear = 2020;
 const currentYear = new Date().getFullYear();
 const years = [];
 
-for (let i = currentYear; i >= currentYear - 5; i--) {
+for (let i = currentYear; i >= startYear; i--) {
   years.push({ value: i, label: `${i}` });
 }
 
@@ -121,13 +122,9 @@ function Report(props) {
     axios
       .request(config)
       .then((response) => {
-        console.log(response.data);
         setReportList(response.data.data);
         setIsLoading(false);
       })
-      .catch((error) => {
-        console.log(error);
-      });
   };
 
   useEffect(() => {
@@ -154,7 +151,6 @@ function Report(props) {
     const filteredList = reportList.filter((item) =>
       item.staffName.toLowerCase().includes(query)
     );
-    console.log("filteredList: ", filteredList);
     setFilteredStaffDataList(filteredList);
   };
 
@@ -177,7 +173,6 @@ function Report(props) {
     axios
       .request(config)
       .then((response) => {
-        console.log(response.data.data);
         setReportData(response.data.data);
         setIsLoadingStaffData(false);
       })
@@ -186,8 +181,6 @@ function Report(props) {
         if (error.response.data === "Invalid Token") {
           localStorage.clear();
           navigate = "/";
-        } else {
-          console.error("Error:", error);
         }
       });
   };

@@ -154,8 +154,6 @@ function Leaves(props) {
         if (error.response.data === "Invalid Token") {
           localStorage.clear();
           navigate = "/";
-        } else {
-          console.error("Error:", error);
         }
       });
   }, []);
@@ -180,12 +178,22 @@ function Leaves(props) {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log(error);
         setIsLoading(false);
       });
   };
 
   const handleLeave = () => {
+    const errors = {};
+
+    if (!staffLeave.reason) {
+      errors.reason = "Reason is required.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     let config = {
       method: "post",
       maxBodyLength: Infinity,
@@ -196,15 +204,9 @@ function Leaves(props) {
       data: staffLeave,
     };
     setLeaveOpen(false);
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-        navigate(0);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    axios.request(config).then((response) => {
+      navigate(0);
+    });
   };
 
   const deleteLeave = (staffId) => {
@@ -218,15 +220,9 @@ function Leaves(props) {
           "Content-Type": "application/json",
         },
       };
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(response.data);
-          window.location.reload();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      axios.request(config).then((response) => {
+        window.location.reload();
+      });
     }
   };
 
@@ -247,20 +243,14 @@ function Leaves(props) {
         },
         data: editLeave,
       };
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          const updatedList = staffLeaveList.map((item) =>
-            item._id === editLeave._id ? editLeave : item
-          );
-          setStaffLeaveList(updatedList);
-          window.location.reload();
-          setEditOpen(false);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      axios.request(config).then((response) => {
+        const updatedList = staffLeaveList.map((item) =>
+          item._id === editLeave._id ? editLeave : item
+        );
+        setStaffLeaveList(updatedList);
+        window.location.reload();
+        setEditOpen(false);
+      });
     }
   };
 
@@ -274,16 +264,6 @@ function Leaves(props) {
   const handleEditClick = (item) => {
     setEditLeave(item);
     setEditOpen(true);
-  };
-
-  const handleEditDatePicker = (type, ele) => {
-    const currentDate = new Date(ele);
-    const dateString = currentDate.toLocaleDateString("en-US");
-    const formattedDate = moment(dateString).format("DD-MMM-YYYY");
-    setEditLeave((prevState) => ({
-      ...prevState,
-      [type]: formattedDate,
-    }));
   };
 
   const handleEditInputChange = (event) => {
@@ -307,13 +287,17 @@ function Leaves(props) {
   }, [searchQuery, staffLeaveList]);
 
   const handleSearch = () => {
-    const query = searchQuery.toLowerCase();
-    const filteredList = staffLeaveList.filter((item) =>
-      item.staffId.firstName.includes(query)
+    const query = searchQuery;
+    console.log("query: ", query);
+    const regex = new RegExp(query, "i");
+    const filteredList = staffLeaveList.filter(
+      (item) =>
+        regex.test(item.staffId.firstName)
     );
     setFilteredStaffDataList(filteredList);
+    console.log("filteredStaffDataList", filteredStaffDataList);
   };
-
+  console.log("");
   return (
     <>
       <MainCard>
@@ -502,6 +486,8 @@ function Leaves(props) {
                   label="Leave Reason"
                   onChange={addLeave}
                   name="reason"
+                  error={!!validationErrors.reason}
+                  helperText={validationErrors.reason}
                 />
               </Grid>
             </Grid>

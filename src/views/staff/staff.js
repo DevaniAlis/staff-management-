@@ -274,15 +274,9 @@ const Staff = () => {
         },
         data: staffData,
       };
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          navigate(0);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      axios.request(config).then((response) => {
+        navigate(0);
+      });
     }
   };
   const [staffDataList, setStaffDataList] = useState([]);
@@ -305,8 +299,6 @@ const Staff = () => {
         if (error.response.data === "Invalid Token") {
           localStorage.clear();
           navigate = "/";
-        } else {
-          console.error("Error:", error);
         }
       });
   };
@@ -326,9 +318,10 @@ const Staff = () => {
   }, [searchQuery, staffDataList]);
 
   const handleSearch = () => {
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery;
+    const regex = new RegExp(query, "i");
     const filteredList = staffDataList.filter((item) =>
-      item.firstName.includes(query)
+      regex.test(item.firstName)
     );
     setFilteredStaffDataList(filteredList);
   };
@@ -336,7 +329,6 @@ const Staff = () => {
   const handleChecked = (event, staffId) => {
     const newCheckedValue = event.target.checked;
     const updatedStaffData = { isActive: newCheckedValue };
-    console.log(updatedStaffData);
 
     const config = {
       method: "put",
@@ -349,15 +341,9 @@ const Staff = () => {
       data: updatedStaffData,
     };
 
-    axios
-      .request(config)
-      .then((response) => {
-        console.log("Status updated successfully:", response.data);
-        setIsChecked(newCheckedValue);
-      })
-      .catch((error) => {
-        console.log("Error updating status:", error);
-      });
+    axios.request(config).then((response) => {
+      setIsChecked(newCheckedValue);
+    });
   };
 
   const staffDelete = (staffId) => {
@@ -371,15 +357,9 @@ const Staff = () => {
           "Content-Type": "application/json",
         },
       };
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          navigate(0);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      axios.request(config).then((response) => {
+        navigate(0);
+      });
     }
   };
 
@@ -400,16 +380,10 @@ const Staff = () => {
         },
         data: editToStaff,
       };
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(response.data);
-          navigate(0);
-          setEditStaff(false);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      axios.request(config).then((response) => {
+        navigate(0);
+        setEditStaff(false);
+      });
     }
   };
 
@@ -422,10 +396,8 @@ const Staff = () => {
   };
 
   const handleEditClick = (item) => {
-    console.log("Join Date:", item.joinDate);
     setEditToStaff(item);
     const formattedDate = moment(item.joinDate, "YYYY-MM-DD");
-    console.log("Formatted Date:", formattedDate);
     setEditStaff(true);
   };
 
