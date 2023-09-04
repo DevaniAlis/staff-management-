@@ -305,12 +305,10 @@ const Transaction = () => {
         },
         data: editToTransaction,
       };
-      axios
-        .request(config)
-        .then((response) => {
-          window.location.reload();
-          setTransaction(false);
-        })
+      axios.request(config).then((response) => {
+        window.location.reload();
+        setTransaction(false);
+      });
     }
   };
 
@@ -471,11 +469,21 @@ const Transaction = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Staff Name</TableCell>
-                      <TableCell align="center">Transaction Type</TableCell>
-                      <TableCell align="center">Transaction Date</TableCell>
-                      <TableCell align="center">Amount</TableCell>
-                      <TableCell align="center">Action</TableCell>
+                      <TableCell sx={{ fontSize: "16px" }} align="center">
+                        Staff Name
+                      </TableCell>
+                      <TableCell sx={{ fontSize: "16px" }} align="center">
+                        Transaction Type
+                      </TableCell>
+                      <TableCell sx={{ fontSize: "16px" }} align="center">
+                        Transaction Date
+                      </TableCell>
+                      <TableCell sx={{ fontSize: "16px" }} align="center">
+                        Amount
+                      </TableCell>
+                      <TableCell sx={{ fontSize: "16px" }} align="center">
+                        Action
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -570,6 +578,7 @@ const Transaction = () => {
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
+                        format="DD/MM/YYYY"
                         sx={{ width: "100%", mt: "4px" }}
                         label="Transaction Date"
                         onChange={handleDatePicker}

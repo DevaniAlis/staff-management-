@@ -32,6 +32,10 @@ const FirebaseLogin = ({ ...others }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [errors, setErrors] = useState({
+    username: "",
+    password: "",
+  });
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -60,33 +64,47 @@ const FirebaseLogin = ({ ...others }) => {
   };
 
   const handleSubmit = (event) => {
-    setLoading(true);
     event.preventDefault();
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/login`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: login,
-    };
-
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-        setToken(response.data.data);
-        localStorage.setItem("token", response.data.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        if (error.response.data.status == false) {
-          setSnackbarOpen(true);
+    setErrors({ username: "", password: "" });
+    if (!login.username) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        username: "Username is required",
+      }));
+    }
+    if (!login.password) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: "Password is required",
+      }));
+    }
+    if (login.username && login.password) {
+      setLoading(true);
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: `${baseUrl.url}/api/login`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: login,
+      };
+      axios
+        .request(config)
+        .then((response) => {
+          console.log(response.data);
+          setToken(response.data.data);
+          localStorage.setItem("token", response.data.data);
           setLoading(false);
-        }
-      });
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.data.status == false) {
+            setSnackbarOpen(true);
+            setLoading(false);
+          }
+        });
+    }
   };
 
   return (
@@ -141,6 +159,11 @@ const FirebaseLogin = ({ ...others }) => {
             onChange={handleChange}
             label="Username"
           />
+          {errors.username && (
+            <Typography variant="caption" color="error">
+              {errors.username}
+            </Typography>
+          )}
         </FormControl>
 
         <FormControl fullWidth sx={{ ...theme.typography.customInput }}>
@@ -168,6 +191,11 @@ const FirebaseLogin = ({ ...others }) => {
             label="Password"
             inputProps={{}}
           />
+          {errors.password && (
+            <Typography variant="caption" color="error">
+              {errors.password}
+            </Typography>
+          )}
         </FormControl>
         <FormControl fullWidth>
           <Box sx={{ mt: 2 }}>

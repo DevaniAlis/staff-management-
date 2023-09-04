@@ -37,7 +37,7 @@ const PopperStyle = styled(Popper, { shouldForwardProp })(({ theme }) => ({
 
 const OutlineInputStyle = styled(OutlinedInput, { shouldForwardProp })(
   ({ theme }) => ({
-    width: 375,
+    width: 350,
     marginLeft: 16,
     paddingLeft: 16,
     paddingRight: 16,

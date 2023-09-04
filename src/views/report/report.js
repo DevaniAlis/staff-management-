@@ -119,12 +119,10 @@ function Report(props) {
         token: token,
       },
     };
-    axios
-      .request(config)
-      .then((response) => {
-        setReportList(response.data.data);
-        setIsLoading(false);
-      })
+    axios.request(config).then((response) => {
+      setReportList(response.data.data);
+      setIsLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -279,10 +277,18 @@ function Report(props) {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell align="center">Staff Name</TableCell>
-                        <TableCell align="center">Salary</TableCell>
-                        <TableCell align="center">Transaction</TableCell>
-                        <TableCell align="center">Actual Salary</TableCell>
+                        <TableCell sx={{ fontSize: "16px" }} align="center">
+                          Staff Name
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "16px" }} align="center">
+                          Salary
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "16px" }} align="center">
+                          Transaction
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "16px" }} align="center">
+                          Actual Salary
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
