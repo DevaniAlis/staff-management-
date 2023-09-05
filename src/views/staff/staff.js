@@ -511,6 +511,7 @@ const Staff = () => {
                             </TableCell>
                             <TableCell align="center">
                               <FormControlLabel
+                              sx={{display:"flex" , justifyContent:"end" }}
                                 control={
                                   <IOSSwitch
                                     sx={{ m: 1 }}
@@ -632,6 +633,7 @@ const Staff = () => {
                           width: "100%",
                         },
                       }}
+                      format="DD-MM-YYYY"
                       fullWidth
                       label="Joining Date"
                       onChange={handleDatePicker}
@@ -871,6 +873,7 @@ const Staff = () => {
                           width: "100%",
                         },
                       }}
+                      format="DD-MM-YYYY"
                       fullWidth
                       label="Join Date"
                       name="joinDate"

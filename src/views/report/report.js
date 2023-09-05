@@ -319,6 +319,7 @@ function Report(props) {
             </Grid>
           </Grid>
         </MainCard>
+        {/* Salary Slip */}
         <Dialog
           maxWidth="md"
           fullWidth={true}
@@ -356,7 +357,7 @@ function Report(props) {
                         </Box>
                         <Box display="flex" alignItems="center">
                           <Typography sx={detailsReport}>
-                            Date Of Start Work :
+                            Date Of Start Work :&nbsp;
                           </Typography>
                           <Typography>
                             {moment(item.dateOfStartWork).format("DD-MM-YYYY")}
@@ -364,7 +365,7 @@ function Report(props) {
                         </Box>
                         <Box display="flex" alignItems="center">
                           <Typography sx={detailsReport}>
-                            End Of Work :
+                            Date Of End Work :&nbsp;
                           </Typography>
                           <Typography>
                             {moment(item.dateOfEndWork).format("DD-MM-YYYY")}

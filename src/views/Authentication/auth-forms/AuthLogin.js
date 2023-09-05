@@ -200,6 +200,7 @@ const FirebaseLogin = ({ ...others }) => {
         <FormControl fullWidth>
           <Box sx={{ mt: 2 }}>
             <Button
+              sx={{ padding: "10px" }}
               disableElevation
               fullWidth
               size="large"
@@ -208,9 +209,9 @@ const FirebaseLogin = ({ ...others }) => {
               color="secondary"
             >
               {loading ? (
-                <CircularProgress color="inherit" />
+                <CircularProgress color="inherit" size={30} />
               ) : (
-                <span>SIGN IN</span>
+                <span style={{ fontSize: "18px" , fontWeight:"600"}}>SIGN IN</span>
               )}
             </Button>
           </Box>

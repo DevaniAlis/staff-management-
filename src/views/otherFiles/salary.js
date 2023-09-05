@@ -74,6 +74,9 @@ const editDialog = {
 const deleteDialog = {
   padding: "5px 20px",
   backgroundColor: "#5e35b1",
+  "&:hover" : {
+    backgroundColor: "#5e35b1",
+  }
 };
 
 const hoverEffect = {
