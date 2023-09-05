@@ -494,9 +494,9 @@ function Report(props) {
                                   </TableRow>
                                   <TableRow>
                                     <TableCell sx={detailsReport}>
-                                      Balance
+                                      Outstanding
                                     </TableCell>
-                                    <TableCell>{item.actualSalary}</TableCell>
+                                    <TableCell>{item.outstanding}</TableCell>
                                   </TableRow>
                                 </TableBody>
                               </Table>
