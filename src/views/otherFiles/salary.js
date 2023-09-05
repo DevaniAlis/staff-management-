@@ -205,11 +205,9 @@ function Salary(props) {
       data: staffSalary,
     };
     setSalaryOpen(false);
-    axios
-      .request(config)
-      .then((response) => {
-        window.location.reload();
-      })
+    axios.request(config).then((response) => {
+      window.location.reload();
+    });
   };
 
   const deleteSalary = (staffId) => {
@@ -223,11 +221,9 @@ function Salary(props) {
           "Content-Type": "application/json",
         },
       };
-      axios
-        .request(config)
-        .then((response) => {
-          window.location.reload();
-        })
+      axios.request(config).then((response) => {
+        window.location.reload();
+      });
     }
   };
 
@@ -249,12 +245,10 @@ function Salary(props) {
         data: editSalary,
       };
 
-      axios
-        .request(config)
-        .then((response) => {
-          window.location.reload();
-          setEditOpen(false);
-        })
+      axios.request(config).then((response) => {
+        window.location.reload();
+        setEditOpen(false);
+      });
     }
   };
   const handleSelectChangeValue = (event, newValue) => {
@@ -415,6 +409,14 @@ function Salary(props) {
         <DialogContent>
           <Box>
             <Grid container>
+              <style>
+                {`
+                      .MuiAutocomplete-listbox li:hover
+                      {
+                        color: #5e35b1;
+                      },
+                  `}
+              </style>
               <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
                   fullWidth
@@ -457,6 +459,7 @@ function Salary(props) {
                           }}
                           label="Salary Date"
                           onChange={handleDatePicker}
+                          format="DD-MM-YYYY"
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -584,6 +587,7 @@ function Salary(props) {
                               },
                             })
                           }
+                          format="DD-MM-YYYY"
                         />
                       </DemoContainer>
                     </LocalizationProvider>

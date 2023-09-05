@@ -37,7 +37,7 @@ const PopperStyle = styled(Popper, { shouldForwardProp })(({ theme }) => ({
 
 const OutlineInputStyle = styled(OutlinedInput, { shouldForwardProp })(
   ({ theme }) => ({
-    width: 375,
+    width: 350,
     marginLeft: 16,
     paddingLeft: 16,
     paddingRight: 16,
@@ -135,8 +135,6 @@ MobileSearch.propTypes = {
 const SearchSection = ({ searchQuery, setSearchQuery }) => {
   const theme = useTheme();
   const [value, setValue] = useState("");
-
-  console.log(value);
 
   return (
     <>
