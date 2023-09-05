@@ -926,40 +926,6 @@ const Staff = () => {
                         width: "100%",
                       },
                     }}
-                    placeholder="Position"
-                    label="Position"
-                    value={editToStaff?.position || ""}
-                    name="position"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Email ID"
-                    label="Email ID"
-                    value={editToStaff?.email || ""}
-                    name="email"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
-                      },
-                    }}
                     fullWidth
                     placeholder="Phone Number"
                     label="Phone Number"
@@ -968,110 +934,41 @@ const Staff = () => {
                     onChange={handleEditInputChange}
                   />
                 </Grid>
-
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Aadhaar Number"
-                    label="Aadhaar Number"
-                    value={editToStaff?.aadhaarNo || ""}
-                    name="aadhaarNo"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Pancard Number"
-                    label="Pancard Number"
-                    value={editToStaff?.pancardNo || ""}
-                    name="pancardNo"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Bank Name"
-                    label="Bank Name"
-                    value={editToStaff?.bankName || ""}
-                    name="bankName"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
-                      },
-                    }}
-                    placeholder="Account Number"
-                    label="Account Number"
-                    value={editToStaff?.accountNo || ""}
-                    name="accountNo"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
-                <Grid item md={6}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Ifsc Code"
-                    label="Ifsc Code"
-                    value={editToStaff?.ifscCode || ""}
-                    name="ifscCode"
-                    onChange={handleEditInputChange}
-                  />
-                </Grid>
               </Grid>
               <Grid display="contents" mt={2}>
-                <Grid md={6} sm={12} xs={12}>
+              <Grid item md={6} sm={12} xs={12}>
                   <TextField
                     sx={{
                       mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
+                      width: "100%",
                       "@media (max-width: 900px)": {
                         marginLeft: "0",
                         width: "100%",
                       },
                     }}
-                    fullWidth
                     placeholder="Salary"
                     label="Salary"
                     value={editToStaff?.salary || ""}
                     name="salary"
+                    onChange={handleEditInputChange}
+                  />
+                </Grid>
+                <Grid item md={6} sm={12} xs={12}>
+                  <TextField
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
+                    placeholder="Reference Name"
+                    label="Reference Name"
+                    value={editToStaff?.refName || ""}
+                    name="refName"
                     onChange={handleEditInputChange}
                   />
                 </Grid>
