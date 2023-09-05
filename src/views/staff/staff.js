@@ -27,6 +27,7 @@ import {
   TextField,
   Typography,
   Box,
+  Autocomplete,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
@@ -83,6 +84,9 @@ const editDialog = {
 const deleteDialog = {
   padding: "5px 20px",
   backgroundColor: "#5e35b1",
+  "&:hover": {
+    backgroundColor: "#5e35b1",
+  },
 };
 
 const hoverEffect = {
@@ -155,6 +159,7 @@ const Staff = () => {
   const classes = useStyles();
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
+  const [filterData, setFilterData] = useState("");
   const [staff, setStaff] = useState(false);
   const [deleteStaffOpen, setDeleteStaffOpen] = useState(false);
   const [staffToDelete, setStaffToDelete] = useState(null);
@@ -163,6 +168,7 @@ const Staff = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [validateError, setValidateError] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [staffDataList, setStaffDataList] = useState([]);
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -171,19 +177,14 @@ const Staff = () => {
     type: "",
     lastName: "",
     middleName: "",
-    gender: "",
+    gender: "male",
     description: "",
-    position: "",
-    email: "",
     phone: "",
     address: "",
     joinDate: "",
-    aadhaarNo: "",
-    pancardNo: "",
-    bankName: "",
-    accountNo: "",
-    ifscCode: "",
     salary: "",
+    isActive: "true",
+    refName: "",
   });
 
   const handleChangeValue = (event) => {
@@ -204,9 +205,6 @@ const Staff = () => {
   const validateFields = () => {
     const errors = {};
     const phoneNumberPattern = /^\d{10}$/;
-    const aadhaarPattern = /^[0-9]{9,18}$/;
-    const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
     if (!staffData.firstName) {
       errors.firstName = "First Name is required";
@@ -216,8 +214,8 @@ const Staff = () => {
       errors.lastName = "Last Name is required";
     }
 
-    if (!staffData.position) {
-      errors.position = "Position is required";
+    if (!staffData.type) {
+      errors.type = "staff Type is required";
     }
 
     if (!staffData.phone) {
@@ -230,32 +228,6 @@ const Staff = () => {
       errors.salary = "Salary is required.";
     } else if (isNaN(staffData.salary)) {
       errors.salary = "Salary must be a valid number.";
-    }
-
-    if (!staffData.aadhaarNo) {
-      errors.aadhaarNo = "Aadhaar number is required.";
-    } else if (!aadhaarPattern.test(staffData.aadhaarNo)) {
-      errors.aadhaarNo = "Invalid Aadhaar number.";
-    }
-
-    if (!staffData.pancardNo) {
-      errors.pancardNo = "PAN Card number is required.";
-    } else if (!panPattern.test(staffData.pancardNo)) {
-      errors.pancardNo = "Invalid PAN Card number.";
-    }
-
-    if (!staffData.bankName) {
-      errors.bankName = "Bank Name is required";
-    }
-
-    if (!/^\d+$/.test(staffData.accountNo)) {
-      errors.accountNo = "Account Number should be a numeric value";
-    }
-
-    if (!staffData.ifscCode) {
-      errors.ifscCode = "IFSC Code is required.";
-    } else if (!ifscPattern.test(staffData.ifscCode)) {
-      errors.ifscCode = "Invalid IFSC Code.";
     }
 
     setValidateError(errors);
@@ -279,7 +251,11 @@ const Staff = () => {
       });
     }
   };
-  const [staffDataList, setStaffDataList] = useState([]);
+
+  useEffect(() => {
+    getStaffList();
+  }, []);
+
   const getStaffList = () => {
     let config = {
       method: "get",
@@ -302,20 +278,31 @@ const Staff = () => {
         }
       });
   };
-  useEffect(() => {
-    getStaffList();
-  }, []);
 
   useEffect(() => {
-    const debouncedSearch = setTimeout(() => {
-      if (searchQuery === "") {
-        setFilteredStaffDataList(staffDataList);
-      } else {
-        handleSearch();
-      }
-    }, 300);
-    return () => clearTimeout(debouncedSearch);
+    if (searchQuery) {
+      const filteredData = staffDataList.filter((staff) => {
+        // Assuming 'name' is a property of each staff object
+        return staff.firstName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      });
+      setFilteredStaffDataList(filteredData);
+    } else {
+      setFilteredStaffDataList(staffDataList);
+    }
   }, [searchQuery, staffDataList]);
+
+  useEffect(() => {
+    if (filterData) {
+      const filteredByType = staffDataList.filter(
+        (item) => item.type.toLowerCase() === filterData.toLowerCase()
+      );
+      setFilteredStaffDataList(filteredByType);
+    } else {
+      setFilteredStaffDataList(staffDataList);
+    }
+  }, [filterData]);
 
   const handleSearch = () => {
     const query = searchQuery;
@@ -323,7 +310,14 @@ const Staff = () => {
     const filteredList = staffDataList.filter((item) =>
       regex.test(item.firstName)
     );
-    setFilteredStaffDataList(filteredList);
+    if (filterData) {
+      const combinedFilters = filteredList.filter(
+        (item) => item.type.toLowerCase() === filterData.toLowerCase()
+      );
+      setFilteredStaffDataList(combinedFilters);
+    } else {
+      setFilteredStaffDataList(filteredList);
+    }
   };
 
   const handleChecked = (event, staffId) => {
@@ -401,6 +395,10 @@ const Staff = () => {
     setEditStaff(true);
   };
 
+  const uniqueStaffTypes = [
+    ...new Set(staffDataList.map((item) => item.type.toLowerCase())),
+  ];
+
   return (
     <>
       <MainCard>
@@ -425,10 +423,35 @@ const Staff = () => {
           </Grid>
         </Grid>
         <Divider sx={{ height: 2, bgcolor: "black", marginY: "20px" }} />
-        <SearchSection
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
+        <Grid container>
+          <Grid marginRight={"15px"}>
+            <SearchSection
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          </Grid>
+          <Grid>
+            <style>
+              {`
+                      .MuiAutocomplete-listbox li:hover
+                      {
+                        color: #5e35b1;
+                      },
+                  `}
+            </style>
+            <Autocomplete
+              fullWidth
+              disablePortal
+              id="combo-box-demo"
+              options={uniqueStaffTypes}
+              sx={{ width: 300 }}
+              renderInput={(params) => (
+                <TextField {...params} label="Search By Staff Type" />
+              )}
+              onChange={(_, newValue) => setFilterData(newValue)}
+            />
+          </Grid>
+        </Grid>
         <Grid container spacing={gridSpacing}>
           <Grid item xs={12} sm={12} sx={displayStyle}>
             <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -455,7 +478,6 @@ const Staff = () => {
                     <TableRow>
                       <TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Staff Type</TableCell>
-                      <TableCell align="center">Position</TableCell>
                       <TableCell align="center">Phone Number</TableCell>
                       <TableCell align="center">Salary</TableCell>
                       <TableCell align="center">Join Date</TableCell>
@@ -481,9 +503,6 @@ const Staff = () => {
                                   variant="outlined"
                                 />
                               )}
-                            </TableCell>
-                            <TableCell align="center">
-                              {item.position}
                             </TableCell>
                             <TableCell align="center">{item.phone}</TableCell>
                             <TableCell align="center">{item.salary}</TableCell>
@@ -597,6 +616,8 @@ const Staff = () => {
                         marginX: 0,
                       },
                     }}
+                    error={!!validateError.type}
+                    helperText={validateError.type}
                   />
                 </Grid>
                 <Grid item md={6} sm={12} xs={12}>
@@ -632,6 +653,7 @@ const Staff = () => {
                         name="gender"
                         label="Gender"
                         onChange={handleChangeValue}
+                        defaultValue="male"
                       >
                         <MenuItem name="gender" value="male">
                           Male
@@ -658,41 +680,6 @@ const Staff = () => {
                       },
                     }}
                     fullWidth
-                    placeholder="Position"
-                    label="Position"
-                    onChange={handleChangeValue}
-                    name="position"
-                    error={!!validateError.position}
-                    helperText={validateError.position}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Email ID"
-                    label="Email ID"
-                    onChange={handleChangeValue}
-                    name="email"
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
-                      },
-                    }}
-                    fullWidth
                     placeholder="Phone Number"
                     label="Phone Number"
                     onChange={handleChangeValue}
@@ -705,102 +692,9 @@ const Staff = () => {
                   <TextField
                     sx={{
                       mt: "12px",
+                      marginRight: "10px",
                       "@media (max-width: 900px)": {
                         marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Aadhaar Number"
-                    label="Aadhaar Number"
-                    onChange={handleChangeValue}
-                    name="aadhaarNo"
-                    error={!!validateError.aadhaarNo}
-                    helperText={validateError.aadhaarNo}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Pancard Number"
-                    label="Pancard Number"
-                    onChange={handleChangeValue}
-                    name="pancardNo"
-                    error={!!validateError.pancardNo}
-                    helperText={validateError.pancardNo}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Bank Name"
-                    label="Bank Name"
-                    onChange={handleChangeValue}
-                    name="bankName"
-                    error={!!validateError.bankName}
-                    helperText={validateError.bankName}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Account Number"
-                    label="Account Number"
-                    onChange={handleChangeValue}
-                    name="accountNo"
-                    error={!!validateError.accountNo}
-                    helperText={validateError.accountNo}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      "@media (max-width: 900px)": {
-                        marginX: 0,
-                      },
-                    }}
-                    fullWidth
-                    placeholder="Ifsc Code"
-                    label="Ifsc Code"
-                    onChange={handleChangeValue}
-                    name="ifscCode"
-                    error={!!validateError.ifscCode}
-                    helperText={validateError.ifscCode}
-                  />
-                </Grid>
-                <Grid item md={6} sm={12} xs={12}>
-                  <TextField
-                    sx={{
-                      mt: "12px",
-                      marginLeft: "10px",
-                      width: "96%",
-                      "@media (max-width: 900px)": {
-                        marginLeft: "0",
-                        width: "100%",
                       },
                     }}
                     fullWidth
@@ -810,6 +704,24 @@ const Staff = () => {
                     name="salary"
                     error={!!validateError.salary}
                     helperText={validateError.salary}
+                  />
+                </Grid>
+                <Grid item md={6} sm={12} xs={12}>
+                  <TextField
+                    sx={{
+                      mt: "12px",
+                      marginLeft: "10px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        marginLeft: "0",
+                        width: "100%",
+                      },
+                    }}
+                    fullWidth
+                    placeholder="Reference Name"
+                    label="Reference Name"
+                    onChange={handleChangeValue}
+                    name="refName"
                   />
                 </Grid>
                 <Grid item md={12} sm={12} xs={12}>

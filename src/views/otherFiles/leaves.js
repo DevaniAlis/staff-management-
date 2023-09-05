@@ -290,9 +290,8 @@ function Leaves(props) {
     const query = searchQuery;
     console.log("query: ", query);
     const regex = new RegExp(query, "i");
-    const filteredList = staffLeaveList.filter(
-      (item) =>
-        regex.test(item.staffId.firstName)
+    const filteredList = staffLeaveList.filter((item) =>
+      regex.test(item.staffId.firstName)
     );
     setFilteredStaffDataList(filteredList);
     console.log("filteredStaffDataList", filteredStaffDataList);
@@ -417,6 +416,14 @@ function Leaves(props) {
         <DialogContent>
           <Box>
             <Grid container>
+              <style>
+                {`
+                      .MuiAutocomplete-listbox li:hover
+                      {
+                        color: #5e35b1;
+                      },
+                  `}
+              </style>
               <Grid md={12} sm={12} xs={12}>
                 <Autocomplete
                   fullWidth
@@ -459,6 +466,7 @@ function Leaves(props) {
                         onChange={(newDate) =>
                           handleDatePicker("startDate", newDate)
                         }
+                        format="DD-MM-YYYY"
                       />
                     </DemoContainer>
                   </LocalizationProvider>
@@ -474,6 +482,7 @@ function Leaves(props) {
                         onChange={(newDate) =>
                           handleDatePicker("endDate", newDate)
                         }
+                        format="DD-MM-YYYY"
                       />
                     </DemoContainer>
                   </LocalizationProvider>
@@ -595,6 +604,7 @@ function Leaves(props) {
                               },
                             })
                           }
+                          format="DD-MM-YYYY"
                         />
                       </DemoContainer>
                     </LocalizationProvider>
@@ -620,6 +630,7 @@ function Leaves(props) {
                               },
                             })
                           }
+                          format="DD-MM-YYYY"
                         />
                       </DemoContainer>
                     </LocalizationProvider>
