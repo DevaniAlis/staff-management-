@@ -729,6 +729,7 @@ const Transaction = () => {
                               },
                             })
                           }
+                          format="DD-MM-YYYY"
                         />
                       </DemoContainer>
                     </LocalizationProvider>

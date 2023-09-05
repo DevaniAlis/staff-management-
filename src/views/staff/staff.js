@@ -168,6 +168,7 @@ const Staff = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [validateError, setValidateError] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [staffDataList, setStaffDataList] = useState([]);
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -250,7 +251,11 @@ const Staff = () => {
       });
     }
   };
-  const [staffDataList, setStaffDataList] = useState([]);
+
+  useEffect(() => {
+    getStaffList();
+  }, []);
+
   const getStaffList = () => {
     let config = {
       method: "get",
@@ -273,20 +278,31 @@ const Staff = () => {
         }
       });
   };
-  useEffect(() => {
-    getStaffList();
-  }, []);
 
   useEffect(() => {
-    const debouncedSearch = setTimeout(() => {
-      if (searchQuery === "") {
-        setFilteredStaffDataList(staffDataList);
-      } else {
-        handleSearch();
-      }
-    }, 300);
-    return () => clearTimeout(debouncedSearch);
+    if (searchQuery) {
+      const filteredData = staffDataList.filter((staff) => {
+        // Assuming 'name' is a property of each staff object
+        return staff.firstName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      });
+      setFilteredStaffDataList(filteredData);
+    } else {
+      setFilteredStaffDataList(staffDataList);
+    }
   }, [searchQuery, staffDataList]);
+
+  useEffect(() => {
+    if (filterData) {
+      const filteredByType = staffDataList.filter(
+        (item) => item.type.toLowerCase() === filterData.toLowerCase()
+      );
+      setFilteredStaffDataList(filteredByType);
+    } else {
+      setFilteredStaffDataList(staffDataList);
+    }
+  }, [filterData]);
 
   const handleSearch = () => {
     const query = searchQuery;
@@ -294,7 +310,14 @@ const Staff = () => {
     const filteredList = staffDataList.filter((item) =>
       regex.test(item.firstName)
     );
-    setFilteredStaffDataList(filteredList);
+    if (filterData) {
+      const combinedFilters = filteredList.filter(
+        (item) => item.type.toLowerCase() === filterData.toLowerCase()
+      );
+      setFilteredStaffDataList(combinedFilters);
+    } else {
+      setFilteredStaffDataList(filteredList);
+    }
   };
 
   const handleChecked = (event, staffId) => {
@@ -376,14 +399,6 @@ const Staff = () => {
     ...new Set(staffDataList.map((item) => item.type.toLowerCase())),
   ];
 
-  const handleFilterChange = (event, newValue) => {
-    setFilterData(newValue);
-  };
-
-  const staffFilterDataList = staffDataList.filter(
-    (item) => item.type.toLowerCase() === filterData
-  );
-  console.log("staffFilterDataList", staffFilterDataList);
   return (
     <>
       <MainCard>
@@ -416,6 +431,14 @@ const Staff = () => {
             />
           </Grid>
           <Grid>
+            <style>
+              {`
+                      .MuiAutocomplete-listbox li:hover
+                      {
+                        color: #5e35b1;
+                      },
+                  `}
+            </style>
             <Autocomplete
               fullWidth
               disablePortal
@@ -425,7 +448,7 @@ const Staff = () => {
               renderInput={(params) => (
                 <TextField {...params} label="Search By Staff Type" />
               )}
-              onChange={handleFilterChange}
+              onChange={(_, newValue) => setFilterData(newValue)}
             />
           </Grid>
         </Grid>

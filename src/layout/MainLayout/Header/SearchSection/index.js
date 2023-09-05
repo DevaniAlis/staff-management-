@@ -136,8 +136,6 @@ const SearchSection = ({ searchQuery, setSearchQuery }) => {
   const theme = useTheme();
   const [value, setValue] = useState("");
 
-  console.log(value);
-
   return (
     <>
       <Box sx={{ display: { xs: "block", md: "none" } }}>
