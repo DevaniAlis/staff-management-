@@ -183,6 +183,14 @@ function Report(props) {
       });
   };
 
+  const positiveAmountStyle = {
+    color: "green",
+  };
+
+  const negativeAmountStyle = {
+    color: "red",
+  };
+
   return (
     <PrintProvider>
       <NoPrint>
@@ -287,12 +295,22 @@ function Report(props) {
                           Transaction
                         </TableCell>
                         <TableCell sx={{ fontSize: "16px" }} align="center">
-                          Actual Salary
+                          leaves
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "16px" }} align="center">
+                          Actual Month Salary
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "16px" }} align="center">
+                          Final Amount
                         </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {filteredStaffDataList.map((item) => {
+                        const finalAmountStyle =
+                          item.actualSalary < 0
+                            ? negativeAmountStyle
+                            : positiveAmountStyle;
                         return (
                           <TableRow
                             key={item.staffId}
@@ -307,7 +325,13 @@ function Report(props) {
                               {item.transactionTotal}
                             </TableCell>
                             <TableCell align="center">
+                              {item.leaveTotal}
+                            </TableCell>
+                            <TableCell align="center" style={finalAmountStyle}>
                               {item.actualSalary}
+                            </TableCell>
+                            <TableCell align="center" style={finalAmountStyle}>
+                              {item.finalSalary}
                             </TableCell>
                           </TableRow>
                         );
@@ -319,6 +343,7 @@ function Report(props) {
             </Grid>
           </Grid>
         </MainCard>
+        {/* Salary Slip */}
         <Dialog
           maxWidth="md"
           fullWidth={true}
@@ -356,7 +381,7 @@ function Report(props) {
                         </Box>
                         <Box display="flex" alignItems="center">
                           <Typography sx={detailsReport}>
-                            Date Of Start Work :
+                            Date Of Start Work :&nbsp;
                           </Typography>
                           <Typography>
                             {moment(item.dateOfStartWork).format("DD-MM-YYYY")}
@@ -364,7 +389,7 @@ function Report(props) {
                         </Box>
                         <Box display="flex" alignItems="center">
                           <Typography sx={detailsReport}>
-                            End Of Work :
+                            Date Of End Work :&nbsp;
                           </Typography>
                           <Typography>
                             {moment(item.dateOfEndWork).format("DD-MM-YYYY")}
@@ -403,7 +428,7 @@ function Report(props) {
                               </Table>
                             </TableContainer>
                           </Grid>
-                          <Grid item md={9}>
+                          <Grid item md={5}>
                             <Typography
                               sx={{ fontWeight: 500, fontSize: "16px" }}
                             >
@@ -415,29 +440,46 @@ function Report(props) {
                                   <TableRow>
                                     <TableCell>Transaction Date</TableCell>
                                     <TableCell>Amount</TableCell>
-                                    <TableCell>Monthly Salary</TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
                                   {item.transactionData.transactions.map(
                                     (transactions) => (
-                                      <TableRow
-                                        key={transactions.transactionDate}
-                                      >
-                                        <TableCell>
-                                          {moment(
-                                            transactions.transactionDate
-                                          ).format("DD-MM-YYYY")}
-                                        </TableCell>
-                                        <TableCell>
-                                          {transactions.amount}
-                                        </TableCell>
-                                        <TableCell>
-                                          {item.transactionData.total}
-                                        </TableCell>
-                                      </TableRow>
+                                        <TableRow
+                                          key={transactions.transactionDate}
+                                        >
+                                          <TableCell>
+                                            {moment(
+                                              transactions.transactionDate
+                                            ).format("DD-MM-YYYY")}
+                                          </TableCell>
+                                          <TableCell>
+                                            {transactions.amount}
+                                          </TableCell>
+                                        </TableRow>
                                     )
                                   )}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Grid>
+                          <Grid item md={3}>
+                            <Typography
+                              sx={{ fontWeight: 500, fontSize: "16px" }}
+                            >
+                              Salary
+                            </Typography>
+                            <TableContainer component={Paper}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Salary Amount</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  <TableRow>
+                                    <TableCell>{item.salary}</TableCell>
+                                  </TableRow>
                                 </TableBody>
                               </Table>
                             </TableContainer>
@@ -485,7 +527,7 @@ function Report(props) {
                                   </TableRow>
                                   <TableRow>
                                     <TableCell sx={detailsReport}>
-                                      Total Transaction Amount
+                                      Total Transaction Amount (Current Month)
                                     </TableCell>
                                     <TableCell>
                                       {item.transactionData.total}
@@ -493,9 +535,9 @@ function Report(props) {
                                   </TableRow>
                                   <TableRow>
                                     <TableCell sx={detailsReport}>
-                                      Balance
+                                      Outstanding
                                     </TableCell>
-                                    <TableCell>{item.actualSalary}</TableCell>
+                                    <TableCell>{item.outstanding}</TableCell>
                                   </TableRow>
                                 </TableBody>
                               </Table>

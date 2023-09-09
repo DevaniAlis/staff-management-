@@ -72,12 +72,16 @@ const editDialog = {
 const deleteDialog = {
   backgroundColor: "#5e35b1",
   padding: "5px 20px",
+  "&:hover": {
+    border: "1px solid #5e35b1",
+    backgroundColor: "#5e35b1",
+  },
 };
 
 const cancelButton = {
   "&:hover": {
     border: "1px solid #5e35b1",
-    backgroundColor: "none",
+    backgroundColor: "#5e35b1",
   },
   margin: "10px",
   width: "100px",
