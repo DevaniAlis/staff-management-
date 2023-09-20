@@ -11,7 +11,11 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  FormControl,
   Grid,
+  InputLabel,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -81,7 +85,7 @@ const deleteDialog = {
 const cancelButton = {
   "&:hover": {
     border: "1px solid #5e35b1",
-    backgroundColor: "#5e35b1",
+    backgroundColor: "none",
   },
   margin: "10px",
   width: "100px",
@@ -593,7 +597,32 @@ const Transaction = () => {
               </Grid>
               <Grid display="contents" mt={2}>
                 <Grid md={6} sm={12} xs={12}>
-                  <TextField
+                  <Box
+                    sx={{
+                      mt: "12px",
+                      width: "96%",
+                      "@media (max-width: 900px)": {
+                        width: "100%",
+                      },
+                    }}
+                  >
+                    <FormControl fullWidth>
+                      <InputLabel>Transaction Type</InputLabel>
+                      <Select
+                        label="Transaction Type"
+                        name="transactionType"
+                        onChange={handleChangeValue}
+                      >
+                        <MenuItem name="transactionType" value="case">
+                          cash
+                        </MenuItem>
+                        <MenuItem name="transactionType" value="online">
+                          online 
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  {/* <TextField
                     sx={{
                       mt: "12px",
                       width: "96%",
@@ -605,7 +634,7 @@ const Transaction = () => {
                     label="Transaction Type"
                     onChange={handleChangeValue}
                     name="transactionType"
-                  />
+                  /> */}
                 </Grid>
                 <Grid md={6} sm={12} xs={12}>
                   <TextField
@@ -699,44 +728,53 @@ const Transaction = () => {
                   value={`${editToTransaction?.staffId.firstName} ${editToTransaction?.staffId.lastName}`}
                 />
               </Grid>
-              <Grid md={12} sm={12} xs={12}>
-                <TextField
-                  fullWidth
-                  sx={{ mt: "12px " }}
-                  placeholder="Transaction Type"
-                  label="Transaction Type"
-                  value={editToTransaction?.transactionType || ""}
-                  name="transactionType"
-                  onChange={handleEditInputChange}
-                />
+              <Grid md={12} sm={12} xs={12} mt="3px">
+                <Box>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DatePicker"]}>
+                      <DatePicker
+                        sx={{ width: "100%", mt: "4px" }}
+                        label="Transaction Date"
+                        value={dayjs(
+                          moment(editToTransaction?.transactionDate).format(
+                            "YYYY-MM-DD"
+                          )
+                        )}
+                        onChange={(newDate) =>
+                          handleEditInputChange({
+                            target: {
+                              name: "transactionDate",
+                              value: newDate
+                                ? newDate.format("YYYY-MM-DD")
+                                : "",
+                            },
+                          })
+                        }
+                        format="DD-MM-YYYY"
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </Box>
               </Grid>
-              <Grid display="contents">
-                <Grid md={6} sm={12} xs={12} mt="4px">
-                  <Box>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DemoContainer components={["DatePicker"]}>
-                        <DatePicker
-                          sx={{ width: "96%", mt: "4px" }}
-                          label="Transaction Date"
-                          value={dayjs(
-                            moment(editToTransaction?.transactionDate).format(
-                              "YYYY-MM-DD"
-                            )
-                          )}
-                          onChange={(newDate) =>
-                            handleEditInputChange({
-                              target: {
-                                name: "transactionDate",
-                                value: newDate
-                                  ? newDate.format("YYYY-MM-DD")
-                                  : "",
-                              },
-                            })
-                          }
-                          format="DD-MM-YYYY"
-                        />
-                      </DemoContainer>
-                    </LocalizationProvider>
+              <Grid display="contents" mt={2}>
+                <Grid md={6} sm={12} xs={12}>
+                  <Box sx={{ width: "96%", mt: "12px" }}>
+                    <FormControl fullWidth>
+                      <InputLabel>Transaction Type</InputLabel>
+                      <Select
+                        label="Transaction Type"
+                        name="transactionType"
+                        value={
+                          editToTransaction
+                            ? editToTransaction.transactionType
+                            : ""
+                        }
+                        onChange={handleEditInputChange}
+                      >
+                        <MenuItem value="case">cash</MenuItem>
+                        <MenuItem value="online">online</MenuItem>
+                      </Select>
+                    </FormControl>
                   </Box>
                 </Grid>
                 <Grid md={6} sm={12} xs={12}>
@@ -748,6 +786,16 @@ const Transaction = () => {
                     onChange={handleEditInputChange}
                     value={editToTransaction?.amount || ""}
                     name="amount"
+                  />
+                </Grid>
+                <Grid md={12} sm={12} xs={12} mt="12px">
+                  <TextField
+                    sx={{ width: "100%" }}
+                    placeholder="Description"
+                    label="Description"
+                    onChange={handleEditInputChange}
+                    value={editToTransaction?.description || ""}
+                    name="description"
                   />
                 </Grid>
               </Grid>

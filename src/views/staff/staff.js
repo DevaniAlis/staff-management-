@@ -293,6 +293,8 @@ const Staff = () => {
     }
   }, [searchQuery, staffDataList]);
 
+  let rowCount = 0;
+
   useEffect(() => {
     if (filterData) {
       const filteredByType = staffDataList.filter(
@@ -476,6 +478,7 @@ const Staff = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
+                      <TableCell align="center">No</TableCell>
                       <TableCell align="center">Staff Name</TableCell>
                       <TableCell align="center">Staff Type</TableCell>
                       <TableCell align="center">Phone Number</TableCell>
@@ -487,9 +490,11 @@ const Staff = () => {
                   </TableHead>
                   <TableBody>
                     {filteredStaffDataList.map((item) => {
+                      rowCount++;
                       return (
                         <>
                           <TableRow key={item.staffId}>
+                            <TableCell align="center">{rowCount}</TableCell>
                             <TableCell align="center">
                               {`${item.firstName} ${item.lastName}`}
                             </TableCell>
@@ -511,7 +516,7 @@ const Staff = () => {
                             </TableCell>
                             <TableCell align="center">
                               <FormControlLabel
-                              sx={{display:"flex" , justifyContent:"end" }}
+                                sx={{ display: "flex", justifyContent: "end" }}
                                 control={
                                   <IOSSwitch
                                     sx={{ m: 1 }}
@@ -939,7 +944,7 @@ const Staff = () => {
                 </Grid>
               </Grid>
               <Grid display="contents" mt={2}>
-              <Grid item md={6} sm={12} xs={12}>
+                <Grid item md={6} sm={12} xs={12}>
                   <TextField
                     sx={{
                       mt: "12px",
