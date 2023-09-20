@@ -30,6 +30,10 @@ import baseUrl from "../baseUrl";
 import PrintIcon from "@mui/icons-material/Print";
 import { Oval } from "react-loader-spinner";
 import { useNavigate } from "react-router";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import dayjs from "dayjs";
 const token = localStorage.getItem("token");
 
 // css
@@ -63,6 +67,7 @@ const cancelButton = {
 const detailsReport = {
   fontWeight: 500,
   fontSize: "14px",
+  border: "none",
 };
 
 const autoPikerStyle = {
@@ -103,31 +108,49 @@ function Report(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStaffDataList, setFilteredStaffDataList] = useState([]);
   const [reportList, setReportList] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [reportData, setReportData] = useState([]);
+
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const [isLoadingStaffData, setIsLoadingStaffData] = useState(false);
 
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate);
+  };
+
   const handleReportList = () => {
+    const fDate = moment(selectedDate.format("YYYY-MM-DD"));
+
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/report/staffWise?month=${selectedMonth}&year=${selectedYear}`,
+      url: `${
+        baseUrl.url
+      }/api/report/staffWise?staffId=&date=${fDate.date()}-${fDate
+        .add(1, "month")
+        .month()}-${fDate.year()}`,
       headers: {
         token: token,
+        "Content-Type": "application/json",
       },
     };
-    axios.request(config).then((response) => {
-      setReportList(response.data.data);
-      setIsLoading(false);
-    });
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        setReportList(response.data.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   useEffect(() => {
     handleReportList();
-  }, [selectedMonth, selectedYear, reportList.staffId]);
+  }, [selectedDate, reportList.staffId]);
 
   useEffect(() => {
     const debouncedSearch = setTimeout(() => {
@@ -140,9 +163,7 @@ function Report(props) {
     return () => clearTimeout(debouncedSearch);
   }, [searchQuery, reportList]);
 
-  useEffect(() => {
-    setIsLoading(true);
-  }, [selectedMonth, selectedYear]);
+  let rowCount = 0;
 
   const handleSearch = () => {
     const query = searchQuery.toLowerCase();
@@ -157,21 +178,28 @@ function Report(props) {
   };
 
   const handleButtonClick = (staffId) => {
+    const fDate = moment(selectedDate.format("YYYY-MM-DD"));
+
     setDialogOpen(true);
     setIsLoadingStaffData(true);
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${baseUrl.url}/api/salarySlip?staffId=${staffId}&month=${selectedMonth}&year=${selectedYear}`,
+      url: `${
+        baseUrl.url
+      }/api/salarySlip?staffId=${staffId}&date=${fDate.date()}-${fDate
+        .add(1, "month")
+        .month()}-${fDate.year()}`,
       headers: {
         token: token,
+        "Content-Type": "application/json",
       },
     };
 
     axios
       .request(config)
       .then((response) => {
-        setReportData(response.data.data);
+        setReportData(response.data);
         setIsLoadingStaffData(false);
       })
       .catch((error) => {
@@ -182,13 +210,16 @@ function Report(props) {
         }
       });
   };
+  console.log("reportData", reportData.leaveTransactions);
 
   const positiveAmountStyle = {
-    color: "green",
+    backgroundColor: "#BCE29E",
+    color: "black",
   };
 
   const negativeAmountStyle = {
-    color: "red",
+    backgroundColor: "#FF8787",
+    color: "black",
   };
 
   return (
@@ -218,49 +249,22 @@ function Report(props) {
                   setSearchQuery={setSearchQuery}
                 />
               </Grid>
+
               <Grid md={4} sm={12} xs={12}>
-                <style>
-                  {`
-                      .MuiAutocomplete-listbox li:hover
-                      {
-                        color: #5e35b1;
-                      },
-                  `}
-                </style>
-                <Autocomplete
-                  sx={autoPikerStyle}
-                  clearIcon={null}
-                  disablePortal
-                  options={months}
-                  getOptionLabel={(month) => month.label}
-                  value={months.find((month) => month.value === selectedMonth)}
-                  onChange={(event, newValue) =>
-                    setSelectedMonth(newValue?.value || "")
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label="Month" />
-                  )}
-                />
-              </Grid>
-              <Grid md={4} sm={12} xs={12}>
-                <Autocomplete
-                  sx={autoPikerStyle}
-                  clearIcon={null}
-                  disablePortal
-                  options={years}
-                  getOptionLabel={(year) => year.label}
-                  value={years.find((year) => year.value === selectedYear)}
-                  onChange={(event, newValue) =>
-                    setSelectedYear(newValue?.value || "")
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label="Year" />
-                  )}
-                />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer components={["DatePicker"]}>
+                    <DatePicker
+                      format="DD/MM/YYYY"
+                      sx={{ width: "100%", mt: "4px" }}
+                      label="Select Date"
+                      value={selectedDate}
+                      onChange={handleDateChange}
+                    />
+                  </DemoContainer>
+                </LocalizationProvider>
               </Grid>
             </Grid>
           </Box>
-
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12} sm={12} sx={displayStyle}>
               <TableContainer sx={{ minWidth: "100%", borderRadius: "10px" }}>
@@ -285,6 +289,7 @@ function Report(props) {
                   <Table>
                     <TableHead>
                       <TableRow>
+                        <TableCell align="center">No</TableCell>
                         <TableCell sx={{ fontSize: "16px" }} align="center">
                           Staff Name
                         </TableCell>
@@ -298,17 +303,15 @@ function Report(props) {
                           leaves
                         </TableCell>
                         <TableCell sx={{ fontSize: "16px" }} align="center">
-                          Actual Month Salary
-                        </TableCell>
-                        <TableCell sx={{ fontSize: "16px" }} align="center">
                           Final Amount
                         </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {filteredStaffDataList.map((item) => {
+                        rowCount++;
                         const finalAmountStyle =
-                          item.actualSalary < 0
+                          item.outstanding < 0
                             ? negativeAmountStyle
                             : positiveAmountStyle;
                         return (
@@ -317,21 +320,23 @@ function Report(props) {
                             onClick={() => handleButtonClick(item.staffId)}
                             style={{ cursor: "pointer" }}
                           >
-                            <TableCell align="center">
-                              {item.staffName}
+                            <TableCell align="center" style={finalAmountStyle}>
+                              {rowCount}
                             </TableCell>
-                            <TableCell align="center">{item.salary}</TableCell>
-                            <TableCell align="center">
+                            <TableCell align="center" style={finalAmountStyle}>
+                              {item.fullName}
+                            </TableCell>
+                            <TableCell align="center" style={finalAmountStyle}>
+                              {item.salary === "null" ? 0 : item.salary}
+                            </TableCell>
+                            <TableCell align="center" style={finalAmountStyle}>
                               {item.transactionTotal}
                             </TableCell>
-                            <TableCell align="center">
+                            <TableCell align="center" style={finalAmountStyle}>
                               {item.leaveTotal}
                             </TableCell>
                             <TableCell align="center" style={finalAmountStyle}>
-                              {item.actualSalary}
-                            </TableCell>
-                            <TableCell align="center" style={finalAmountStyle}>
-                              {item.finalSalary}
+                              {item.outstanding}
                             </TableCell>
                           </TableRow>
                         );
@@ -369,193 +374,211 @@ function Report(props) {
                 strokeWidth={2}
                 strokeWidthSecondary={2}
               />
+            ) : reportData.salary === "null" ? (
+              <Typography
+                display="flex"
+                justifyContent="space-around"
+                fontSize="20px"
+                pt="12px"
+              >
+                No salary data found. Please add Salary
+              </Typography>
             ) : (
               <Print single name="foo">
-                {reportData.map((item) => {
-                  return (
-                    <>
-                      <Box key={item.staffId}>
-                        <Box display="flex" alignItems="center">
-                          <Typography sx={detailsReport}>Name :</Typography>
-                          <Typography ml={1}>{item.staffName}</Typography>
-                        </Box>
-                        <Box display="flex" alignItems="center">
-                          <Typography sx={detailsReport}>
-                            Date Of Start Work :&nbsp;
-                          </Typography>
-                          <Typography>
-                            {moment(item.dateOfStartWork).format("DD-MM-YYYY")}
-                          </Typography>
-                        </Box>
-                        <Box display="flex" alignItems="center">
-                          <Typography sx={detailsReport}>
-                            Date Of End Work :&nbsp;
-                          </Typography>
-                          <Typography>
-                            {moment(item.dateOfEndWork).format("DD-MM-YYYY")}
-                          </Typography>
-                        </Box>
-                        <Divider
-                          sx={{ height: 1, bgcolor: "black", m: "20px" }}
-                        />
-                        <Grid container spacing={4} pt={2}>
-                          <Grid item md={3}>
-                            <Typography
-                              sx={{ fontWeight: 500, fontSize: "16px" }}
-                            >
-                              Leave Details
-                            </Typography>
-                            <TableContainer component={Paper}>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell>Days</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {item.leaveData.leaves.map((leave) => (
-                                    <TableRow key={leave.startDate}>
-                                      <TableCell>
-                                        {moment(leave.startDate).format(
-                                          "DD-MM-YYYY"
-                                        )}
-                                      </TableCell>
-                                      <TableCell>{leave.days}</TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
-                          </Grid>
-                          <Grid item md={5}>
-                            <Typography
-                              sx={{ fontWeight: 500, fontSize: "16px" }}
-                            >
-                              Transaction Details
-                            </Typography>
-                            <TableContainer component={Paper}>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>Transaction Date</TableCell>
-                                    <TableCell>Amount</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {item.transactionData.transactions.map(
-                                    (transactions) => (
-                                        <TableRow
-                                          key={transactions.transactionDate}
-                                        >
-                                          <TableCell>
-                                            {moment(
-                                              transactions.transactionDate
-                                            ).format("DD-MM-YYYY")}
-                                          </TableCell>
-                                          <TableCell>
-                                            {transactions.amount}
-                                          </TableCell>
-                                        </TableRow>
-                                    )
-                                  )}
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
-                          </Grid>
-                          <Grid item md={3}>
-                            <Typography
-                              sx={{ fontWeight: 500, fontSize: "16px" }}
-                            >
-                              Salary
-                            </Typography>
-                            <TableContainer component={Paper}>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell>Salary Amount</TableCell>
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  <TableRow>
-                                    <TableCell>{item.salary}</TableCell>
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
-                          </Grid>
-                        </Grid>
-                        <Divider
-                          sx={{ height: 1, bgcolor: "black", m: "20px" }}
-                        />
-                        <Grid container justifyContent="end">
-                          <Grid md={4}>
-                            <TableContainer component={Paper}>
-                              <Table size="small">
-                                <TableBody>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Days Worked
-                                    </TableCell>
-                                    <TableCell>30</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Leave
+                <Box>
+                  <Box display="flex" alignItems="center">
+                    <Typography sx={detailsReport}>Name :</Typography>
+                    <Typography ml={1}>{reportData.fullName}</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center">
+                    <Typography sx={detailsReport}>Phone No. :</Typography>
+                    <Typography ml={1}>{reportData.phone}</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center">
+                    <Typography sx={detailsReport}>
+                      Date Of Start Work :&nbsp;
+                    </Typography>
+                    <Typography>
+                      {moment(reportData.dateOfStartWork).format("DD-MM-YYYY")}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center">
+                    <Typography sx={detailsReport}>
+                      Date Of End Work :&nbsp;
+                    </Typography>
+                    <Typography>
+                      {moment(reportData.dateOfEndWork).format("DD-MM-YYYY")}
+                    </Typography>
+                  </Box>
+                  <Divider sx={{ height: 1, bgcolor: "black", m: "20px" }} />
+                  <Grid
+                    container
+                    spacing={4}
+                    justifyContent="space-around"
+                    pt={2}
+                  >
+                    <Grid item md={3}>
+                      <Typography sx={{ fontWeight: 500, fontSize: "16px" }}>
+                        Leave Details
+                      </Typography>
+                      <TableContainer component={Paper}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Date</TableCell>
+                              <TableCell>Days</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {reportData.leaveTransactions &&
+                              reportData.leaveTransactions.map((leave) => (
+                                <TableRow key={leave.startDate}>
+                                  <TableCell>
+                                    {moment(leave.startDate).format(
+                                      "DD-MM-YYYY"
+                                    )}
+                                  </TableCell>
+                                  <TableCell>{leave.days}</TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                    <Grid item md={4}>
+                      <Typography sx={{ fontWeight: 500, fontSize: "16px" }}>
+                        Salary Details
+                      </Typography>
+                      <TableContainer component={Paper}>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Salary Date</TableCell>
+                              <TableCell>Salary Amount</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {reportData.salaryTransactions &&
+                              reportData.salaryTransactions.map(
+                                (salaryTransaction) => (
+                                  <TableRow key={salaryTransaction.startDate}>
+                                    <TableCell>
+                                      {moment(salaryTransaction.date).format(
+                                        "DD-MM-YYYY"
+                                      )}
                                     </TableCell>
                                     <TableCell>
-                                      {item.leaveData.total}
+                                      {salaryTransaction.salary}
                                     </TableCell>
                                   </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Net Days Worked
-                                    </TableCell>
-                                    <TableCell>{item.netDaysWorked}</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Pending Amount
-                                    </TableCell>
-                                    <TableCell>0</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Salary
-                                    </TableCell>
-                                    <TableCell>{item.salary}</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Total Transaction Amount (Current Month)
-                                    </TableCell>
-                                    <TableCell>
-                                      {item.transactionData.total}
-                                    </TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={detailsReport}>
-                                      Outstanding
-                                    </TableCell>
-                                    <TableCell>{item.outstanding}</TableCell>
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
-                          </Grid>
-                        </Grid>
-                        <Box>
+                                )
+                              )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                  </Grid>
+                  <Divider sx={{ height: 1, bgcolor: "black", m: "20px" }} />
+                  <Grid container justifyContent="end">
+                    <Grid md={4}>
+                      <TableContainer component={Paper}>
+                        <Table size="small">
+                          <TableBody>
+                            <TableRow>
+                              <TableCell sx={detailsReport}>
+                                Days Worked
+                              </TableCell>
+                              <TableCell>{reportData.totalDays}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell sx={detailsReport}>Leave</TableCell>
+                              <TableCell>{reportData.leaveTotal}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell sx={detailsReport}>
+                                Net Days Worked
+                              </TableCell>
+                              <TableCell>{reportData.NetDaysWorked}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell sx={detailsReport}>Salary</TableCell>
+                              <TableCell>{reportData.salary}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell sx={detailsReport}>
+                                Total Transaction Amount
+                              </TableCell>
+                              <TableCell>
+                                {reportData.transactionTotal}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell sx={detailsReport}>
+                                Outstanding
+                              </TableCell>
+                              <TableCell>{reportData.outstanding}</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Grid>
+                  </Grid>
+                  <Box>
+                    <TableRow>
+                      <TableCell sx={detailsReport}>Final Amount :</TableCell>
+                      <TableCell sx={{ border: "none" }}>
+                        {reportData.outstanding}
+                      </TableCell>
+                    </TableRow>
+                  </Box>
+                  <Divider sx={{ height: 1, bgcolor: "black", mb: "20px" }} />
+                  <Grid item md={6}>
+                    <Typography
+                      sx={{
+                        fontWeight: 500,
+                        fontSize: "16px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Transaction Details
+                    </Typography>
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
                           <TableRow>
-                            <TableCell sx={detailsReport}>
-                              Final Amount :
+                            <TableCell align="center">
+                              Transaction Date
                             </TableCell>
-                            <TableCell>{item.actualSalary}</TableCell>
+                            <TableCell align="center">
+                              Transaction Note
+                            </TableCell>
+                            <TableCell align="center">Amount</TableCell>
                           </TableRow>
-                        </Box>
-                      </Box>
-                    </>
-                  );
-                })}
+                        </TableHead>
+                        <TableBody>
+                          {reportData.transactions &&
+                            reportData.transactions.map((transactions) => (
+                              <TableRow key={transactions.transactionDate}>
+                                <TableCell align="center">
+                                  {moment(transactions.transactionDate).format(
+                                    "DD-MM-YYYY"
+                                  )}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {transactions.description
+                                    ? transactions.description
+                                    : "N/A"}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {transactions.amount}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                </Box>
               </Print>
             )}
           </DialogContent>
