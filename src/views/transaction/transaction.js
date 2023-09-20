@@ -614,10 +614,10 @@ const Transaction = () => {
                         onChange={handleChangeValue}
                       >
                         <MenuItem name="transactionType" value="case">
-                          Case
+                          cash
                         </MenuItem>
                         <MenuItem name="transactionType" value="online">
-                          Online
+                          online 
                         </MenuItem>
                       </Select>
                     </FormControl>
@@ -771,8 +771,8 @@ const Transaction = () => {
                         }
                         onChange={handleEditInputChange}
                       >
-                        <MenuItem value="case">Case</MenuItem>
-                        <MenuItem value="online">Online</MenuItem>
+                        <MenuItem value="case">cash</MenuItem>
+                        <MenuItem value="online">online</MenuItem>
                       </Select>
                     </FormControl>
                   </Box>
