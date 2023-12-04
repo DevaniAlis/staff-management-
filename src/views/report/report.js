@@ -187,8 +187,7 @@ function Report(props) {
       url: `${
         baseUrl.url
       }/api/salarySlip?staffId=${staffId}&date=${fDate.date()}-${fDate
-        .add(1, "month")
-        .month()}-${fDate.year()}`,
+        .month()+1}-${fDate.year()}`,
       headers: {
         token: token,
         "Content-Type": "application/json",
